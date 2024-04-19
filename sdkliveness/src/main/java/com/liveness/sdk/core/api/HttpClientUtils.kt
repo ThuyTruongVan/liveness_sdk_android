@@ -273,7 +273,7 @@ internal class HttpClientUtils {
         this.context = context
         this.appId = mLivenessRequest?.appId
         privateKey = mLivenessRequest?.privateKey
-        this.baseUrl = baseUrl
+        this.baseUrl = mLivenessRequest?.baseURL ?: baseUrl
         jwsUtils.setAppLicense(privateKey)
     }
 

@@ -17,5 +17,7 @@ data class LivenessRequest(
     @field:SerializedName("client_transaction_id")
     var clientTransactionId: String? = null,
     @field:SerializedName("secret")
-    var secret: String? = null
+    var secret: String? = null,
+    @field:SerializedName("base_url")
+    var baseURL: String? = null
 )

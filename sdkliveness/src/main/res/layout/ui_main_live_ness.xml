@@ -52,6 +52,7 @@
             android:layout_below="@id/ll_toolbar"
             android:keepScreenOn="true"
             android:visibility="visible"
+            app:cameraAudio="off"
             app:cameraMode="video" />
 
         <com.liveness.sdk.core.facedetector.FaceBoundsOverlay

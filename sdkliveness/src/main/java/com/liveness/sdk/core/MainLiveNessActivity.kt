@@ -3,6 +3,7 @@ package com.liveness.sdk.core
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -27,6 +28,7 @@ import com.liveness.sdk.core.utils.AppPreferenceUtils
 import com.liveness.sdk.core.utils.AppUtils
 import com.liveness.sdk.core.utils.TotpUtils
 import com.nimbusds.jose.shaded.gson.Gson
+import com.otaliastudios.cameraview.CameraException
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraOptions
 import com.otaliastudios.cameraview.PictureResult
@@ -44,11 +46,14 @@ import java.util.Random
  */
 internal class MainLiveNessActivity : Activity() {
     private val REQUEST_PERMISSION_CODE = 1231
-    private val pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
+    private var pathVideo = ""
     private var bgColor = 0
+    private var isCapture = false
     private var lstBgDefault: ArrayList<Int> = arrayListOf(R.drawable.img_0, R.drawable.img_1, R.drawable.img_2, R.drawable.img_3)
 
-    private val permissions = arrayOf(
+    private var isFirstVideo = true
+
+    private var permissions = arrayOf(
         Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO
     )
 
@@ -63,17 +68,35 @@ internal class MainLiveNessActivity : Activity() {
         binding.imvBack.setOnClickListener {
             finish()
         }
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            permissions = arrayOf(
+                Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        }
+        initCamera()
         if (checkPermissions()) {
-            init()
+            binding.cameraViewVideo.open()
         } else {
             requestPermissions()
         }
     }
 
     private fun checkPermissions(): Boolean {
-        val resultCamera = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA)
-        val resultRecord = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.RECORD_AUDIO)
-        return resultCamera == PackageManager.PERMISSION_GRANTED && resultRecord == PackageManager.PERMISSION_GRANTED
+        return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            val resultCamera = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA)
+            val resultRecord = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.RECORD_AUDIO)
+            val resultRead = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE)
+            val resultWrite = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            (resultCamera == PackageManager.PERMISSION_GRANTED
+                    && resultRecord == PackageManager.PERMISSION_GRANTED
+                    && resultRead == PackageManager.PERMISSION_GRANTED
+                    && resultWrite == PackageManager.PERMISSION_GRANTED)
+        } else {
+            val resultCamera = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA)
+            val resultRecord = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.RECORD_AUDIO)
+            resultCamera == PackageManager.PERMISSION_GRANTED && resultRecord == PackageManager.PERMISSION_GRANTED
+        }
     }
 
     private fun requestPermissions() {
@@ -84,8 +107,8 @@ internal class MainLiveNessActivity : Activity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSION_CODE) {
             if (checkPermissions()) {
-                Toast.makeText(applicationContext, "Permission granted", Toast.LENGTH_LONG).show()
-                init()
+//                Toast.makeText(applicationContext, "Permission granted", Toast.LENGTH_LONG).show()
+                binding.cameraViewVideo.open()
             } else {
                 Toast.makeText(applicationContext, "Permission denied", Toast.LENGTH_LONG).show()
             }
@@ -100,9 +123,12 @@ internal class MainLiveNessActivity : Activity() {
         }
     }
 
-    private fun init() = binding.apply {
-        val lensFacing = Facing.FRONT
-        setupCamera(lensFacing)
+    private fun initCamera() {
+        binding.apply {
+            pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
+            val lensFacing = Facing.FRONT
+            setupCamera(lensFacing)
+        }
     }
 
     private fun setupCamera(lensFacing: Facing) = binding.apply {
@@ -110,36 +136,41 @@ internal class MainLiveNessActivity : Activity() {
         faceDetector.setonFaceDetectionFailureListener(object : FaceDetector.OnFaceDetectionResultListener {
             override fun onSuccess(faceBounds: Face) {
                 super.onSuccess(faceBounds)
-                cameraViewVideo.stopVideo()
-                binding.bgFullScreenDefault.visibility = View.VISIBLE
-                binding.llVideo.visibility = View.GONE
-                bgColor = Random().nextInt(3)
-                AppUtils.showLog("Thuytv----bgColor: $bgColor")
-                binding.bgFullScreenDefault.background = ResourcesCompat.getDrawable(resources, lstBgDefault[bgColor], this@MainLiveNessActivity.theme)
-                Handler(Looper.myLooper()!!).postDelayed({
-                    cameraViewVideo.takePictureSnapshot()
-                }, 300)
+                AppUtils.showLog("Thuytv--faceDetector--onSuccess")
+                if (!isCapture) {
+                    isCapture = true
+                    cameraViewVideo.stopVideo()
+                    binding.bgFullScreenDefault.visibility = View.VISIBLE
+                    binding.llVideo.visibility = View.GONE
+                    bgColor = Random().nextInt(3)
+                    AppUtils.showLog("Thuytv----bgColor: $bgColor")
+                    binding.bgFullScreenDefault.background = ResourcesCompat.getDrawable(resources, lstBgDefault[bgColor], this@MainLiveNessActivity.theme)
+                    Handler(Looper.myLooper()!!).postDelayed({
+                        cameraViewVideo.takePictureSnapshot()
+                    }, 300)
+                }
             }
 
         })
         cameraViewVideo.facing = lensFacing
         cameraViewVideo.mode = Mode.VIDEO
-        cameraViewVideo.addFrameProcessor {
-            faceDetector.process(
-                Frame(
-                    data = it.getData(),
-                    rotation = it.rotationToUser,
-                    size = Size(it.size.width, it.size.height),
-                    format = it.format,
-                    lensFacing = if (cameraViewVideo.facing == Facing.BACK) LensFacing.BACK else LensFacing.FRONT
-                )
-            )
-        }
+
 
         cameraViewVideo.addCameraListener(object : CameraListener() {
             override fun onCameraOpened(options: CameraOptions) {
                 super.onCameraOpened(options)
+                AppUtils.showLog("Thuytv--onCameraOpened : ")
                 cameraViewVideo.takeVideoSnapshot(File(pathVideo))
+            }
+
+            override fun onCameraError(exception: CameraException) {
+                super.onCameraError(exception)
+                AppUtils.showLog("Thuytv--onCameraError")
+            }
+
+            override fun onCameraClosed() {
+                super.onCameraClosed()
+                AppUtils.showLog("Thuytv--onCameraClosed")
             }
 
             override fun onPictureTaken(result: PictureResult) {
@@ -151,7 +182,7 @@ internal class MainLiveNessActivity : Activity() {
                 }
                 binding.bgFullScreenDefault.visibility = View.GONE
                 binding.llVideo.visibility = View.VISIBLE
-
+                isCapture = false
             }
 
             override fun onVideoTaken(result: VideoResult) {
@@ -163,11 +194,22 @@ internal class MainLiveNessActivity : Activity() {
                 }
             }
         })
+        cameraViewVideo.addFrameProcessor {
+            faceDetector.process(
+                Frame(
+                    data = it.getData(),
+                    rotation = it.rotationToUser,
+                    size = Size(it.size.width, it.size.height),
+                    format = it.format,
+                    lensFacing = if (cameraViewVideo.facing == Facing.BACK) LensFacing.BACK else LensFacing.FRONT
+                )
+            )
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        binding.cameraViewVideo.open()
+//        binding.cameraViewVideo.open()
     }
 
     override fun onPause() {

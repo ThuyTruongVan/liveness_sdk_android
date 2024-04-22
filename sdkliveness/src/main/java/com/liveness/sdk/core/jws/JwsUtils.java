@@ -1,5 +1,6 @@
 package com.liveness.sdk.core.jws;
 
+import com.liveness.sdk.core.utils.AppConfig;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
@@ -80,7 +81,14 @@ public class JwsUtils {
 //			jweHeader.setKeyID("PK.SD.KEK");
             jweObject = new JWEObject(jweHeader, senderJwePayload);
 //			System.out.print("JWEDecrypt: Header: " + jweHeader.toJSONObject().toString() + "\n");
-            encrypter = new RSAEncrypter((RSAPublicKey) pubkeyEidReader_jws.getPublicKeyFromCertString(EID_PUB));
+            String publicKey = EID_PUB;
+            if (AppConfig.INSTANCE.getMLivenessRequest() != null) {
+                publicKey = AppConfig.INSTANCE.getMLivenessRequest().getPublicKey();
+                if (publicKey == null || publicKey.isEmpty()) {
+                    publicKey = EID_PUB;
+                }
+            }
+            encrypter = new RSAEncrypter((RSAPublicKey) pubkeyEidReader_jws.getPublicKeyFromCertString(publicKey));
             jweObject.encrypt(encrypter);
             senderJwe = jweObject.serialize();
 

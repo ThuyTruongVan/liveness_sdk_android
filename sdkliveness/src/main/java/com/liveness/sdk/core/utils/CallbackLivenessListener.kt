@@ -6,5 +6,5 @@ import com.liveness.sdk.core.model.LivenessModel
  * Created by Thuytv on 16/04/2024.
  */
 interface CallbackLivenessListener {
-    fun onCallbackLiveness(data: LivenessModel)
+    fun onCallbackLiveness(data: LivenessModel?)
 }

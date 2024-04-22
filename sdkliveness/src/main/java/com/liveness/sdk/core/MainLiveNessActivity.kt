@@ -52,6 +52,7 @@ internal class MainLiveNessActivity : Activity() {
     private var lstBgDefault: ArrayList<Int> = arrayListOf(R.drawable.img_0, R.drawable.img_1, R.drawable.img_2, R.drawable.img_3)
 
     private var isFirstVideo = true
+    private var typeScreen = ""
 
     private var permissions = arrayOf(
         Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO
@@ -65,6 +66,7 @@ internal class MainLiveNessActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        typeScreen = intent.getStringExtra(AppConfig.KEY_BUNDLE_SCREEN) ?: ""
         binding.imvBack.setOnClickListener {
             finish()
         }
@@ -74,11 +76,19 @@ internal class MainLiveNessActivity : Activity() {
                 Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         }
+
         initCamera()
         if (checkPermissions()) {
             binding.cameraViewVideo.open()
         } else {
             requestPermissions()
+        }
+        if (typeScreen == AppConfig.TYPE_SCREEN_REGISTER_FACE) {
+            binding.btnCapture.setOnClickListener {
+                binding.cameraViewVideo.takePictureSnapshot()
+            }
+        } else {
+            binding.btnCapture.visibility = View.GONE
         }
     }
 
@@ -160,7 +170,11 @@ internal class MainLiveNessActivity : Activity() {
             override fun onCameraOpened(options: CameraOptions) {
                 super.onCameraOpened(options)
                 AppUtils.showLog("Thuytv--onCameraOpened : ")
-                cameraViewVideo.takeVideoSnapshot(File(pathVideo))
+                if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
+                    cameraViewVideo.takeVideoSnapshot(File(pathVideo))
+                } else {
+                    binding.btnCapture.visibility = View.VISIBLE
+                }
             }
 
             override fun onCameraError(exception: CameraException) {
@@ -176,13 +190,20 @@ internal class MainLiveNessActivity : Activity() {
             override fun onPictureTaken(result: PictureResult) {
                 super.onPictureTaken(result)
                 Log.d("Thuytv", "-----onPictureTaken")
-                result.data.let {
-                    val imgLiveNess = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
-                    callAPIGEtTOTP(imgLiveNess, bgColor)
+                if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
+                    result.data.let {
+                        val imgLiveNess = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
+                        callAPIGEtTOTP(imgLiveNess, bgColor)
+                    }
+                    binding.bgFullScreenDefault.visibility = View.GONE
+                    binding.llVideo.visibility = View.VISIBLE
+                    isCapture = false
+                } else {
+                    result.data.let {
+                        val faceImage = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
+                        registerFace(faceImage)
+                    }
                 }
-                binding.bgFullScreenDefault.visibility = View.GONE
-                binding.llVideo.visibility = View.VISIBLE
-                isCapture = false
             }
 
             override fun onVideoTaken(result: VideoResult) {
@@ -194,16 +215,18 @@ internal class MainLiveNessActivity : Activity() {
                 }
             }
         })
-        cameraViewVideo.addFrameProcessor {
-            faceDetector.process(
-                Frame(
-                    data = it.getData(),
-                    rotation = it.rotationToUser,
-                    size = Size(it.size.width, it.size.height),
-                    format = it.format,
-                    lensFacing = if (cameraViewVideo.facing == Facing.BACK) LensFacing.BACK else LensFacing.FRONT
+        if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
+            cameraViewVideo.addFrameProcessor {
+                faceDetector.process(
+                    Frame(
+                        data = it.getData(),
+                        rotation = it.rotationToUser,
+                        size = Size(it.size.width, it.size.height),
+                        format = it.format,
+                        lensFacing = if (cameraViewVideo.facing == Facing.BACK) LensFacing.BACK else LensFacing.FRONT
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -281,16 +304,16 @@ internal class MainLiveNessActivity : Activity() {
         if (result?.has("status") == true && result.getInt("status") == 200) {
             AppUtils.showLog("Thuytv------checkLiveNessFlash--success")
             val liveNessModel = Gson().fromJson<LivenessModel>(response, LivenessModel::class.java)
-            if (liveNessModel.success == true) {
-                liveNessModel.pathVideo = pathVideo
-                this.runOnUiThread {
-                    showLoading(false)
-                    AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
-                    finish()
-                }
-            } else {
-                showToast(result?.getString("message") ?: "Error")
+//            if (liveNessModel.success == true) {
+            liveNessModel.pathVideo = pathVideo
+            this.runOnUiThread {
+                showLoading(false)
+                AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
+                finish()
             }
+//            } else {
+//                showToast(result?.getString("message") ?: "Error")
+//            }
         } else {
             showToast(result?.getString("message") ?: "Error")
         }
@@ -324,6 +347,46 @@ internal class MainLiveNessActivity : Activity() {
                 binding.prbLoading.visibility = View.GONE
             }
         }
+
+    }
+
+    private fun registerFace(faceImage: String) {
+        showLoading(true)
+        Thread {
+            val request = JSONObject()
+            request.put("deviceId", AppConfig.mLivenessRequest?.deviceId)
+            request.put("deviceOs", "Android")
+            request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
+            request.put("period", AppConfig.mLivenessRequest?.duration)
+            request.put("secret", AppConfig.mLivenessRequest?.secret)
+            val responseDevice = HttpClientUtils.instance?.postV3("/eid/v3/registerDevice", request)
+            Log.d("Thuytv", "---response: $responseDevice")
+            var result: JSONObject? = null
+            if (responseDevice != null && responseDevice.length > 0) {
+                result = JSONObject(responseDevice)
+            }
+            if (result != null && result.has("status") && result.getInt("status") == 200) {
+                val response = HttpClientUtils.instance?.registerFace(faceImage)
+                var result: JSONObject? = null
+                if (response?.isNotEmpty() == true) {
+                    result = JSONObject(response)
+                }
+                if (result?.has("status") == true && result.getInt("status") == 200) {
+                    AppUtils.showLog("Thuytv------registerFace--success")
+                    showLoading(false)
+                    AppPreferenceUtils(this).setDeviceId(this, AppConfig.mLivenessRequest?.deviceId ?: "")
+                    this.runOnUiThread {
+                        AppConfig.livenessListener?.onCallbackLiveness(null)
+                        showToast("Register Face Success")
+                        finish()
+                    }
+
+                } else {
+                    showLoading(false)
+                    showToast(result?.getString("message") ?: "Error")
+                }
+            }
+        }.start()
 
     }
 }

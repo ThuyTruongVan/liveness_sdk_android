@@ -19,5 +19,7 @@ data class LivenessRequest(
     @field:SerializedName("secret")
     var secret: String? = null,
     @field:SerializedName("base_url")
-    var baseURL: String? = null
+    var baseURL: String? = null,
+    @field:SerializedName("public_key")
+    var publicKey: String? = null
 )

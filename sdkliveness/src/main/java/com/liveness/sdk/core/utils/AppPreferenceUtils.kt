@@ -13,7 +13,7 @@ internal class AppPreferenceUtils(context: Context?) {
     init {
         if (context != null)
             IShare = context.getSharedPreferences(
-                context.applicationInfo.packageName,
+                APP_SHARE_PREFERENCE_NAME,
                 Context.MODE_PRIVATE
             )
     }
@@ -78,23 +78,41 @@ internal class AppPreferenceUtils(context: Context?) {
     }
 
     fun setTOTPSecret(context: Context, strKey: String) {
-        val secret = KeyStoreUtils.getInstance(context)?.encryptData(strKey)
-        setValueString(KEY_TOTP_SECRET, secret)
+//        val secret = KeyStoreUtils.getInstance(context)?.encryptData(strKey)
+        val enCryptData = EnCryptData()
+        enCryptData.encryptText(context, KEY_TOTP_SECRET, strKey)
+//        setValueString(KEY_TOTP_SECRET, secret)
     }
 
     fun getTOTPSecret(context: Context): String {
-        val secret = getValueString(KEY_TOTP_SECRET)
-        if (secret.isNullOrEmpty()) {
-            return ""
+//        val secret = getValueString(KEY_TOTP_SECRET)
+//        if (secret.isNullOrEmpty()) {
+//            return ""
+//        }
+//        return KeyStoreUtils.getInstance(context)?.decryptData(secret) ?: ""
+        val deCryptData = DeCryptData()
+        return deCryptData.decryptData(context, KEY_TOTP_SECRET)
+    }
+
+    fun setDeviceId(context: Context, strKey: String?) {
+        strKey?.let {
+            val enCryptData = EnCryptData()
+            enCryptData.encryptText(context, KEY_DEVICE_ID, strKey)
         }
-        return KeyStoreUtils.getInstance(context)?.decryptData(secret) ?: ""
+    }
+
+    fun getDeviceId(context: Context): String? {
+        val deCryptData = DeCryptData()
+        return deCryptData.decryptData(context, KEY_DEVICE_ID)
     }
 
 
     companion object {
-        const val KEY_DEVICE_ID = "KEY_DEVICE_ID"
-        const val KEY_TOTP_SECRET = "KEY_TOTP_SECRET"
-        const val KEY_SIGNATURE = "KEY_SIGNATURE"
+        const val APP_SHARE_PREFERENCE_NAME = "mSharePreferenceName"
+        const val KEY_DEVICE_ID = "mDeviceId"
+        const val KEY_TOTP_SECRET = "mTOTPSecret"
+        const val KEY_SIGNATURE = "mSignature"
+        const val KEY_ALIAS = "mKeystoreSecretAlias"
     }
 }
 

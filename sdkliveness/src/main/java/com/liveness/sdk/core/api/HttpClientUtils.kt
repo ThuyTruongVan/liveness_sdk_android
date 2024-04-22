@@ -2,6 +2,7 @@ package com.liveness.sdk.core.api
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import com.liveness.sdk.core.jws.JwsUtils
 import com.liveness.sdk.core.model.LivenessRequest
 import com.liveness.sdk.core.utils.AppConfig
@@ -315,6 +316,17 @@ internal class HttpClientUtils {
         val optionalHeader = HashMap<String, String>()
         optionalHeader.put("deviceid", AppConfig.mLivenessRequest?.deviceId ?: "")
         return instance?.postV3("/eid/v3/verifyFace", request, optionalHeader)
+    }
+
+    fun registerFace(faceImage: String): String? {
+        val request = JSONObject()
+        Log.d("Thuytv","------deviceId: " + AppConfig.mLivenessRequest?.deviceId)
+        request.put("deviceId", AppConfig.mLivenessRequest?.deviceId ?: "")
+        request.put("face_image", faceImage)
+        val optionalHeader = HashMap<String, String>()
+        optionalHeader.put("deviceid", AppConfig.mLivenessRequest?.deviceId ?: "")
+        return instance?.postV3("/eid/v3/registerFace", request, optionalHeader)
+//        return instance?.post("/eid/v3/verifyFace", request, optionalHeader)
     }
 
 }

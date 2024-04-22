@@ -3,6 +3,7 @@ package com.liveness.flash
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.liveness.flash.databinding.UiMainActivityBinding
@@ -10,11 +11,13 @@ import com.liveness.sdk.core.LiveNessSDK
 import com.liveness.sdk.core.model.LivenessModel
 import com.liveness.sdk.core.model.LivenessRequest
 import com.liveness.sdk.core.utils.CallbackLivenessListener
+import java.util.UUID
 
 /**
  * Created by Thuytv on 15/04/2024.
  */
 class MainActivity : AppCompatActivity() {
+    private var deviceId = ""
     private val binding by lazy {
         UiMainActivityBinding.inflate(layoutInflater)
     }
@@ -22,11 +25,23 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        val mDeviceId = LiveNessSDK.getDeviceId(this)
+        if (mDeviceId?.isNotEmpty() == true) {
+            deviceId = mDeviceId
+            binding.btnRegisterFace.isEnabled = false
+        }
         binding.btnLiveNessFlash.setOnClickListener {
             LiveNessSDK.startLiveNess(this, getLivenessRequest(), object : CallbackLivenessListener {
-                override fun onCallbackLiveness(data: LivenessModel) {
-                    binding.vlContent.text = data.pathVideo
-                    showDefaultDialog(this@MainActivity, data.data?.toString())
+                override fun onCallbackLiveness(data: LivenessModel?) {
+                    binding.vlContent.text = data?.pathVideo
+                    showDefaultDialog(this@MainActivity, data?.data?.toString())
+                }
+            })
+        }
+        binding.btnRegisterFace.setOnClickListener {
+            LiveNessSDK.registerFace(this, getLivenessRequest(), object : CallbackLivenessListener {
+                override fun onCallbackLiveness(data: LivenessModel?) {
+                    binding.btnRegisterFace.isEnabled = false
                 }
             })
         }
@@ -61,10 +76,35 @@ class MainActivity : AppCompatActivity() {
                 "UW7GZybBe40J2AxVC48GX+jVk5iQjBzUtEf81jIZp61AD5KijNn33lHf653K09ch\n" +
                 "uw+D9R3JrjzTHoyep6eif/s=\n" +
                 "-----END PRIVATE KEY-----\n"
+        val public_key = "-----BEGIN CERTIFICATE-----\n" +
+                "MIIDjzCCAnegAwIBAgIEPhgWFTANBgkqhkiG9w0BAQsFADBbMScwJQYDVQQDDB5SZWdlcnkgU2Vs\n" +
+                "Zi1TaWduZWQgQ2VydGlmaWNhdGUxIzAhBgNVBAoMGlJlZ2VyeSwgaHR0cHM6Ly9yZWdlcnkuY29t\n" +
+                "MQswCQYDVQQGEwJVQTAgFw0yNDA0MTEwMDAwMDBaGA8yMTI0MDQxMTAzMTMwOVowUTEdMBsGA1UE\n" +
+                "AwwUcXVhbmd0cnVuZ3F0cy5jb20udm4xIzAhBgNVBAoMGlJlZ2VyeSwgaHR0cHM6Ly9yZWdlcnku\n" +
+                "Y29tMQswCQYDVQQGEwJVQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIfK7LjzjqCo\n" +
+                "VSzXz/ROHc2IyBMc89GwnR0slF1Lenavs+r+lnjFAxkVonBRTjtMj1pWqlACnd3qiIAD/8GbSagG\n" +
+                "qsV43BDPbioDibWg/9wln82VLwEQohjLTl7VJtKuRAIUcg2nY4r5LNzpdClJx+k7zrIVDKSO8tRa\n" +
+                "onU1dU6KLSmC2ZOzT10zrK4qmjvN/LFp0rlXJtdw++MUOIM9kccyi+3MK7iiraNV7Tlazy9xF0OZ\n" +
+                "ytzgSX5R+oHE3aUS0M+W4p/dhihvLKjiejuw46E0dqEKxaqMJHXj2Qei1Ky1RrdRBNB0oQLCoUGx\n" +
+                "KRaYw1CbZ7QWAgnrbqTvs1Y8pwUCAwEAAaNjMGEwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8E\n" +
+                "BAMCAYYwHQYDVR0OBBYEFIlsqZHH0jmPvIjlF4YARXnamm7AMB8GA1UdIwQYMBaAFIlsqZHH0jmP\n" +
+                "vIjlF4YARXnamm7AMA0GCSqGSIb3DQEBCwUAA4IBAQBfSk1XtHU8ix87g+lVzRQrEf7qsqWiwkN9\n" +
+                "TW05qaPDMoMEoe/MW0YJZ+QwgvGMNLkEWjz/v0p1fVFF6kIolbo1o+1P6D4RCWvyB8S5zV9Mv+aR\n" +
+                "1uWbAYiAA2uql/NrIJ3V1pJhIgRgDsRNuVP8MhNZc6DgJQLZOMKLwXsNHDtGOHk+ZcPiyWcjb4a3\n" +
+                "voZCp4HN8+V2umO+QGuESZhTLihBnXv9HTpKxwWu4tK/4dgngDYM3UmChRjD/H7A3aYV4Xyxkqw2\n" +
+                "rnd2LAr/zUEhFkbs21iG3DF0cHGKI15YzIq5pEhb9l4ePcCIgWgnJDNJPA/QhxpRB1XhP4bpK8kP\n" +
+                "GJ8f\n" +
+                "-----END CERTIFICATE-----"
         val appId = "com.qts.test"
+        if (deviceId.isNullOrEmpty()) {
+            deviceId = UUID.randomUUID().toString()
+        }
+//        deviceId = "f8552f6d-35da-45f0-9761-f38fe1ea33d1"
+        Log.d("Thuytv", "----deviceId: $deviceId")
         return LivenessRequest(
             duration = 600, privateKey = privateKey, appId = appId,
-            deviceId = "f8552f6d-35da-45f0-9761-f38fe1ea33d1", clientTransactionId = "TEST", secret = "ABCDEFGHIJKLMNOP"
+            deviceId = deviceId, clientTransactionId = "TEST", secret = "ABCDEFGHIJKLMNOP",
+            baseURL = "https://face-matching.vietplus.eu", publicKey = public_key
         )
 
     }

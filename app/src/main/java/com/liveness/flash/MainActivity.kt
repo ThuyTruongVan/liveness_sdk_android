@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.liveness.flash.databinding.UiMainActivityBinding
@@ -30,6 +31,9 @@ class MainActivity : AppCompatActivity() {
             deviceId = mDeviceId
             binding.btnRegisterFace.isEnabled = false
         }
+        val overlay = LayoutInflater.from(this).inflate(R.layout.ui_custom_view, null)
+        LiveNessSDK.setCustomView(overlay)
+
         binding.btnLiveNessFlash.setOnClickListener {
             LiveNessSDK.startLiveNess(this, getLivenessRequest(), object : CallbackLivenessListener {
                 override fun onCallbackLiveness(data: LivenessModel?) {

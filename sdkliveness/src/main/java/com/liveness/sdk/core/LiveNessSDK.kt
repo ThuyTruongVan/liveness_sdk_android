@@ -2,6 +2,7 @@ package com.liveness.sdk.core
 
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import androidx.core.content.ContextCompat
 import com.liveness.sdk.core.api.HttpClientUtils
 import com.liveness.sdk.core.model.LivenessRequest
@@ -21,6 +22,9 @@ class LiveNessSDK {
             httpClientUtil?.setVariables(context, mLivenessRequest)
             val intent = Intent(context, MainLiveNessActivity::class.java)
             ContextCompat.startActivity(context, intent, null)
+        }
+        fun setCustomView(mCustomView: View) {
+            AppConfig.mCustomView = mCustomView
         }
 
         fun registerFace(context: Context, mLivenessRequest: LivenessRequest, livenessListener: CallbackLivenessListener) {

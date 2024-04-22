@@ -1,6 +1,7 @@
 package com.liveness.sdk.core
 
 import android.Manifest
+import android.R.layout
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
@@ -10,7 +11,9 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.util.Size
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -22,7 +25,6 @@ import com.liveness.sdk.core.facedetector.FaceDetector
 import com.liveness.sdk.core.facedetector.Frame
 import com.liveness.sdk.core.facedetector.LensFacing
 import com.liveness.sdk.core.model.LivenessModel
-import com.liveness.sdk.core.model.LivenessRequest
 import com.liveness.sdk.core.utils.AppConfig
 import com.liveness.sdk.core.utils.AppPreferenceUtils
 import com.liveness.sdk.core.utils.AppUtils
@@ -37,7 +39,6 @@ import com.otaliastudios.cameraview.controls.Facing
 import com.otaliastudios.cameraview.controls.Mode
 import org.json.JSONObject
 import java.io.File
-import java.util.Base64
 import java.util.Random
 
 
@@ -66,6 +67,11 @@ internal class MainLiveNessActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        if (AppConfig.mCustomView != null) {
+            binding.frameViewCustom.addView(AppConfig.mCustomView)
+        }
+
         typeScreen = intent.getStringExtra(AppConfig.KEY_BUNDLE_SCREEN) ?: ""
         binding.imvBack.setOnClickListener {
             finish()

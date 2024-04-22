@@ -61,6 +61,10 @@
             android:layout_height="match_parent"
             android:layout_below="@id/ll_toolbar" />
 
+        <FrameLayout
+            android:id="@+id/frame_view_custom"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
         <ProgressBar
             android:id="@+id/prb_loading"
             android:layout_width="wrap_content"
@@ -75,8 +79,8 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_margin="15dp"
-            android:text="Capture"
             android:background="@drawable/background_button_all"
+            android:text="Capture"
             android:textColor="#FFFFFF"
             android:visibility="gone" />
     </RelativeLayout>

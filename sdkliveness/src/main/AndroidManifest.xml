@@ -12,14 +12,13 @@
         android:name="android.hardware.camera"
         android:required="true" />
     <application
-        android:requestLegacyExternalStorage="true"
-        android:usesCleartextTraffic="false"
-        tools:targetApi="31">
+        android:requestLegacyExternalStorage="true">
         <activity
             android:name=".MainLiveNessActivity"
             android:exported="true" />
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-            android:value="face" />
+            android:value="face"
+            tools:replace="value"/>
     </application>
 </manifest>

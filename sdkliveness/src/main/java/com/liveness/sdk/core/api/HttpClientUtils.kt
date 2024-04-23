@@ -110,6 +110,11 @@ internal class HttpClientUtils {
                         urlConnection.setRequestProperty(key, value)
                     }
                 }
+                if (AppConfig.mLivenessRequest?.optionHeader?.isNotEmpty() == true) {
+                    for ((key, value) in AppConfig.mLivenessRequest?.optionHeader!!) {
+                        urlConnection.setRequestProperty(key, value)
+                    }
+                }
                 val os = urlConnection.outputStream
                 os.write(requestBody.toString().toByteArray(StandardCharsets.UTF_8))
                 os.flush()
@@ -134,6 +139,12 @@ internal class HttpClientUtils {
 
     private fun doPostV3(urlString: String, requestBody: JSONObject, optionalHeader: Map<String, String>?): String? {
         val encryptedRequestBody = JSONObject()
+        if (AppConfig.mLivenessRequest?.optionRequest?.isNotEmpty() == true) {
+            for ((key, value) in AppConfig.mLivenessRequest?.optionRequest!!) {
+                requestBody.put(key, value)
+            }
+        }
+        Log.d("Thuytv", "---requestBody: $requestBody")
         val encryptedBody = jwsUtils.encrypt(requestBody)
         try {
             showLog("jws: $encryptedBody")
@@ -320,7 +331,7 @@ internal class HttpClientUtils {
 
     fun registerFace(faceImage: String): String? {
         val request = JSONObject()
-        Log.d("Thuytv","------deviceId: " + AppConfig.mLivenessRequest?.deviceId)
+        Log.d("Thuytv", "------deviceId: " + AppConfig.mLivenessRequest?.deviceId)
         request.put("deviceId", AppConfig.mLivenessRequest?.deviceId ?: "")
         request.put("face_image", faceImage)
         val optionalHeader = HashMap<String, String>()

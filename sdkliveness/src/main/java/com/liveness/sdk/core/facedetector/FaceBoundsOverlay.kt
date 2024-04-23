@@ -33,11 +33,13 @@ internal class FaceBoundsOverlay @JvmOverloads constructor(ctx: Context, attrs: 
         boundsPaint.strokeWidth = 4f
     }
 
-    internal fun updateFaces(bounds: List<FaceBounds>) {
+    internal fun updateFaces(bounds: List<FaceBounds>?) {
 //        Log.d("Thuytv","-----updateFaces:" + bounds.size)
-        facesBounds.clear()
-        facesBounds.addAll(bounds)
-        invalidate()
+        bounds?.apply {
+            facesBounds.clear()
+            facesBounds.addAll(bounds)
+            invalidate()
+        }
     }
 
     override fun onDraw(canvas: Canvas) {

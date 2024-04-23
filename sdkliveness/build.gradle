@@ -22,8 +22,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildFeatures {
         viewBinding true
@@ -44,58 +44,17 @@ android {
 
 dependencies {
 
-    implementation('androidx.core:core-ktx:1.9.0')
-    implementation('androidx.appcompat:appcompat:1.6.1')
-//    implementation(platform('com.google.firebase:firebase-bom:32.8.1'))
+    implementation('androidx.core:core-ktx:1.5.0')
+    implementation('androidx.appcompat:appcompat:1.4.0')
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
+
     implementation('com.google.mlkit:face-detection:16.1.6')
     implementation('com.otaliastudios:cameraview:2.7.2')
     implementation('org.bouncycastle:bcpkix-jdk15on:1.65')
     implementation('com.nimbusds:nimbus-jose-jwt:9.31')
     implementation('commons-codec:commons-codec:1.10')
-//    implementation('com.google.firebase:firebase-ml-vision-face-model:20.0.2')
 
 }
-//def libraryGroupId = 'io.liveness.flash'
-//def libraryArtifactId = 'sdk'
-//def libraryVersion = 'v1.0.0'
-//publishing {
-//    publications {
-//        aar(MavenPublication) {
-//            groupId libraryGroupId
-//            version libraryVersion
-//            artifactId libraryArtifactId
-//
-//            artifact("$buildDir/outputs/aar/sdkliveness-release.aar")
-//        }
-//    }
-//}
-//afterEvaluate {
-//    publishing {
-//        publications {
-//            mavenJava(MavenPublication) {
-//                // Applies the component for the release build variant.
-//                groupId libraryGroupId
-//                version libraryVersion
-//                artifactId libraryArtifactId
-//                artifact("$buildDir/outputs/aar/sdkliveness-release.aar")
-//                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-//                pom.withXml {
-//                    def dependencies = asNode().appendNode("dependencies")
-//                    configurations.api.allDependencies.each {
-//                        def dependency = dependencies.appendNode("dependency")
-//                        print(it.group)
-//                        dependency.appendNode("groupId", it.group)
-//                        dependency.appendNode("artifactId", it.name)
-//                        dependency.appendNode("version", it.version)
-//                    }
-//                }
-//            }
-//        }
-//    }
-////    artifactoryPublish {
-////        publications(publishing.publications.mavenJava)
-////    }
-//}
 afterEvaluate {
     publishing {
         publications {

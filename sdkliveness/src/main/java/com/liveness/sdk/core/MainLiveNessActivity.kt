@@ -249,6 +249,9 @@ internal class MainLiveNessActivity : Activity() {
     override fun onDestroy() {
         super.onDestroy()
         binding.cameraViewVideo.destroy()
+        if (AppConfig.mCustomView != null) {
+            binding.frameViewCustom.removeView(AppConfig.mCustomView)
+        }
     }
 
 //    private fun demoAPI() {

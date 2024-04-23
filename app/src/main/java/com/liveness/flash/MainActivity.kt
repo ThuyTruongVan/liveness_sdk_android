@@ -105,10 +105,17 @@ class MainActivity : AppCompatActivity() {
         }
 //        deviceId = "f8552f6d-35da-45f0-9761-f38fe1ea33d1"
         Log.d("Thuytv", "----deviceId: $deviceId")
+        val optionHeader: HashMap<String, String> = HashMap()
+        optionHeader["header1"] = "test"
+        optionHeader["header2"] = "TEST-02"
+        val optionRequest: HashMap<String, String> = HashMap()
+        optionRequest["request-1"] = "test"
+        optionRequest["request-2"] = "TEST-02"
         return LivenessRequest(
             duration = 600, privateKey = privateKey, appId = appId,
             deviceId = deviceId, clientTransactionId = "TEST", secret = "ABCDEFGHIJKLMNOP",
-            baseURL = "https://face-matching.vietplus.eu", publicKey = public_key
+            baseURL = "https://face-matching.vietplus.eu", publicKey = public_key, ownerId = "123",
+            optionHeader = optionHeader, optionRequest = optionRequest
         )
 
     }

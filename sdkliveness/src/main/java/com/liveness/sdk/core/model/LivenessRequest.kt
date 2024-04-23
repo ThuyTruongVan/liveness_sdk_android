@@ -16,10 +16,16 @@ data class LivenessRequest(
     var appId: String? = null,
     @field:SerializedName("client_transaction_id")
     var clientTransactionId: String? = null,
+    @field:SerializedName("owner_id")
+    var ownerId: String? = null,
     @field:SerializedName("secret")
     var secret: String? = null,
     @field:SerializedName("base_url")
     var baseURL: String? = null,
     @field:SerializedName("public_key")
-    var publicKey: String? = null
+    var publicKey: String? = null,
+    @field:SerializedName("option_header")
+    var optionHeader: HashMap<String, String>? = null,
+    @field:SerializedName("option_request")
+    var optionRequest: HashMap<String, String>? = null
 )

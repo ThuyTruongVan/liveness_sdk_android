@@ -8,13 +8,11 @@ import com.liveness.sdk.core.jws.TOTPGenerator
 import com.liveness.sdk.core.utils.AppUtils.getDeviceId
 import org.json.JSONObject
 
-internal class TotpUtils private constructor(private val mContext: Context) {
+internal class TotpUtils(private val mContext: Context) {
     private var secret: String = ""
-    private val generator: TOTPGenerator
 
     init {
         secret = AppPreferenceUtils(mContext).getTOTPSecret(mContext)
-        generator = TOTPGenerator()
     }
 
     private fun setSecret(secretString: String) {
@@ -22,7 +20,7 @@ internal class TotpUtils private constructor(private val mContext: Context) {
         AppPreferenceUtils(mContext).setTOTPSecret(mContext, secretString)
     }
 
-    private val totpSecret: String
+    private var totpSecret: String? = null
         /**
          * return totpSecret read from shared pref
          * if null, then will try to call register device api to get secret
@@ -60,20 +58,21 @@ internal class TotpUtils private constructor(private val mContext: Context) {
         }
 
     fun getTotp(): String {
-        if (totpSecret.isEmpty()) {
-            return ""
+        if (totpSecret?.isNotEmpty() == true) {
+            val generator = TOTPGenerator()
+            return generator.generateTOTP(totpSecret!!)
         }
-        return generator.generateTOTP(totpSecret)
+        return ""
     }
 
 
-    companion object {
-        private var totpUtils: TotpUtils? = null
-        fun getInstance(context: Context): TotpUtils? {
-            if (totpUtils == null) {
-                totpUtils = TotpUtils(context)
-            }
-            return totpUtils
-        }
-    }
+//    companion object {
+//        private var totpUtils: TotpUtils? = null
+//        fun getInstance(context: Context): TotpUtils? {
+//            if (totpUtils == null) {
+//                totpUtils = TotpUtils(context)
+//            }
+//            return totpUtils
+//        }
+//    }
 }

@@ -9,14 +9,9 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 class TOTPGenerator {
-    private val base32: Base32
-
-    init {
-        base32 = Base32()
-    }
-
     fun generateTOTP(secret: String): String {
         return try {
+            val base32 = Base32()
             // Ensure the secret is base32 encoded
             val keyBytes = base32.decode(secret)
 
@@ -55,6 +50,9 @@ class TOTPGenerator {
             e.printStackTrace()
             ""
         } catch (e: InvalidKeyException) {
+            e.printStackTrace()
+            ""
+        } catch (e: Exception) {
             e.printStackTrace()
             ""
         }

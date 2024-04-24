@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:gravity="center"
     android:id="@+id/root_view_test"
-    android:background="#FA2"
     android:layout_height="match_parent">
     <TextView
         android:layout_width="wrap_content"

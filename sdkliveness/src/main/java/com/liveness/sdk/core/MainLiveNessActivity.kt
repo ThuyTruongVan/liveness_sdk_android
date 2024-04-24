@@ -311,7 +311,6 @@ internal class MainLiveNessActivity : Activity() {
             result = JSONObject(response)
         }
         if (result?.has("status") == true && result.getInt("status") == 200) {
-            AppUtils.showLog("Thuytv------checkLiveNessFlash--success")
             val liveNessModel = Gson().fromJson<LivenessModel>(response, LivenessModel::class.java)
 //            if (liveNessModel.success == true) {
             liveNessModel.pathVideo = pathVideo
@@ -331,8 +330,7 @@ internal class MainLiveNessActivity : Activity() {
     fun callAPIGEtTOTP(imgLiveNess: String, bgColor: Int) {
         showLoading(true)
         Thread {
-            val tOTP = TotpUtils.getInstance(this)?.getTotp()
-            Log.d("Thuytv", "-----tOTP: $tOTP")
+            val tOTP = TotpUtils(this).getTotp()
             if (tOTP.isNullOrEmpty()) {
                 showToast("TOTP null")
             } else {

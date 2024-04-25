@@ -331,7 +331,8 @@ internal class MainLiveNessActivity : Activity() {
         showLoading(true)
         Thread {
             val tOTP = TotpUtils(this).getTotp()
-            if (tOTP.isNullOrEmpty()) {
+            Log.d("Thuytv","----tOTP: $tOTP")
+            if (tOTP.isNullOrEmpty() || tOTP == "-1") {
                 showToast("TOTP null")
             } else {
                 initTransaction(tOTP, imgLiveNess, bgColor)

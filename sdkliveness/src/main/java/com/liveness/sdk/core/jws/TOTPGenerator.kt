@@ -1,5 +1,6 @@
 package com.liveness.sdk.core.jws
 
+import android.util.Log
 import com.liveness.sdk.core.utils.AppConfig
 import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer
@@ -13,9 +14,13 @@ class TOTPGenerator {
         return try {
             val base32 = Base32()
             // Ensure the secret is base32 encoded
-            val keyBytes = base32.decode(secret)
-
+            Log.d("Thuytv","----secret: $secret" )
+//            val keyBytes = base32.decode(testSecret)
+            val keyBytes = base32.decode("ABCDEFGHIJKLMNOP")
             // Calculate the number of time steps (30 seconds intervals) since Unix epoch
+            if(keyBytes.isEmpty()){
+                return "-1"
+            }
             val period = AppConfig.mLivenessRequest?.duration ?: 30
 //            val timeStep = System.currentTimeMillis() / (TIME_STEP_SECONDS * 1000)
             val timeStep = System.currentTimeMillis() / (period * 1000)

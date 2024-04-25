@@ -108,13 +108,10 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
                     for (face in faces) {
                         if (face.smilingProbability != null) {
                             val smile = face.smilingProbability ?: 0.0f
-                            Log.d("Thuytv", "--------faces---smilingProbability: $smile")
                             if (smile > 0.95) {
-                                Log.d("Thuytv", "--------faces---smile")
                                 onFaceDetectionResultListener?.onSuccess(face)
                                 isProcessing = true
                             } else {
-                                Log.d("Thuytv", "--------faces--NOT-smile")
                                 val faceBounds = faces.map { face -> face.toFaceBounds(this) }
 //                                mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
                             }

@@ -41,7 +41,7 @@ class LiveNessSDK {
             return AppPreferenceUtils(context).getDeviceId(context)
         }
         fun checkVersion(): String{
-            return "v1.1.2"
+            return "v1.1.3"
         }
     }
 }

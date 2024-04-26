@@ -104,7 +104,6 @@ class MainActivity : AppCompatActivity() {
 //            deviceId = UUID.randomUUID().toString()
 //        }
         deviceId = "f8552f6d-35da-45f0-9761-f38fe1ea33d1"
-        Log.d("Thuytv", "----deviceId: $deviceId")
         val optionHeader: HashMap<String, String> = HashMap()
         optionHeader["header1"] = "test"
         optionHeader["header2"] = "TEST-02"

@@ -152,14 +152,12 @@ internal class MainLiveNessActivity : Activity() {
         faceDetector.setonFaceDetectionFailureListener(object : FaceDetector.OnFaceDetectionResultListener {
             override fun onSuccess(faceBounds: Face) {
                 super.onSuccess(faceBounds)
-                AppUtils.showLog("Thuytv--faceDetector--onSuccess")
                 if (!isCapture) {
                     isCapture = true
                     cameraViewVideo.stopVideo()
                     binding.bgFullScreenDefault.visibility = View.VISIBLE
                     binding.llVideo.visibility = View.GONE
                     bgColor = Random().nextInt(3)
-                    AppUtils.showLog("Thuytv----bgColor: $bgColor")
                     binding.bgFullScreenDefault.background = ResourcesCompat.getDrawable(resources, lstBgDefault[bgColor], this@MainLiveNessActivity.theme)
                     Handler(Looper.myLooper()!!).postDelayed({
                         cameraViewVideo.takePictureSnapshot()
@@ -175,7 +173,6 @@ internal class MainLiveNessActivity : Activity() {
         cameraViewVideo.addCameraListener(object : CameraListener() {
             override fun onCameraOpened(options: CameraOptions) {
                 super.onCameraOpened(options)
-                AppUtils.showLog("Thuytv--onCameraOpened : ")
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
                     cameraViewVideo.takeVideoSnapshot(File(pathVideo))
                 } else {
@@ -195,7 +192,6 @@ internal class MainLiveNessActivity : Activity() {
 
             override fun onPictureTaken(result: PictureResult) {
                 super.onPictureTaken(result)
-                Log.d("Thuytv", "-----onPictureTaken")
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
                     result.data.let {
                         val imgLiveNess = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
@@ -214,7 +210,6 @@ internal class MainLiveNessActivity : Activity() {
 
             override fun onVideoTaken(result: VideoResult) {
                 super.onVideoTaken(result)
-                Log.d("Thuytv", "-----onVideoTaken")
                 result.file.let {
 //                    AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(pathVideo = it.absolutePath))
 //                    finish()
@@ -331,7 +326,6 @@ internal class MainLiveNessActivity : Activity() {
         showLoading(true)
         Thread {
             val tOTP = TotpUtils(this).getTotp()
-            Log.d("Thuytv","----tOTP: $tOTP")
             if (tOTP.isNullOrEmpty() || tOTP == "-1") {
                 showToast("TOTP null")
             } else {
@@ -368,7 +362,6 @@ internal class MainLiveNessActivity : Activity() {
             request.put("period", AppConfig.mLivenessRequest?.duration)
             request.put("secret", AppConfig.mLivenessRequest?.secret)
             val responseDevice = HttpClientUtils.instance?.postV3("/eid/v3/registerDevice", request)
-            Log.d("Thuytv", "---response: $responseDevice")
             var result: JSONObject? = null
             if (responseDevice != null && responseDevice.length > 0) {
                 result = JSONObject(responseDevice)
@@ -380,7 +373,6 @@ internal class MainLiveNessActivity : Activity() {
                     result = JSONObject(response)
                 }
                 if (result?.has("status") == true && result.getInt("status") == 200) {
-                    AppUtils.showLog("Thuytv------registerFace--success")
                     showLoading(false)
                     AppPreferenceUtils(this).setDeviceId(this, AppConfig.mLivenessRequest?.deviceId ?: "")
                     this.runOnUiThread {

@@ -144,10 +144,9 @@ internal class HttpClientUtils {
                 requestBody.put(key, value)
             }
         }
-        Log.d("Thuytv", "---requestBody: $requestBody")
         val encryptedBody = jwsUtils.encrypt(requestBody)
         try {
-            showLog("jws: $encryptedBody")
+//            showLog("jws: $encryptedBody")
 
             encryptedRequestBody.put("jws", encryptedBody)
         } catch (e: JSONException) {
@@ -331,7 +330,6 @@ internal class HttpClientUtils {
 
     fun registerFace(faceImage: String): String? {
         val request = JSONObject()
-        Log.d("Thuytv", "------deviceId: " + AppConfig.mLivenessRequest?.deviceId)
         request.put("deviceId", AppConfig.mLivenessRequest?.deviceId ?: "")
         request.put("face_image", faceImage)
         val optionalHeader = HashMap<String, String>()

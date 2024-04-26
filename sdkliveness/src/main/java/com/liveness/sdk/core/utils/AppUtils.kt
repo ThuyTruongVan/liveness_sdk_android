@@ -30,7 +30,7 @@ import java.util.UUID
 internal object AppUtils {
     fun showLog(strLog: String) {
 //        if (BuildConfig.DEBUG) {
-        Log.d("liveness", strLog)
+//        Log.d("liveness", strLog)
 //        }
     }
 

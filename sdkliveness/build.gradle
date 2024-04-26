@@ -1,7 +1,7 @@
 plugins {
     id('com.android.library')
     id('org.jetbrains.kotlin.android')
-    id ('maven-publish')
+//    id ('maven-publish')
 }
 
 android {
@@ -9,7 +9,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        minSdk 21
+        minSdk 24
     }
 
     buildTypes {
@@ -25,48 +25,48 @@ android {
     buildFeatures {
         viewBinding true
     }
-    libraryVariants.all { variant ->
-        variant.outputs.all { output ->
-            if (outputFile != null && outputFileName.endsWith('.aar')) {
-                outputFileName = "sdk-${version}.aar"
-            }
-        }
-    }
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-        }
-    }
+//    libraryVariants.all { variant ->
+//        variant.outputs.all { output ->
+//            if (outputFile != null && outputFileName.endsWith('.aar')) {
+//                outputFileName = "sdk-${version}.aar"
+//            }
+//        }
+//    }
+//    publishing {
+//        singleVariant("release") {
+//            withSourcesJar()
+//        }
+//    }
 }
 
 dependencies {
     implementation('androidx.appcompat:appcompat:1.4.1')
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
 
-    implementation('com.google.mlkit:face-detection:16.1.1')
+    implementation('com.google.mlkit:face-detection:16.1.5')
     implementation('com.otaliastudios:cameraview:2.7.2')
     implementation('org.bouncycastle:bcpkix-jdk15on:1.65')
     implementation('com.nimbusds:nimbus-jose-jwt:9.31')
-    implementation('commons-codec:commons-codec:1.10')
+    implementation('commons-codec:commons-codec:1.16.0')
 
 }
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                from components.release
-
-                groupId "io.liveness.flash"
-                artifactId "sdk-android"
-                version "v1.0.0"
-            }
-        }
-
-        repositories {
-            maven {
-                name = "BuildFolder"
-                url = "${project.buildDir}/repository"
-            }
-        }
-    }
-}
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            release(MavenPublication) {
+//                from components.release
+//
+//                groupId "io.liveness.flash"
+//                artifactId "sdk-android"
+//                version "v1.0.0"
+//            }
+//        }
+//
+//        repositories {
+//            maven {
+//                name = "BuildFolder"
+//                url = "${project.buildDir}/repository"
+//            }
+//        }
+//    }
+//}

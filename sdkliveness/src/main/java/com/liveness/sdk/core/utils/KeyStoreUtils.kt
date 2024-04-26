@@ -150,7 +150,6 @@ internal class KeyStoreUtils(private val mContext: Context) {
     private fun removeSavedSharedPreferences() {
         val sharedPreferences = mContext.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE)
         val clearedPreferencesSuccessfully = sharedPreferences.edit().clear().commit()
-        Log.d(LOG_TAG, String.format("Cleared secret key shared preferences `%s`", clearedPreferencesSuccessfully))
     }
 
     @Throws(
@@ -206,9 +205,9 @@ internal class KeyStoreUtils(private val mContext: Context) {
             edit.putString(ENCRYPTED_KEY_NAME, encryptedKeyBase64encoded)
             val successfullyWroteKey = edit.commit()
             if (successfullyWroteKey) {
-                Log.d(LOG_TAG, "Saved keys successfully")
+//                Log.d(LOG_TAG, "Saved keys successfully")
             } else {
-                Log.e(LOG_TAG, "Saved keys unsuccessfully")
+//                Log.e(LOG_TAG, "Saved keys unsuccessfully")
                 throw IOException("Could not save keys")
             }
         }

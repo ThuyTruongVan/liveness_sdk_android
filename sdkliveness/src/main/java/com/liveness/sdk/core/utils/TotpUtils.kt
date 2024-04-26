@@ -40,7 +40,6 @@ internal class TotpUtils(private val mContext: Context) {
                 request.put("period", AppConfig.mLivenessRequest?.duration)
                 request.put("secret", AppConfig.mLivenessRequest?.secret)
                 val response = instance?.postV3("/eid/v3/registerDevice", request)
-                Log.d("Thuytv", "---response: $response")
                 var result: JSONObject? = null
                 if (response != null && response.length > 0) {
                     result = JSONObject(response)

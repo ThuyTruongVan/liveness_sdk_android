@@ -1,10 +1,14 @@
 package com.liveness.sdk.core.model
 
+import androidx.annotation.Keep
+import com.google.android.gms.common.annotation.KeepForSdk
+import com.google.android.gms.common.annotation.KeepName
 import com.nimbusds.jose.shaded.gson.annotations.SerializedName
 
 /**
  * Created by Thuytv on 16/04/2024.
  */
+@Keep
 data class LivenessModel(
     @field:SerializedName("status")
     var status: Int? = null,

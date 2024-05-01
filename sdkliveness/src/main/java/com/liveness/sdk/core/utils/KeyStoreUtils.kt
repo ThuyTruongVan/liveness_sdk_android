@@ -64,8 +64,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
    So this is only useful for saving data that a user can re-generate with some ease. Cookies from a server for example.
 
 */
-internal class KeyStoreUtils(private val mContext: Context) {
+class KeyStoreUtils(private val mContext: Context) {
     // Using algorithm as described at https://medium.com/@ericfu/securely-storing-secrets-in-an-android-application-501f030ae5a3
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Throws(
         KeyStoreException::class,
         CertificateException::class,
@@ -125,6 +126,7 @@ internal class KeyStoreUtils(private val mContext: Context) {
         removeSavedSharedPreferences()
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Throws(
         NoSuchAlgorithmException::class,
         NoSuchProviderException::class,
@@ -150,8 +152,10 @@ internal class KeyStoreUtils(private val mContext: Context) {
     private fun removeSavedSharedPreferences() {
         val sharedPreferences = mContext.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE)
         val clearedPreferencesSuccessfully = sharedPreferences.edit().clear().commit()
+        Log.d(LOG_TAG, String.format("Cleared secret key shared preferences `%s`", clearedPreferencesSuccessfully))
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Throws(
         NoSuchProviderException::class,
         NoSuchAlgorithmException::class,
@@ -205,9 +209,9 @@ internal class KeyStoreUtils(private val mContext: Context) {
             edit.putString(ENCRYPTED_KEY_NAME, encryptedKeyBase64encoded)
             val successfullyWroteKey = edit.commit()
             if (successfullyWroteKey) {
-//                Log.d(LOG_TAG, "Saved keys successfully")
+                Log.d(LOG_TAG, "Saved keys successfully")
             } else {
-//                Log.e(LOG_TAG, "Saved keys unsuccessfully")
+                Log.e(LOG_TAG, "Saved keys unsuccessfully")
                 throw IOException("Could not save keys")
             }
         }
@@ -259,6 +263,7 @@ internal class KeyStoreUtils(private val mContext: Context) {
         keyGenerator.generateKey()
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Throws(
         NoSuchPaddingException::class,
         NoSuchAlgorithmException::class,
@@ -304,6 +309,7 @@ internal class KeyStoreUtils(private val mContext: Context) {
         return Base64.encodeToString(encodedBytes, Base64.DEFAULT)
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Throws(
         NoSuchPaddingException::class,
         NoSuchAlgorithmException::class,
@@ -340,6 +346,7 @@ internal class KeyStoreUtils(private val mContext: Context) {
             throw e
         }
         val decodedBytes = c.doFinal(encryptedDecodedData)
+//        return String(decodedBytes, CHARSET_NAME)
         return String(decodedBytes, Charset.defaultCharset())
     }
 

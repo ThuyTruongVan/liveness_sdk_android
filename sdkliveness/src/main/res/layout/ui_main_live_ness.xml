@@ -4,6 +4,8 @@
     android:id="@+id/root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusable="true"
     android:orientation="vertical">
 
     <ImageView
@@ -65,7 +67,8 @@
         <FrameLayout
             android:id="@+id/frame_view_custom"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            />
         <ProgressBar
             android:id="@+id/prb_loading"
             android:layout_width="wrap_content"

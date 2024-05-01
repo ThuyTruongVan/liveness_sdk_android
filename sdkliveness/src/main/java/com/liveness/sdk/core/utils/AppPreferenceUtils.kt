@@ -13,7 +13,7 @@ internal class AppPreferenceUtils(context: Context?) {
     init {
         if (context != null)
             IShare = context.getSharedPreferences(
-                APP_SHARE_PREFERENCE_NAME,
+                context.applicationInfo.packageName,
                 Context.MODE_PRIVATE
             )
     }
@@ -66,11 +66,11 @@ internal class AppPreferenceUtils(context: Context?) {
     }
 
     fun getValueString(key: String?): String? {
-        return IShare?.getString(key, "")?.trim { it <= ' ' }
+        return IShare?.getString(key, null)
     }
 
     fun getValueString(key: String?, value: String?): String? {
-        return IShare?.getString(key, value)?.trim { it <= ' ' }
+        return IShare?.getString(key, value)
     }
 
     fun removeValue(key: String) {
@@ -79,38 +79,54 @@ internal class AppPreferenceUtils(context: Context?) {
 
     fun setTOTPSecret(context: Context, strKey: String) {
 //        val secret = KeyStoreUtils.getInstance(context)?.encryptData(strKey)
-        val enCryptData = EnCryptData()
-        enCryptData.encryptText(context, KEY_TOTP_SECRET, strKey)
+//        val enCryptData = EnCryptData()
+//        enCryptData.encryptText(context, KEY_TOTP_SECRET, strKey)
+        KeyStoreUtils.getInstance(context)?.encryptData(strKey)
 //        setValueString(KEY_TOTP_SECRET, secret)
     }
 
     fun getTOTPSecret(context: Context): String {
-//        val secret = getValueString(KEY_TOTP_SECRET)
-//        if (secret.isNullOrEmpty()) {
-//            return ""
-//        }
-//        return KeyStoreUtils.getInstance(context)?.decryptData(secret) ?: ""
-        val deCryptData = DeCryptData()
-        return deCryptData.decryptData(context, KEY_TOTP_SECRET)
+        val secret = getValueString(KEY_TOTP_SECRET)
+        if (secret.isNullOrEmpty()) {
+            return ""
+        }
+        return KeyStoreUtils.getInstance(context)?.decryptData(secret) ?: ""
+//        val deCryptData = DeCryptData()
+//        return deCryptData.decryptData(context, KEY_TOTP_SECRET)
     }
 
-    fun setDeviceId(context: Context, strKey: String?) {
+    fun setDeviceId(strKey: String?) {
         strKey?.let {
             val enCryptData = EnCryptData()
-            enCryptData.encryptText(context, KEY_DEVICE_ID, strKey)
+//            enCryptData.encryptText(context, KEY_DEVICE_ID, strKey)
+            setValueString(KEY_DEVICE_ID, strKey)
         }
+
     }
 
-    fun getDeviceId(context: Context): String? {
-        val deCryptData = DeCryptData()
-        return deCryptData.decryptData(context, KEY_DEVICE_ID)
+    fun getDeviceId(): String? {
+//        val deCryptData = DeCryptData()
+//        return deCryptData.decryptData(context, KEY_DEVICE_ID)
+        return getValueString(KEY_DEVICE_ID)
     }
 
+    fun isRegisterFace(): Boolean {
+        return getValueBoolean(KEY_REGISTER_FACE)
+    }
+
+    fun setRegisterFace(isRegister: Boolean) {
+        return setValueBoolean(KEY_REGISTER_FACE, isRegister)
+    }
 
     companion object {
         const val APP_SHARE_PREFERENCE_NAME = "mSharePreferenceName"
-        const val KEY_DEVICE_ID = "mDeviceId"
-        const val KEY_TOTP_SECRET = "mTOTPSecret"
+
+        //        const val KEY_DEVICE_ID = "mDeviceId"
+        const val KEY_DEVICE_ID = "KEY_DEVICE_ID"
+
+        //        const val KEY_TOTP_SECRET = "mTOTPSecret"
+        const val KEY_TOTP_SECRET = "KEY_TOTP_SECRET"
+        const val KEY_REGISTER_FACE = "KEY_REGISTER_FACE"
         const val KEY_SIGNATURE = "mSignature"
         const val KEY_ALIAS = "mKeystoreSecretAlias"
     }

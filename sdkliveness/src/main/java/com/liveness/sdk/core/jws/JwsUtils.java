@@ -107,7 +107,7 @@ public class JwsUtils {
             jwsObject.sign(signer);
 //			System.out.println("JWS: Header: " + header.toJSONObject().toString());
             senderJws = jwsObject.serialize();
-            System.out.print("JWS : " + senderJws + "\n");
+//            System.out.print("JWS : " + senderJws + "\n");
             return senderJws;
 
         } catch (Exception ex) {

@@ -6,6 +6,7 @@ import android.util.Log
 import com.liveness.sdk.core.jws.JwsUtils
 import com.liveness.sdk.core.model.LivenessRequest
 import com.liveness.sdk.core.utils.AppConfig
+import com.liveness.sdk.core.utils.AppPreferenceUtils
 import com.liveness.sdk.core.utils.AppUtils.showLog
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.json.JSONException
@@ -146,7 +147,8 @@ internal class HttpClientUtils {
         }
         val encryptedBody = jwsUtils.encrypt(requestBody)
         try {
-//            showLog("jws: $encryptedBody")
+            showLog("requestBody: ${requestBody.toString()}")
+            showLog("jws: $encryptedBody")
 
             encryptedRequestBody.put("jws", encryptedBody)
         } catch (e: JSONException) {
@@ -311,7 +313,7 @@ internal class HttpClientUtils {
 
     fun initTransaction(mContext: Context): String? {
         val request = JSONObject()
-        request.put("deviceId", AppConfig.mLivenessRequest?.deviceId)
+        request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId)
         request.put("period", AppConfig.mLivenessRequest?.duration)
         request.put("clientTransactionId", AppConfig.mLivenessRequest?.clientTransactionId)
         return instance?.postV3("/eid/v3/initTransaction", request)
@@ -324,16 +326,16 @@ internal class HttpClientUtils {
         request.put("image_live", imageLive)
         request.put("color", color)
         val optionalHeader = HashMap<String, String>()
-        optionalHeader.put("deviceid", AppConfig.mLivenessRequest?.deviceId ?: "")
+        optionalHeader.put("deviceid", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: "")
         return instance?.postV3("/eid/v3/verifyFace", request, optionalHeader)
     }
 
-    fun registerFace(faceImage: String): String? {
+    fun registerFace(mContext: Context, faceImage: String): String? {
         val request = JSONObject()
-        request.put("deviceId", AppConfig.mLivenessRequest?.deviceId ?: "")
+        request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: "")
         request.put("face_image", faceImage)
         val optionalHeader = HashMap<String, String>()
-        optionalHeader.put("deviceid", AppConfig.mLivenessRequest?.deviceId ?: "")
+        optionalHeader.put("deviceid", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: "")
         return instance?.postV3("/eid/v3/registerFace", request, optionalHeader)
 //        return instance?.post("/eid/v3/verifyFace", request, optionalHeader)
     }

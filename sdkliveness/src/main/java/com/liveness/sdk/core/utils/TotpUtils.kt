@@ -34,7 +34,7 @@ internal class TotpUtils(private val mContext: Context) {
             }
             try {
                 val request = JSONObject()
-                request.put("deviceId", AppConfig.mLivenessRequest?.deviceId)
+                request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?:AppConfig.mLivenessRequest?.deviceId)
                 request.put("deviceOs", "Android")
                 request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
                 request.put("period", AppConfig.mLivenessRequest?.duration)

@@ -18,7 +18,6 @@
             android:exported="true" />
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-            android:value="face"
-            tools:replace="value"/>
+            android:value="face"/>
     </application>
 </manifest>

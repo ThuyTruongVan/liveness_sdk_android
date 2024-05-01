@@ -13,6 +13,11 @@ import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -33,6 +38,7 @@ import com.nimbusds.jose.shaded.gson.Gson
 import com.otaliastudios.cameraview.CameraException
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraOptions
+import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.PictureResult
 import com.otaliastudios.cameraview.VideoResult
 import com.otaliastudios.cameraview.controls.Facing
@@ -54,26 +60,31 @@ internal class MainLiveNessActivity : Activity() {
 
     private var isFirstVideo = true
     private var typeScreen = ""
+    private lateinit var cameraViewVideo: CameraView
+    private lateinit var btnCapture: Button
+    private lateinit var prbLoading: ProgressBar
+    private lateinit var bgFullScreenDefault: ImageView
+    private lateinit var llVideo: RelativeLayout
 
     private var permissions = arrayOf(
         Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO
     )
 
-
-    private val binding by lazy {
-        UiMainLiveNessBinding.inflate(layoutInflater)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding.root)
+        setContentView(R.layout.ui_main_live_ness)
 
         if (AppConfig.mCustomView != null) {
-            binding.frameViewCustom.addView(AppConfig.mCustomView)
+            findViewById<FrameLayout>(R.id.frame_view_custom).addView(AppConfig.mCustomView)
         }
+        cameraViewVideo = findViewById(R.id.camera_view_video)
+        btnCapture = findViewById(R.id.btn_capture)
+        prbLoading = findViewById(R.id.prb_loading)
+        bgFullScreenDefault = findViewById(R.id.bg_full_screen_default)
+        llVideo = findViewById(R.id.ll_video)
 
         typeScreen = intent.getStringExtra(AppConfig.KEY_BUNDLE_SCREEN) ?: ""
-        binding.imvBack.setOnClickListener {
+        findViewById<ImageView>(R.id.imv_back).setOnClickListener {
             finish()
         }
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
@@ -85,16 +96,20 @@ internal class MainLiveNessActivity : Activity() {
 
         initCamera()
         if (checkPermissions()) {
-            binding.cameraViewVideo.open()
+            cameraViewVideo.open()
         } else {
             requestPermissions()
         }
         if (typeScreen == AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-            binding.btnCapture.setOnClickListener {
-                binding.cameraViewVideo.takePictureSnapshot()
+            btnCapture.setOnClickListener {
+                cameraViewVideo.takePictureSnapshot()
             }
         } else {
-            binding.btnCapture.visibility = View.GONE
+            btnCapture.visibility = View.GONE
+        }
+        AppConfig.mActionView?.setOnClickListener {
+            Log.d("Thuytv","-----AppConfig.mActionView---setOnClickListener")
+            cameraViewVideo.takePictureSnapshot()
         }
     }
 
@@ -124,7 +139,7 @@ internal class MainLiveNessActivity : Activity() {
         if (requestCode == REQUEST_PERMISSION_CODE) {
             if (checkPermissions()) {
 //                Toast.makeText(applicationContext, "Permission granted", Toast.LENGTH_LONG).show()
-                binding.cameraViewVideo.open()
+                cameraViewVideo.open()
             } else {
                 Toast.makeText(applicationContext, "Permission denied", Toast.LENGTH_LONG).show()
             }
@@ -140,25 +155,25 @@ internal class MainLiveNessActivity : Activity() {
     }
 
     private fun initCamera() {
-        binding.apply {
+        apply {
             pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
             val lensFacing = Facing.FRONT
             setupCamera(lensFacing)
         }
     }
 
-    private fun setupCamera(lensFacing: Facing) = binding.apply {
-        val faceDetector = FaceDetector(faceBoundsOverlay)
+    private fun setupCamera(lensFacing: Facing) = apply {
+        val faceDetector = FaceDetector(findViewById(R.id.faceBoundsOverlay))
         faceDetector.setonFaceDetectionFailureListener(object : FaceDetector.OnFaceDetectionResultListener {
             override fun onSuccess(faceBounds: Face) {
                 super.onSuccess(faceBounds)
                 if (!isCapture) {
                     isCapture = true
                     cameraViewVideo.stopVideo()
-                    binding.bgFullScreenDefault.visibility = View.VISIBLE
-                    binding.llVideo.visibility = View.GONE
+                    bgFullScreenDefault.visibility = View.VISIBLE
+                    llVideo.visibility = View.GONE
                     bgColor = Random().nextInt(3)
-                    binding.bgFullScreenDefault.background = ResourcesCompat.getDrawable(resources, lstBgDefault[bgColor], this@MainLiveNessActivity.theme)
+                    bgFullScreenDefault.background = ResourcesCompat.getDrawable(resources, lstBgDefault[bgColor], this@MainLiveNessActivity.theme)
                     Handler(Looper.myLooper()!!).postDelayed({
                         cameraViewVideo.takePictureSnapshot()
                     }, 300)
@@ -176,7 +191,11 @@ internal class MainLiveNessActivity : Activity() {
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
                     cameraViewVideo.takeVideoSnapshot(File(pathVideo))
                 } else {
-                    binding.btnCapture.visibility = View.VISIBLE
+                    if (AppConfig.mCustomView == null) {
+                        btnCapture.visibility = View.VISIBLE
+                    } else {
+                        btnCapture.visibility = View.GONE
+                    }
                 }
             }
 
@@ -197,8 +216,8 @@ internal class MainLiveNessActivity : Activity() {
                         val imgLiveNess = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
                         callAPIGEtTOTP(imgLiveNess, bgColor)
                     }
-                    binding.bgFullScreenDefault.visibility = View.GONE
-                    binding.llVideo.visibility = View.VISIBLE
+                    bgFullScreenDefault.visibility = View.GONE
+                    llVideo.visibility = View.VISIBLE
                     isCapture = false
                 } else {
                     result.data.let {
@@ -233,19 +252,19 @@ internal class MainLiveNessActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-//        binding.cameraViewVideo.open()
+//        cameraViewVideo.open()
     }
 
     override fun onPause() {
         super.onPause()
-        binding.cameraViewVideo.close()
+        cameraViewVideo.close()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.cameraViewVideo.destroy()
+        cameraViewVideo.destroy()
         if (AppConfig.mCustomView != null) {
-            binding.frameViewCustom.removeView(AppConfig.mCustomView)
+            findViewById<FrameLayout>(R.id.frame_view_custom).removeView(AppConfig.mCustomView)
         }
     }
 
@@ -344,9 +363,9 @@ internal class MainLiveNessActivity : Activity() {
     private fun showLoading(isShow: Boolean) {
         this.runOnUiThread {
             if (isShow) {
-                binding.prbLoading.visibility = View.VISIBLE
+                prbLoading.visibility = View.VISIBLE
             } else {
-                binding.prbLoading.visibility = View.GONE
+                prbLoading.visibility = View.GONE
             }
         }
 
@@ -356,28 +375,31 @@ internal class MainLiveNessActivity : Activity() {
         showLoading(true)
         Thread {
             val request = JSONObject()
-            request.put("deviceId", AppConfig.mLivenessRequest?.deviceId)
+            request.put("deviceId", AppPreferenceUtils(this).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId)
             request.put("deviceOs", "Android")
             request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
             request.put("period", AppConfig.mLivenessRequest?.duration)
-            request.put("secret", AppConfig.mLivenessRequest?.secret)
+            request.put("secret", AppPreferenceUtils(this).getTOTPSecret(this) ?: AppConfig.mLivenessRequest?.secret)
             val responseDevice = HttpClientUtils.instance?.postV3("/eid/v3/registerDevice", request)
             var result: JSONObject? = null
             if (responseDevice != null && responseDevice.length > 0) {
                 result = JSONObject(responseDevice)
             }
             if (result != null && result.has("status") && result.getInt("status") == 200) {
-                val response = HttpClientUtils.instance?.registerFace(faceImage)
+                val response = HttpClientUtils.instance?.registerFace(this, faceImage)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)
                 }
                 if (result?.has("status") == true && result.getInt("status") == 200) {
                     showLoading(false)
-                    AppPreferenceUtils(this).setDeviceId(this, AppConfig.mLivenessRequest?.deviceId ?: "")
+                    AppConfig.mLivenessRequest?.deviceId?.let {
+                        AppPreferenceUtils(this).setDeviceId(it)
+                    }
                     this.runOnUiThread {
                         AppConfig.livenessListener?.onCallbackLiveness(null)
                         showToast("Register Face Success")
+                        AppPreferenceUtils(this).setRegisterFace(true)
                         finish()
                     }
 

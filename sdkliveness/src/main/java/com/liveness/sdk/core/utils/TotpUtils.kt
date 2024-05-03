@@ -17,6 +17,7 @@ internal class TotpUtils(private val mContext: Context) {
 
     private fun setSecret(secretString: String) {
         secret = secretString
+        Log.d("Thuytv", "------setSecret: $secretString")
         AppPreferenceUtils(mContext).setTOTPSecret(mContext, secretString)
     }
 
@@ -34,7 +35,7 @@ internal class TotpUtils(private val mContext: Context) {
             }
             try {
                 val request = JSONObject()
-                request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?:AppConfig.mLivenessRequest?.deviceId)
+                request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId)
                 request.put("deviceOs", "Android")
                 request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
                 request.put("period", AppConfig.mLivenessRequest?.duration)
@@ -59,6 +60,7 @@ internal class TotpUtils(private val mContext: Context) {
     fun getTotp(): String {
         if (totpSecret?.isNotEmpty() == true) {
             val generator = TOTPGenerator()
+            Log.d("Thuytv", "-----totpSecret: $totpSecret")
             return generator.generateTOTP(totpSecret!!)
         }
         return ""

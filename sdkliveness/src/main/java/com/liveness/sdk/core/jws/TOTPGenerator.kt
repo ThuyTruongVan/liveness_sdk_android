@@ -21,6 +21,7 @@ class TOTPGenerator {
                 return "-1"
             }
             val period = AppConfig.mLivenessRequest?.duration ?: 30
+            Log.d("Thuytv","-----period: $period")
 //            val timeStep = System.currentTimeMillis() / (TIME_STEP_SECONDS * 1000)
             val timeStep = System.currentTimeMillis() / (period * 1000)
 

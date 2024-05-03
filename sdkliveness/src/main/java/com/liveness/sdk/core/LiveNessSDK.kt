@@ -68,7 +68,7 @@ class LiveNessSDK {
 
         @Keep
         fun checkVersion(): String {
-            return "v1.1.6"
+            return "v1.1.7"
         }
     }
 }

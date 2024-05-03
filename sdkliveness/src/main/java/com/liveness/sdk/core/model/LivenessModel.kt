@@ -23,5 +23,9 @@ data class LivenessModel(
     @field:SerializedName("success")
     var success: Boolean? = null,
     @field:SerializedName("path_video")
-    var pathVideo: String? = null
+    var pathVideo: String? = null,
+    @field:SerializedName("face_image")
+    var faceImage: String? = null,
+    @field:SerializedName("liveness_image")
+    var livenessImage: String? = null
 )

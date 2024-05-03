@@ -65,6 +65,8 @@ internal class MainLiveNessActivity : Activity() {
     private lateinit var prbLoading: ProgressBar
     private lateinit var bgFullScreenDefault: ImageView
     private lateinit var llVideo: RelativeLayout
+    private var mImgLiveNess: String = ""
+    private var mFaceImage: String = ""
 
     private var permissions = arrayOf(
         Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO
@@ -108,7 +110,7 @@ internal class MainLiveNessActivity : Activity() {
             btnCapture.visibility = View.GONE
         }
         AppConfig.mActionView?.setOnClickListener {
-            Log.d("Thuytv","-----AppConfig.mActionView---setOnClickListener")
+            Log.d("Thuytv", "-----AppConfig.mActionView---setOnClickListener")
             cameraViewVideo.takePictureSnapshot()
         }
     }
@@ -213,16 +215,16 @@ internal class MainLiveNessActivity : Activity() {
                 super.onPictureTaken(result)
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
                     result.data.let {
-                        val imgLiveNess = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
-                        callAPIGEtTOTP(imgLiveNess, bgColor)
+                        mImgLiveNess = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
+                        callAPIGEtTOTP(mImgLiveNess, bgColor)
                     }
                     bgFullScreenDefault.visibility = View.GONE
                     llVideo.visibility = View.VISIBLE
                     isCapture = false
                 } else {
                     result.data.let {
-                        val faceImage = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
-                        registerFace(faceImage)
+                        mFaceImage = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
+                        registerFace(mFaceImage)
                     }
                 }
             }
@@ -252,7 +254,7 @@ internal class MainLiveNessActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-//        cameraViewVideo.open()
+        cameraViewVideo.open()
     }
 
     override fun onPause() {
@@ -328,6 +330,7 @@ internal class MainLiveNessActivity : Activity() {
             val liveNessModel = Gson().fromJson<LivenessModel>(response, LivenessModel::class.java)
 //            if (liveNessModel.success == true) {
             liveNessModel.pathVideo = pathVideo
+            liveNessModel.livenessImage = mImgLiveNess
             this.runOnUiThread {
                 showLoading(false)
                 AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
@@ -397,7 +400,7 @@ internal class MainLiveNessActivity : Activity() {
                         AppPreferenceUtils(this).setDeviceId(it)
                     }
                     this.runOnUiThread {
-                        AppConfig.livenessListener?.onCallbackLiveness(null)
+                        AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(faceImage = mFaceImage))
                         showToast("Register Face Success")
                         AppPreferenceUtils(this).setRegisterFace(true)
                         finish()

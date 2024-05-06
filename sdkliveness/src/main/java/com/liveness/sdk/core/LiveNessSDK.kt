@@ -43,9 +43,13 @@ class LiveNessSDK {
             AppConfig.mLivenessRequest = mLivenessRequest
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
-            val intent = Intent(context, MainLiveNessActivity::class.java)
-            intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
-            ContextCompat.startActivity(context, intent, null)
+            if (mLivenessRequest.imageFace.isNullOrEmpty()) {
+                val intent = Intent(context, MainLiveNessActivity::class.java)
+                intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
+                ContextCompat.startActivity(context, intent, null)
+            } else {
+                httpClientUtil?.registerDeviceAndFace(context, mLivenessRequest.imageFace ?: "")
+            }
         }
 
         @Keep

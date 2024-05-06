@@ -27,6 +27,8 @@ data class LivenessRequest(
     var baseURL: String? = null,
     @field:SerializedName("public_key")
     var publicKey: String? = null,
+    @field:SerializedName("image_face")
+    var imageFace: String? = null,
     @field:SerializedName("option_header")
     var optionHeader: HashMap<String, String>? = null,
     @field:SerializedName("option_request")

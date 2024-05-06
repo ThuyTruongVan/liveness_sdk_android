@@ -1,9 +1,14 @@
 package com.liveness.sdk.core.api
 
 import android.content.Context
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
+import android.widget.Toast
 import com.liveness.sdk.core.jws.JwsUtils
+import com.liveness.sdk.core.model.LivenessModel
 import com.liveness.sdk.core.model.LivenessRequest
 import com.liveness.sdk.core.utils.AppConfig
 import com.liveness.sdk.core.utils.AppPreferenceUtils
@@ -338,6 +343,45 @@ internal class HttpClientUtils {
         optionalHeader.put("deviceid", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: "")
         return instance?.postV3("/eid/v3/registerFace", request, optionalHeader)
 //        return instance?.post("/eid/v3/verifyFace", request, optionalHeader)
+    }
+
+    fun registerDeviceAndFace(mContext: Context, faceImage: String) {
+        Thread {
+            val request = JSONObject()
+            request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId)
+            request.put("deviceOs", "Android")
+            request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
+            request.put("period", AppConfig.mLivenessRequest?.duration)
+            request.put("secret", AppPreferenceUtils(mContext).getTOTPSecret(mContext) ?: AppConfig.mLivenessRequest?.secret)
+            val responseDevice = instance?.postV3("/eid/v3/registerDevice", request)
+            var result: JSONObject? = null
+            if (responseDevice != null && responseDevice.length > 0) {
+                result = JSONObject(responseDevice)
+            }
+            if (result != null && result.has("status") && result.getInt("status") == 200) {
+                val response = HttpClientUtils.instance?.registerFace(mContext, faceImage)
+                var result: JSONObject? = null
+                if (response?.isNotEmpty() == true) {
+                    result = JSONObject(response)
+                }
+                if (result?.has("status") == true && result.getInt("status") == 200) {
+//                    showLoading(false)
+                    AppConfig.mLivenessRequest?.deviceId?.let {
+                        AppPreferenceUtils(mContext).setDeviceId(it)
+                    }
+                    Handler(Looper.getMainLooper()).post {
+                        AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(faceImage = faceImage))
+                        AppPreferenceUtils(mContext).setRegisterFace(true)
+                    }
+
+                } else {
+//                    showLoading(false)
+                    Toast.makeText(mContext, result?.getString("message") ?: "Error", Toast.LENGTH_LONG).show()
+//                    showToast(result?.getString("message") ?: "Error")
+                }
+            }
+        }.start()
+
     }
 
 }

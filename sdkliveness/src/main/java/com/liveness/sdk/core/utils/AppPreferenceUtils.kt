@@ -2,6 +2,7 @@ package com.liveness.sdk.core.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import java.util.UUID
 
 /**
  * Created by Thuytv8 on 08/04/2019.
@@ -89,6 +90,7 @@ internal class AppPreferenceUtils(context: Context?) {
         val secret = getValueString(KEY_TOTP_SECRET)
         if (secret.isNullOrEmpty()) {
             return ""
+//            return "ABCDEFGHIJKLMNOP"
         }
         return KeyStoreUtils.getInstance(context)?.decryptData(secret) ?: ""
 //        val deCryptData = DeCryptData()
@@ -107,7 +109,11 @@ internal class AppPreferenceUtils(context: Context?) {
     fun getDeviceId(): String? {
 //        val deCryptData = DeCryptData()
 //        return deCryptData.decryptData(context, KEY_DEVICE_ID)
-        return getValueString(KEY_DEVICE_ID)
+        var deviceId = getValueString(KEY_DEVICE_ID)
+//        if (deviceId.isNullOrEmpty()) {
+//            deviceId = UUID.randomUUID().toString()
+//        }
+        return deviceId
     }
 
     fun isRegisterFace(): Boolean {

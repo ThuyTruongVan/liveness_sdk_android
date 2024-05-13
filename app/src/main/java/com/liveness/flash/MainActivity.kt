@@ -41,10 +41,11 @@ class MainActivity : AppCompatActivity() {
 //            btnRegisterFace.isEnabled = false
 //        }
 //        if(LiveNessSDK.isRegisterFace(this))
-        val overlay = LayoutInflater.from(this).inflate(R.layout.ui_custom_view, null)
-        LiveNessSDK.setCustomView(overlay, null)
+
 
         btnLiveNessFlash.setOnClickListener {
+            val overlay = LayoutInflater.from(this).inflate(R.layout.ui_custom_view, null)
+            LiveNessSDK.setCustomView(overlay, null)
             LiveNessSDK.startLiveNess(this, getLivenessRequest(), object : CallbackLivenessListener {
                 override fun onCallbackLiveness(data: LivenessModel?) {
                     val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 //            request.imageFace = getImage()
             LiveNessSDK.registerFace(this, request, object : CallbackLivenessListener {
                 override fun onCallbackLiveness(data: LivenessModel?) {
-                    Log.d("Thuytv", "------faceImage: ${data?.faceImage}")
+                    Log.d("Thuytv", "------faceImage: ${data?.message}")
                     btnRegisterFace.isEnabled = false
                 }
             })
@@ -133,8 +134,14 @@ class MainActivity : AppCompatActivity() {
             duration = 600, privateKey = privateKey, appId = appId,
             deviceId = deviceId, clientTransactionId = "TEST", secret = "ABCDEFGHIJKLMNOP",
             baseURL = "https://face-matching.vietplus.eu", publicKey = public_key, ownerId = "123",
-            optionHeader = optionHeader, optionRequest = optionRequest
+            optionHeader = optionHeader, optionRequest = optionRequest, isDebug = true
         )
+// return LivenessRequest(
+//            duration = 600, privateKey = privateKey, appId = appId,
+//            deviceId = deviceId, clientTransactionId = "TEST", secret = "ABCDEFGHIJKLMNOP",
+//            baseURL = "https://ibmbdev.ncb-bank.vn/onboarding/khcn/face", publicKey = public_key, ownerId = "123",
+//            optionHeader = optionHeader, optionRequest = optionRequest
+//        )
 
     }
 

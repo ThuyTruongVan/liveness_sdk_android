@@ -311,12 +311,20 @@ internal class MainLiveNessActivity : Activity() {
         if (!response.isNullOrEmpty()) {
             result = JSONObject(response)
         }
-        if (result?.has("status") == true && result.getInt("status") == 200) {
-            val transactionId = result.getString("data")
-            val signature = result.getString("signature")
+        var status = -1
+        if (result?.has("status") == true) {
+            status = result.getInt("status")
+        }
+        var strMessage = "Error"
+        if (result?.has("message") == true) {
+            strMessage = result.getString("message")
+        }
+        if (status == 200) {
+            val transactionId = result?.getString("data") ?: ""
+//            val signature = result?.getString("signature")
             checkLiveNessFlash(tOTP, transactionId, imgLiveNess, bgColor)
         } else {
-            showToast(result?.getString("message") ?: "Error")
+            showToast(strMessage)
         }
     }
 
@@ -326,7 +334,15 @@ internal class MainLiveNessActivity : Activity() {
         if (response?.isNotEmpty() == true) {
             result = JSONObject(response)
         }
-        if (result?.has("status") == true && result.getInt("status") == 200) {
+        var status = -1
+        if (result?.has("status") == true) {
+            status = result.getInt("status")
+        }
+        var strMessage = "Error"
+        if (result?.has("message") == true) {
+            strMessage = result.getString("message")
+        }
+        if (status == 200) {
             val liveNessModel = Gson().fromJson<LivenessModel>(response, LivenessModel::class.java)
 //            if (liveNessModel.success == true) {
             liveNessModel.pathVideo = pathVideo
@@ -340,7 +356,12 @@ internal class MainLiveNessActivity : Activity() {
 //                showToast(result?.getString("message") ?: "Error")
 //            }
         } else {
-            showToast(result?.getString("message") ?: "Error")
+//            showToast(result?.getString("message") ?: "Error")
+            this.runOnUiThread {
+                showLoading(false)
+                AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = status, message = strMessage))
+                finish()
+            }
         }
     }
 
@@ -388,13 +409,29 @@ internal class MainLiveNessActivity : Activity() {
             if (responseDevice != null && responseDevice.length > 0) {
                 result = JSONObject(responseDevice)
             }
-            if (result != null && result.has("status") && result.getInt("status") == 200) {
+            var statusDevice = -1
+            if (result?.has("status") == true) {
+                statusDevice = result.getInt("status")
+            }
+            var strMessageDevice = "Error"
+            if (result?.has("message") == true) {
+                strMessageDevice = result.getString("message")
+            }
+            if (statusDevice == 200) {
                 val response = HttpClientUtils.instance?.registerFace(this, faceImage)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)
                 }
-                if (result?.has("status") == true && result.getInt("status") == 200) {
+                var status = -1
+                if (result?.has("status") == true) {
+                    status = result.getInt("status")
+                }
+                var strMessage = "Error"
+                if (result?.has("message") == true) {
+                    strMessage = result.getString("message")
+                }
+                if (status == 200) {
                     showLoading(false)
                     AppConfig.mLivenessRequest?.deviceId?.let {
                         AppPreferenceUtils(this).setDeviceId(it)
@@ -408,7 +445,16 @@ internal class MainLiveNessActivity : Activity() {
 
                 } else {
                     showLoading(false)
-                    showToast(result?.getString("message") ?: "Error")
+//                    showToast(result?.getString("message") ?: "Error")
+                    this.runOnUiThread {
+                        AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = status, message = strMessage))
+                        finish()
+                    }
+                }
+            } else {
+                this.runOnUiThread {
+                    AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = statusDevice, message = strMessageDevice))
+                    finish()
                 }
             }
         }.start()

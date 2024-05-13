@@ -32,5 +32,7 @@ data class LivenessRequest(
     @field:SerializedName("option_header")
     var optionHeader: HashMap<String, String>? = null,
     @field:SerializedName("option_request")
-    var optionRequest: HashMap<String, String>? = null
+    var optionRequest: HashMap<String, String>? = null,
+    @field:SerializedName("is_debug")
+    var isDebug: Boolean? = null
 )

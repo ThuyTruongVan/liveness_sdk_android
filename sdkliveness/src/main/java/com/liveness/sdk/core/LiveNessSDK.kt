@@ -28,6 +28,7 @@ class LiveNessSDK {
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
             val intent = Intent(context, MainLiveNessActivity::class.java)
+            intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, "")
             ContextCompat.startActivity(context, intent, null)
         }
 

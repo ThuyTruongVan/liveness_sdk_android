@@ -12,6 +12,7 @@ import com.liveness.sdk.core.model.LivenessModel
 import com.liveness.sdk.core.model.LivenessRequest
 import com.liveness.sdk.core.utils.AppConfig
 import com.liveness.sdk.core.utils.AppPreferenceUtils
+import com.liveness.sdk.core.utils.AppUtils
 import com.liveness.sdk.core.utils.AppUtils.showLog
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.json.JSONException
@@ -358,13 +359,26 @@ internal class HttpClientUtils {
             if (responseDevice != null && responseDevice.length > 0) {
                 result = JSONObject(responseDevice)
             }
-            if (result != null && result.has("status") && result.getInt("status") == 200) {
+            var statusDevice = -1
+            if (result?.has("status") == true) {
+                statusDevice = result.getInt("status")
+            }
+            var strMessageDevice = "Error"
+            if (result?.has("message") == true) {
+                strMessageDevice = result.getString("message")
+            }
+            if (statusDevice == 200) {
                 val response = HttpClientUtils.instance?.registerFace(mContext, faceImage)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)
                 }
-                if (result?.has("status") == true && result.getInt("status") == 200) {
+               AppUtils.showLog("--result: " + result?.toString())
+                var status = -1
+                if (result?.has("status") == true) {
+                    status = result.getInt("status")
+                }
+                if (status == 200) {
 //                    showLoading(false)
                     AppConfig.mLivenessRequest?.deviceId?.let {
                         AppPreferenceUtils(mContext).setDeviceId(it)
@@ -376,8 +390,24 @@ internal class HttpClientUtils {
 
                 } else {
 //                    showLoading(false)
-                    Toast.makeText(mContext, result?.getString("message") ?: "Error", Toast.LENGTH_LONG).show()
+//                    Toast.makeText(mContext, result?.getString("message") ?: "Error", Toast.LENGTH_LONG).show()
 //                    showToast(result?.getString("message") ?: "Error")
+                    var strMessage = "Error"
+                    if (result?.has("message") == true) {
+                        strMessage = result.getString("message")
+                    }
+                    Handler(Looper.getMainLooper()).post {
+                        AppConfig.livenessListener?.onCallbackLiveness(
+                            LivenessModel(
+                                status = status,
+                                message = strMessage
+                            )
+                        )
+                    }
+                }
+            } else {
+                Handler(Looper.getMainLooper()).post {
+                    AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = statusDevice, message = strMessageDevice))
                 }
             }
         }.start()

@@ -14,6 +14,8 @@ data class LivenessModel(
     var status: Int? = null,
     @field:SerializedName("message")
     var message: String? = null,
+    @field:SerializedName("request_id")
+    var requestId: String? = null,
     @field:SerializedName("data")
     var data: DataModel? = null,
     @field:SerializedName("code")

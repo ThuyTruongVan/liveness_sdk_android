@@ -46,7 +46,6 @@ class MainActivity : AppCompatActivity() {
 
         LiveNessSDK.setCallbackListener(object : CallbackLivenessListener {
             override fun onCallbackLiveness(data: LivenessModel?) {
-                Log.d("Thuytv", "------livenessImage: ${data?.livenessImage}")
                 val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
 
                 val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)

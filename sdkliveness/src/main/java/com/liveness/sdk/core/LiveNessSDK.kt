@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.common.annotation.KeepName
 import com.liveness.sdk.core.api.HttpClientUtils
 import com.liveness.sdk.core.model.LivenessRequest
@@ -29,7 +30,12 @@ class LiveNessSDK {
             AppConfig.mLivenessRequest = mLivenessRequest
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
-            val intent = Intent(context, MainLiveNessActivity::class.java)
+            val intent: Intent = if (mLivenessRequest.isVideo) {
+                Intent(context, MainLiveNessActivityVideo::class.java)
+
+            } else {
+                Intent(context, MainLiveNessActivity::class.java)
+            }
             intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, "")
             ContextCompat.startActivity(context, intent, null)
         }
@@ -38,6 +44,11 @@ class LiveNessSDK {
         fun setCustomView(mCustomView: View, mActionView: View?) {
             AppConfig.mCustomView = mCustomView
             AppConfig.mActionView = mActionView
+        }
+
+        @Keep
+        fun setCustomProgress(mProgressView: View?) {
+            AppConfig.mProgressView = mProgressView
         }
 
         @Keep
@@ -58,6 +69,11 @@ class LiveNessSDK {
             AppPreferenceUtils(context).removeAllValue()
         }
 
+        fun onBackSDK(context: Context) {
+            val intentBack = Intent(AppConfig.INTENT_VALUE_BACK)
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intentBack)
+        }
+
         @Keep
         fun registerFace(context: Context, mLivenessRequest: LivenessRequest, livenessListener: CallbackLivenessListener?) {
             livenessListener?.let {
@@ -67,7 +83,11 @@ class LiveNessSDK {
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
             if (mLivenessRequest.imageFace.isNullOrEmpty()) {
-                val intent = Intent(context, MainLiveNessActivity::class.java)
+                val intent: Intent = if (mLivenessRequest.isVideo) {
+                    Intent(context, MainLiveNessActivityVideo::class.java)
+                } else {
+                    Intent(context, MainLiveNessActivity::class.java)
+                }
                 intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
                 ContextCompat.startActivity(context, intent, null)
             } else {

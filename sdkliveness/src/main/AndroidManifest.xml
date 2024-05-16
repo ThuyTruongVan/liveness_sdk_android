@@ -4,20 +4,23 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
-    <application
-        android:requestLegacyExternalStorage="true">
+    <application android:requestLegacyExternalStorage="true">
         <activity
             android:name=".MainLiveNessActivity"
             android:exported="true" />
+        <activity
+            android:name=".MainLiveNessActivityVideo"
+            android:exported="true" />
+
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-            android:value="face"/>
+            android:value="face" />
     </application>
 </manifest>

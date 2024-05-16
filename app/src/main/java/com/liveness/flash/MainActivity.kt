@@ -5,6 +5,8 @@ import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
@@ -56,6 +58,7 @@ class MainActivity : AppCompatActivity() {
             val overlay = LayoutInflater.from(this).inflate(R.layout.ui_custom_view, null)
             LiveNessSDK.setCustomView(overlay, null)
             LiveNessSDK.startLiveNess(this, getLivenessRequest(), null)
+
         }
         btnRegisterFace.setOnClickListener {
             val overlay = LayoutInflater.from(this).inflate(R.layout.ui_register_face, null)

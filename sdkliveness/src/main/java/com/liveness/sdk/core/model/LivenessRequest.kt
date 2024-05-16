@@ -34,5 +34,7 @@ data class LivenessRequest(
     @field:SerializedName("option_request")
     var optionRequest: HashMap<String, String>? = null,
     @field:SerializedName("is_debug")
-    var isDebug: Boolean? = null
+    var isDebug: Boolean? = null,
+    @field:SerializedName("is_video")
+    var isVideo: Boolean = true
 )

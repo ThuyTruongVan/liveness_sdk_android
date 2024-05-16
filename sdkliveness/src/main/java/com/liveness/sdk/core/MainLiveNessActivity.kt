@@ -1,36 +1,25 @@
 package com.liveness.sdk.core
 
 import android.Manifest
-import android.R.layout
 import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.util.Size
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.core.api.HttpClientUtils
-import com.liveness.sdk.core.databinding.UiMainLiveNessBinding
 import com.liveness.sdk.core.facedetector.FaceDetector
 import com.liveness.sdk.core.facedetector.Frame
 import com.liveness.sdk.core.facedetector.LensFacing
@@ -49,7 +38,6 @@ import com.otaliastudios.cameraview.VideoResult
 import com.otaliastudios.cameraview.controls.Facing
 import com.otaliastudios.cameraview.controls.Mode
 import org.json.JSONObject
-import java.io.File
 import java.util.Random
 import java.util.UUID
 
@@ -111,16 +99,14 @@ internal class MainLiveNessActivity : Activity() {
         }
         if (typeScreen == AppConfig.TYPE_SCREEN_REGISTER_FACE) {
             btnCapture.setOnClickListener {
-                cameraViewVideo.takePicture()
+                cameraViewVideo.takePictureSnapshot()
             }
         } else {
             btnCapture.visibility = View.GONE
         }
         AppConfig.mActionView?.setOnClickListener {
-            Log.d("Thuytv", "-----AppConfig.mActionView---setOnClickListener")
-            cameraViewVideo.takePicture()
+            cameraViewVideo.takePictureSnapshot()
         }
-        registerLocalBroadCast()
     }
 
     private fun checkPermissions(): Boolean {
@@ -182,7 +168,7 @@ internal class MainLiveNessActivity : Activity() {
                     bgColor = Random().nextInt(3)
                     bgFullScreenDefault.background = ResourcesCompat.getDrawable(resources, lstBgDefault[bgColor], this@MainLiveNessActivity.theme)
                     Handler(Looper.myLooper()!!).postDelayed({
-                        cameraViewVideo.takePicture()
+                        cameraViewVideo.takePictureSnapshot()
                     }, 100)
                 }
             }
@@ -273,7 +259,6 @@ internal class MainLiveNessActivity : Activity() {
         if (AppConfig.mCustomView != null) {
             findViewById<FrameLayout>(R.id.frame_view_custom).removeView(AppConfig.mCustomView)
         }
-        unregisterLocalBroadCast()
     }
 
     private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int) {
@@ -449,22 +434,4 @@ internal class MainLiveNessActivity : Activity() {
 
     }
 
-    private fun registerLocalBroadCast() {
-        val filter = IntentFilter()
-        filter.addAction(AppConfig.INTENT_VALUE_BACK)
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiverOnBack, filter)
-    }
-
-    private fun unregisterLocalBroadCast() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiverOnBack)
-    }
-
-    private var receiverOnBack = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, intent: Intent?) {
-            if (intent?.action == AppConfig.INTENT_VALUE_BACK && !isFinishing) {
-                finish()
-            }
-        }
-
-    }
 }

@@ -24,7 +24,6 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.core.api.HttpClientUtils
 import com.liveness.sdk.core.facedetector.FaceDetector
@@ -115,7 +114,6 @@ internal class MainLiveNessActivityVideo : Activity() {
             Log.d("Thuytv", "-----AppConfig.mActionView---setOnClickListener")
             cameraViewVideo.takePictureSnapshot()
         }
-        registerLocalBroadCast()
 
     }
 
@@ -272,43 +270,7 @@ internal class MainLiveNessActivityVideo : Activity() {
         if (AppConfig.mCustomView != null) {
             findViewById<FrameLayout>(R.id.frame_view_custom).removeView(AppConfig.mCustomView)
         }
-        unregisterLocalBroadCast()
     }
-
-//    private fun demoAPI() {
-//        val privateKey = "-----BEGIN PRIVATE KEY-----\n" +
-//                "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7K1QJ6YLRMoNv\n" +
-//                "mqV3qkNXJZWxCT95+/xVlKhea/i3QpJk5Ier4hgUqn3MmlU3NXRv6eHZh579uzqM\n" +
-//                "1U8PJzMGj2j9XnlOkQtWImSKiMUPQYJ4CSnUGCLpiMomZKjGO4tLiS/yCSJ/BFrI\n" +
-//                "TBGYJhJL9wOYYzZdY/mNWSr1+ZsqQFH0Ug7n4XfYrJD7XgtozIgiY5LtbdoV/6At\n" +
-//                "TN8H8czzQnLaA8NjDb8npP7ogu99KVivtoAJJhLZJ9nvXyP9Dp7sKi9d33LaxFwH\n" +
-//                "OiNWRm3qFGm1G8RZoWg4G1h+ETL0z4COBgvAhToGI5gkkeyw+qFfS9hqLN0hJWAm\n" +
-//                "o41oGPo1AgMBAAECggEBAI1qzmNy4JmJjg+MDAufRKQazMBnmWNkhiJvYMt+zvxA\n" +
-//                "O3YpyWyQNtueedBWp55AMErCrxd5xiI2DaYNIV/0oTQKtSwC7qrzIlqhP9AASMwf\n" +
-//                "FiH14nnTBsXmyb46fd7RbIzVCbnZNww7URBXkU+hLF/jMf84rwHfINWwkqopPxir\n" +
-//                "F5Ohqt1G/PxzI3/rc20DzDJX331em5qHBqACp1JcHXtpaFKBOJihVnhYqxon9k1o\n" +
-//                "qcR79HNRlIwHWsxsOUEM8zPTbstQaqMgKLFXyENM43C+B/f+Oz2DBdF32RD7jq8Q\n" +
-//                "xLR1gidq+KCXEejOBuRexrrT4fQiCb7e2robh8o/IUECgYEA4XubVcqjmZmhIlt9\n" +
-//                "PU+63IC1dEVc40PZtJ5AiQvZa+zLCl9ik+9k/dmJE5WUZDki76W3OB+kJq3fUWgQ\n" +
-//                "tyo0UkpxHwqryefGg09syu5cNGE/zd7ZREF0aIsHnXaPtroKq8Z6mz4FctLt9egr\n" +
-//                "8V0M670N9rQz996+E/KHf4jEeBECgYEA1IBBZNWJDE7lIip8CobnPVh718p2HTuc\n" +
-//                "lxeTFrRgI3wWnitYhCGLnJMGDvNv/znApsB7aAgVFz3r5jGKxTPPCwa9gwrKXoJy\n" +
-//                "vBWRIL2gajImGU5fOoDQZJ3dGNgNh8anoe0/esMbdIZMFY6rAIWGiE+Y17+Or1UL\n" +
-//                "EBUen8o7Y+UCgYBWn17QeZWaF5wAj/cwC6Y0ubl73n3NzS4gpj8Spxuyy3hBFt3P\n" +
-//                "CUPaBa0Uef1U92JFgHs/s2Ajf95v7rOlOjB5gKGulDHk0gbAQU4BM8r2UHnrg/Yh\n" +
-//                "s6ed1fNp+bdCMnyQ+yH068G6F/BU7Qmcouuo0KtBoH7qdYa+MQj+5LLdkQKBgEdJ\n" +
-//                "56ZORLXOWexGWGqnqzfXUWSpVUqlTvkZPY0mYgJFhMj3PbDGGDIk2Kl3XaE/3LOU\n" +
-//                "a1IRNBIiAdutzyItKU5HqpglrJJcLOWQTqmvM/usaz+eHTBhOogmtZ+6C3/7Uw1t\n" +
-//                "rBghEDrdOvUYcaGxKdrc6Sen6dREMXvpueZdT+NJAoGAIsPaK0Rgu6Z540hiCF2M\n" +
-//                "0yYHriXljTAWtdm5FpCfoLwKox1OYLMQlFIXfN1qqmo6m13O+MW3IIU7X/aAk7T6\n" +
-//                "UW7GZybBe40J2AxVC48GX+jVk5iQjBzUtEf81jIZp61AD5KijNn33lHf653K09ch\n" +
-//                "uw+D9R3JrjzTHoyep6eif/s=\n" +
-//                "-----END PRIVATE KEY-----\n"
-//        val appId = "com.qts.test"
-//        AppConfig.mLivenessRequest = LivenessRequest(duration = 600,privateKey = privateKey, appId = appId, deviceId = AppUtils.getDeviceId(this), clientTransactionId = "TEST" )
-//        val httpClientUtil = HttpClientUtils.instance
-//        httpClientUtil?.setVariables(this, appId, privateKey, "https://face-matching.vietplus.eu")
-//    }
 
     private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int) {
         val response = HttpClientUtils.instance?.initTransaction(this)
@@ -480,25 +442,6 @@ internal class MainLiveNessActivityVideo : Activity() {
                 }
             }
         }.start()
-
-    }
-
-    private fun registerLocalBroadCast() {
-        val filter = IntentFilter()
-        filter.addAction(AppConfig.INTENT_VALUE_BACK)
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiverOnBack, filter)
-    }
-
-    private fun unregisterLocalBroadCast() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiverOnBack)
-    }
-
-    private var receiverOnBack = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, intent: Intent?) {
-            if (intent?.action == AppConfig.INTENT_VALUE_BACK && !isFinishing) {
-                finish()
-            }
-        }
 
     }
 }

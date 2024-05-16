@@ -68,6 +68,11 @@ class MainActivity : AppCompatActivity() {
                 override fun onCallbackLiveness(data: LivenessModel?) {
                     Log.d("Thuytv", "------faceImage: ${data?.message}")
                     btnRegisterFace.isEnabled = false
+
+                    val decodeString = android.util.Base64.decode(data?.faceImage ?: "", android.util.Base64.NO_PADDING)
+
+                    val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
+                    imvImage.setImageBitmap(bitmap)
                 }
             })
         }

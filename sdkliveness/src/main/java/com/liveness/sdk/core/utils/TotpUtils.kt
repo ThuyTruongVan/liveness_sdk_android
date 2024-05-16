@@ -7,6 +7,7 @@ import com.liveness.sdk.core.api.HttpClientUtils.Companion.instance
 import com.liveness.sdk.core.jws.TOTPGenerator
 import com.liveness.sdk.core.utils.AppUtils.getDeviceId
 import org.json.JSONObject
+import java.util.UUID
 
 internal class TotpUtils(private val mContext: Context) {
     private var secret: String = ""
@@ -34,12 +35,20 @@ internal class TotpUtils(private val mContext: Context) {
                 return secret
             }
             try {
+                var mSecret = AppPreferenceUtils(mContext).getTOTPSecret(mContext) ?: AppConfig.mLivenessRequest?.secret
+                if (mSecret.isNullOrEmpty() || mSecret.length != 16) {
+                    mSecret = AppUtils.getSecretValue()
+                }
+                var mDeviceId = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
+                if (mDeviceId.isNullOrEmpty()) {
+                    mDeviceId = UUID.randomUUID().toString()
+                }
                 val request = JSONObject()
-                request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId)
+                request.put("deviceId", mDeviceId)
                 request.put("deviceOs", "Android")
                 request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
                 request.put("period", AppConfig.mLivenessRequest?.duration)
-                request.put("secret", AppConfig.mLivenessRequest?.secret)
+                request.put("secret", mSecret)
                 val response = instance?.postV3("/eid/v3/registerDevice", request)
                 var result: JSONObject? = null
                 if (response != null && response.length > 0) {

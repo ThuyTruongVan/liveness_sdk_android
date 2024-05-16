@@ -11,6 +11,7 @@ import com.liveness.sdk.core.model.LivenessRequest
 @SuppressLint("StaticFieldLeak")
 internal object AppConfig {
     var livenessListener: CallbackLivenessListener? = null
+    var livenessFaceListener: CallbackLivenessListener? = null
     var mLivenessRequest: LivenessRequest? = null
 
     var mCustomView: View? = null

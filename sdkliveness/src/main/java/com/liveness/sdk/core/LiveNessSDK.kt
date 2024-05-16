@@ -22,8 +22,10 @@ import com.liveness.sdk.core.utils.KeyStoreUtils
 class LiveNessSDK {
     companion object {
         @Keep
-        fun startLiveNess(context: Context, mLivenessRequest: LivenessRequest, livenessListener: CallbackLivenessListener) {
-            AppConfig.livenessListener = livenessListener
+        fun startLiveNess(context: Context, mLivenessRequest: LivenessRequest, livenessListener: CallbackLivenessListener?) {
+            livenessListener?.let {
+                AppConfig.livenessListener = it
+            }
             AppConfig.mLivenessRequest = mLivenessRequest
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
@@ -39,8 +41,28 @@ class LiveNessSDK {
         }
 
         @Keep
-        fun registerFace(context: Context, mLivenessRequest: LivenessRequest, livenessListener: CallbackLivenessListener) {
-            AppConfig.livenessListener = livenessListener
+        fun setCallbackListener(livenessListener: CallbackLivenessListener?) {
+            livenessListener?.let {
+                AppConfig.livenessListener = it
+            }
+        }
+
+        @Keep
+        fun setCallbackListenerFace(livenessListener: CallbackLivenessListener?) {
+            livenessListener?.let {
+                AppConfig.livenessFaceListener = it
+            }
+        }
+
+        fun clearAllData(context: Context) {
+            AppPreferenceUtils(context).removeAllValue()
+        }
+
+        @Keep
+        fun registerFace(context: Context, mLivenessRequest: LivenessRequest, livenessListener: CallbackLivenessListener?) {
+            livenessListener?.let {
+                AppConfig.livenessFaceListener = it
+            }
             AppConfig.mLivenessRequest = mLivenessRequest
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)

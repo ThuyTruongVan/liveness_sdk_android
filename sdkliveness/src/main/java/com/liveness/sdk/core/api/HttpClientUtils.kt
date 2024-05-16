@@ -37,6 +37,7 @@ import java.security.Signature
 import java.security.SignatureException
 import java.security.spec.InvalidKeySpecException
 import java.security.spec.PKCS8EncodedKeySpec
+import java.util.UUID
 
 internal class HttpClientUtils {
     private var baseUrl = "https://face-matching.vietplus.eu"
@@ -318,8 +319,12 @@ internal class HttpClientUtils {
     }
 
     fun initTransaction(mContext: Context): String? {
+        var mDeviceId = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
+        if (mDeviceId.isNullOrEmpty()) {
+            mDeviceId = UUID.randomUUID().toString()
+        }
         val request = JSONObject()
-        request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId)
+        request.put("deviceId", mDeviceId)
         request.put("period", AppConfig.mLivenessRequest?.duration)
         request.put("clientTransactionId", AppConfig.mLivenessRequest?.clientTransactionId)
         return instance?.postV3("/eid/v3/initTransaction", request)
@@ -337,23 +342,35 @@ internal class HttpClientUtils {
     }
 
     fun registerFace(mContext: Context, faceImage: String): String? {
+        var mDeviceId = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
+        if (mDeviceId.isNullOrEmpty()) {
+            mDeviceId = UUID.randomUUID().toString()
+        }
         val request = JSONObject()
-        request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: "")
+        request.put("deviceId", mDeviceId)
         request.put("face_image", faceImage)
         val optionalHeader = HashMap<String, String>()
-        optionalHeader.put("deviceid", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: "")
+        optionalHeader.put("deviceid", mDeviceId)
         return instance?.postV3("/eid/v3/registerFace", request, optionalHeader)
 //        return instance?.post("/eid/v3/verifyFace", request, optionalHeader)
     }
 
     fun registerDeviceAndFace(mContext: Context, faceImage: String) {
         Thread {
+            var mSecret = AppPreferenceUtils(mContext).getTOTPSecret(mContext) ?: AppConfig.mLivenessRequest?.secret
+            if (mSecret.isNullOrEmpty() || mSecret.length != 16) {
+                mSecret = AppUtils.getSecretValue()
+            }
+            var mDeviceId = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
+            if (mDeviceId.isNullOrEmpty()) {
+                mDeviceId = UUID.randomUUID().toString()
+            }
             val request = JSONObject()
-            request.put("deviceId", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId)
+            request.put("deviceId", mDeviceId)
             request.put("deviceOs", "Android")
             request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
             request.put("period", AppConfig.mLivenessRequest?.duration)
-            request.put("secret", AppPreferenceUtils(mContext).getTOTPSecret(mContext) ?: AppConfig.mLivenessRequest?.secret)
+            request.put("secret", mSecret)
             val responseDevice = instance?.postV3("/eid/v3/registerDevice", request)
             var result: JSONObject? = null
             if (responseDevice != null && responseDevice.length > 0) {
@@ -373,18 +390,17 @@ internal class HttpClientUtils {
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)
                 }
-               AppUtils.showLog("--result: " + result?.toString())
+                AppUtils.showLog("--result: " + result?.toString())
                 var status = -1
                 if (result?.has("status") == true) {
                     status = result.getInt("status")
                 }
                 if (status == 200) {
 //                    showLoading(false)
-                    AppConfig.mLivenessRequest?.deviceId?.let {
-                        AppPreferenceUtils(mContext).setDeviceId(it)
-                    }
+                    AppPreferenceUtils(mContext).setDeviceId(mDeviceId)
+
                     Handler(Looper.getMainLooper()).post {
-                        AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(faceImage = faceImage))
+                        AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(faceImage = faceImage))
                         AppPreferenceUtils(mContext).setRegisterFace(true)
                     }
 
@@ -397,7 +413,7 @@ internal class HttpClientUtils {
                         strMessage = result.getString("message")
                     }
                     Handler(Looper.getMainLooper()).post {
-                        AppConfig.livenessListener?.onCallbackLiveness(
+                        AppConfig.livenessFaceListener?.onCallbackLiveness(
                             LivenessModel(
                                 status = status,
                                 message = strMessage
@@ -407,7 +423,7 @@ internal class HttpClientUtils {
                 }
             } else {
                 Handler(Looper.getMainLooper()).post {
-                    AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = statusDevice, message = strMessageDevice))
+                    AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(status = statusDevice, message = strMessageDevice))
                 }
             }
         }.start()

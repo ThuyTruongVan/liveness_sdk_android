@@ -46,6 +46,7 @@ import com.otaliastudios.cameraview.controls.Mode
 import org.json.JSONObject
 import java.io.File
 import java.util.Random
+import java.util.UUID
 
 
 /**
@@ -53,7 +54,8 @@ import java.util.Random
  */
 internal class MainLiveNessActivity : Activity() {
     private val REQUEST_PERMISSION_CODE = 1231
-    private var pathVideo = ""
+
+    //    private var pathVideo = ""
     private var bgColor = 0
     private var isCapture = false
     private var lstBgDefault: ArrayList<Int> = arrayListOf(R.drawable.img_0, R.drawable.img_1, R.drawable.img_2, R.drawable.img_3)
@@ -69,7 +71,7 @@ internal class MainLiveNessActivity : Activity() {
     private var mFaceImage: String = ""
 
     private var permissions = arrayOf(
-        Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO
+        Manifest.permission.CAMERA
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,7 +93,7 @@ internal class MainLiveNessActivity : Activity() {
         }
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             permissions = arrayOf(
-                Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.CAMERA,
                 Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         }
@@ -104,31 +106,28 @@ internal class MainLiveNessActivity : Activity() {
         }
         if (typeScreen == AppConfig.TYPE_SCREEN_REGISTER_FACE) {
             btnCapture.setOnClickListener {
-                cameraViewVideo.takePictureSnapshot()
+                cameraViewVideo.takePicture()
             }
         } else {
             btnCapture.visibility = View.GONE
         }
         AppConfig.mActionView?.setOnClickListener {
             Log.d("Thuytv", "-----AppConfig.mActionView---setOnClickListener")
-            cameraViewVideo.takePictureSnapshot()
+            cameraViewVideo.takePicture()
         }
     }
 
     private fun checkPermissions(): Boolean {
         return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             val resultCamera = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA)
-            val resultRecord = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.RECORD_AUDIO)
             val resultRead = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE)
             val resultWrite = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             (resultCamera == PackageManager.PERMISSION_GRANTED
-                    && resultRecord == PackageManager.PERMISSION_GRANTED
                     && resultRead == PackageManager.PERMISSION_GRANTED
                     && resultWrite == PackageManager.PERMISSION_GRANTED)
         } else {
             val resultCamera = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA)
-            val resultRecord = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.RECORD_AUDIO)
-            resultCamera == PackageManager.PERMISSION_GRANTED && resultRecord == PackageManager.PERMISSION_GRANTED
+            resultCamera == PackageManager.PERMISSION_GRANTED
         }
     }
 
@@ -158,7 +157,7 @@ internal class MainLiveNessActivity : Activity() {
 
     private fun initCamera() {
         apply {
-            pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
+//            pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
             val lensFacing = Facing.FRONT
             setupCamera(lensFacing)
         }
@@ -171,27 +170,27 @@ internal class MainLiveNessActivity : Activity() {
                 super.onSuccess(faceBounds)
                 if (!isCapture) {
                     isCapture = true
-                    cameraViewVideo.stopVideo()
+//                    cameraViewVideo.stopVideo()
                     bgFullScreenDefault.visibility = View.VISIBLE
                     llVideo.visibility = View.GONE
                     bgColor = Random().nextInt(3)
                     bgFullScreenDefault.background = ResourcesCompat.getDrawable(resources, lstBgDefault[bgColor], this@MainLiveNessActivity.theme)
                     Handler(Looper.myLooper()!!).postDelayed({
-                        cameraViewVideo.takePictureSnapshot()
-                    }, 300)
+                        cameraViewVideo.takePicture()
+                    }, 100)
                 }
             }
 
         })
         cameraViewVideo.facing = lensFacing
-        cameraViewVideo.mode = Mode.VIDEO
+        cameraViewVideo.mode = Mode.PICTURE
 
 
         cameraViewVideo.addCameraListener(object : CameraListener() {
             override fun onCameraOpened(options: CameraOptions) {
                 super.onCameraOpened(options)
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-                    cameraViewVideo.takeVideoSnapshot(File(pathVideo))
+//                    cameraViewVideo.takeVideoSnapshot(File(pathVideo))
                 } else {
                     if (AppConfig.mCustomView == null) {
                         btnCapture.visibility = View.VISIBLE
@@ -270,41 +269,6 @@ internal class MainLiveNessActivity : Activity() {
         }
     }
 
-//    private fun demoAPI() {
-//        val privateKey = "-----BEGIN PRIVATE KEY-----\n" +
-//                "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7K1QJ6YLRMoNv\n" +
-//                "mqV3qkNXJZWxCT95+/xVlKhea/i3QpJk5Ier4hgUqn3MmlU3NXRv6eHZh579uzqM\n" +
-//                "1U8PJzMGj2j9XnlOkQtWImSKiMUPQYJ4CSnUGCLpiMomZKjGO4tLiS/yCSJ/BFrI\n" +
-//                "TBGYJhJL9wOYYzZdY/mNWSr1+ZsqQFH0Ug7n4XfYrJD7XgtozIgiY5LtbdoV/6At\n" +
-//                "TN8H8czzQnLaA8NjDb8npP7ogu99KVivtoAJJhLZJ9nvXyP9Dp7sKi9d33LaxFwH\n" +
-//                "OiNWRm3qFGm1G8RZoWg4G1h+ETL0z4COBgvAhToGI5gkkeyw+qFfS9hqLN0hJWAm\n" +
-//                "o41oGPo1AgMBAAECggEBAI1qzmNy4JmJjg+MDAufRKQazMBnmWNkhiJvYMt+zvxA\n" +
-//                "O3YpyWyQNtueedBWp55AMErCrxd5xiI2DaYNIV/0oTQKtSwC7qrzIlqhP9AASMwf\n" +
-//                "FiH14nnTBsXmyb46fd7RbIzVCbnZNww7URBXkU+hLF/jMf84rwHfINWwkqopPxir\n" +
-//                "F5Ohqt1G/PxzI3/rc20DzDJX331em5qHBqACp1JcHXtpaFKBOJihVnhYqxon9k1o\n" +
-//                "qcR79HNRlIwHWsxsOUEM8zPTbstQaqMgKLFXyENM43C+B/f+Oz2DBdF32RD7jq8Q\n" +
-//                "xLR1gidq+KCXEejOBuRexrrT4fQiCb7e2robh8o/IUECgYEA4XubVcqjmZmhIlt9\n" +
-//                "PU+63IC1dEVc40PZtJ5AiQvZa+zLCl9ik+9k/dmJE5WUZDki76W3OB+kJq3fUWgQ\n" +
-//                "tyo0UkpxHwqryefGg09syu5cNGE/zd7ZREF0aIsHnXaPtroKq8Z6mz4FctLt9egr\n" +
-//                "8V0M670N9rQz996+E/KHf4jEeBECgYEA1IBBZNWJDE7lIip8CobnPVh718p2HTuc\n" +
-//                "lxeTFrRgI3wWnitYhCGLnJMGDvNv/znApsB7aAgVFz3r5jGKxTPPCwa9gwrKXoJy\n" +
-//                "vBWRIL2gajImGU5fOoDQZJ3dGNgNh8anoe0/esMbdIZMFY6rAIWGiE+Y17+Or1UL\n" +
-//                "EBUen8o7Y+UCgYBWn17QeZWaF5wAj/cwC6Y0ubl73n3NzS4gpj8Spxuyy3hBFt3P\n" +
-//                "CUPaBa0Uef1U92JFgHs/s2Ajf95v7rOlOjB5gKGulDHk0gbAQU4BM8r2UHnrg/Yh\n" +
-//                "s6ed1fNp+bdCMnyQ+yH068G6F/BU7Qmcouuo0KtBoH7qdYa+MQj+5LLdkQKBgEdJ\n" +
-//                "56ZORLXOWexGWGqnqzfXUWSpVUqlTvkZPY0mYgJFhMj3PbDGGDIk2Kl3XaE/3LOU\n" +
-//                "a1IRNBIiAdutzyItKU5HqpglrJJcLOWQTqmvM/usaz+eHTBhOogmtZ+6C3/7Uw1t\n" +
-//                "rBghEDrdOvUYcaGxKdrc6Sen6dREMXvpueZdT+NJAoGAIsPaK0Rgu6Z540hiCF2M\n" +
-//                "0yYHriXljTAWtdm5FpCfoLwKox1OYLMQlFIXfN1qqmo6m13O+MW3IIU7X/aAk7T6\n" +
-//                "UW7GZybBe40J2AxVC48GX+jVk5iQjBzUtEf81jIZp61AD5KijNn33lHf653K09ch\n" +
-//                "uw+D9R3JrjzTHoyep6eif/s=\n" +
-//                "-----END PRIVATE KEY-----\n"
-//        val appId = "com.qts.test"
-//        AppConfig.mLivenessRequest = LivenessRequest(duration = 600,privateKey = privateKey, appId = appId, deviceId = AppUtils.getDeviceId(this), clientTransactionId = "TEST" )
-//        val httpClientUtil = HttpClientUtils.instance
-//        httpClientUtil?.setVariables(this, appId, privateKey, "https://face-matching.vietplus.eu")
-//    }
-
     private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int) {
         val response = HttpClientUtils.instance?.initTransaction(this)
         var result: JSONObject? = null
@@ -345,10 +309,11 @@ internal class MainLiveNessActivity : Activity() {
         if (status == 200) {
             val liveNessModel = Gson().fromJson<LivenessModel>(response, LivenessModel::class.java)
 //            if (liveNessModel.success == true) {
-            liveNessModel.pathVideo = pathVideo
+//            liveNessModel.pathVideo = pathVideo
             liveNessModel.livenessImage = mImgLiveNess
             this.runOnUiThread {
                 showLoading(false)
+//                AppUtils.showLog("Thuytv------pathVideo: $pathVideo")
                 AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
                 finish()
             }
@@ -398,12 +363,20 @@ internal class MainLiveNessActivity : Activity() {
     private fun registerFace(faceImage: String) {
         showLoading(true)
         Thread {
+            var mSecret = AppPreferenceUtils(this).getTOTPSecret(this) ?: AppConfig.mLivenessRequest?.secret
+            if (mSecret.isNullOrEmpty() || mSecret.length != 16) {
+                mSecret = AppUtils.getSecretValue()
+            }
+            var mDeviceId = AppPreferenceUtils(this).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
+            if (mDeviceId.isNullOrEmpty()) {
+                mDeviceId = UUID.randomUUID().toString()
+            }
             val request = JSONObject()
-            request.put("deviceId", AppPreferenceUtils(this).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId)
+            request.put("deviceId", mDeviceId)
             request.put("deviceOs", "Android")
             request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
             request.put("period", AppConfig.mLivenessRequest?.duration)
-            request.put("secret", AppPreferenceUtils(this).getTOTPSecret(this) ?: AppConfig.mLivenessRequest?.secret)
+            request.put("secret", mSecret)
             val responseDevice = HttpClientUtils.instance?.postV3("/eid/v3/registerDevice", request)
             var result: JSONObject? = null
             if (responseDevice != null && responseDevice.length > 0) {
@@ -418,6 +391,8 @@ internal class MainLiveNessActivity : Activity() {
                 strMessageDevice = result.getString("message")
             }
             if (statusDevice == 200) {
+                AppPreferenceUtils(this).setDeviceId(mDeviceId)
+                AppPreferenceUtils(this).setTOTPSecret(this, mSecret)
                 val response = HttpClientUtils.instance?.registerFace(this, faceImage)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
@@ -433,11 +408,9 @@ internal class MainLiveNessActivity : Activity() {
                 }
                 if (status == 200) {
                     showLoading(false)
-                    AppConfig.mLivenessRequest?.deviceId?.let {
-                        AppPreferenceUtils(this).setDeviceId(it)
-                    }
+
                     this.runOnUiThread {
-                        AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(faceImage = mFaceImage))
+                        AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(faceImage = mFaceImage))
                         showToast("Register Face Success")
                         AppPreferenceUtils(this).setRegisterFace(true)
                         finish()
@@ -447,13 +420,13 @@ internal class MainLiveNessActivity : Activity() {
                     showLoading(false)
 //                    showToast(result?.getString("message") ?: "Error")
                     this.runOnUiThread {
-                        AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = status, message = strMessage))
+                        AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(status = status, message = strMessage))
                         finish()
                     }
                 }
             } else {
                 this.runOnUiThread {
-                    AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = statusDevice, message = strMessageDevice))
+                    AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(status = statusDevice, message = strMessageDevice))
                     finish()
                 }
             }

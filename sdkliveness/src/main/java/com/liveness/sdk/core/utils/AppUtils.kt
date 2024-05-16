@@ -2,13 +2,11 @@ package com.liveness.sdk.core.utils
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.net.Uri
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -21,6 +19,7 @@ import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.Random
 import java.util.UUID
 
 
@@ -30,7 +29,7 @@ import java.util.UUID
 internal object AppUtils {
     fun showLog(strLog: String) {
 //        if (BuildConfig.DEBUG) {
-        if(AppConfig.mLivenessRequest?.isDebug == true) {
+        if (AppConfig.mLivenessRequest?.isDebug == true) {
             Log.d("LiveNess", strLog)
         }
 //        }
@@ -79,15 +78,16 @@ internal object AppUtils {
         val bitmap = Bitmap.createBitmap(myRootView.width, myRootView.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val bgDrawable = myRootView.background
-        if(bgDrawable != null) {
+        if (bgDrawable != null) {
             bgDrawable.draw(canvas)
-        }else{
+        } else {
             canvas.drawColor(Color.WHITE)
         }
         myRootView.draw(canvas)
         return bitmap
     }
-    fun shareScreenshot(mContext: Context, myRootView: View) : Uri {
+
+    fun shareScreenshot(mContext: Context, myRootView: View): Uri {
         // We need date and time to be added to image name to make it unique every time, otherwise bitmap will not update
         val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
         val currentDateandTime = sdf.format(Date())
@@ -126,6 +126,7 @@ internal object AppUtils {
             FileProvider.getUriForFile(mContext, getPackageName(mContext) + ".provider", newFile)
         return contentUri
     }
+
     fun getPackageName(context: Context): String {
         var mPackageName = ""
         try {
@@ -135,6 +136,17 @@ internal object AppUtils {
             e.printStackTrace()
         }
         return mPackageName
+    }
+
+    fun getSecretValue(): String {
+        val LATIN_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        val random = Random()
+        val sb = StringBuilder(16)
+        for (i in 0..15) {
+            val index = random.nextInt(LATIN_LETTERS.length)
+            sb.append(LATIN_LETTERS[index])
+        }
+        return sb.toString()
     }
 
 }

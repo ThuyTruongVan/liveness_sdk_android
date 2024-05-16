@@ -42,19 +42,20 @@ class MainActivity : AppCompatActivity() {
 //        }
 //        if(LiveNessSDK.isRegisterFace(this))
 
+        LiveNessSDK.setCallbackListener(object : CallbackLivenessListener {
+            override fun onCallbackLiveness(data: LivenessModel?) {
+                Log.d("Thuytv", "------livenessImage: ${data?.livenessImage}")
+                val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
 
+                val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
+                imvImage.setImageBitmap(bitmap)
+                showDefaultDialog(this@MainActivity, data?.data?.toString())
+            }
+        })
         btnLiveNessFlash.setOnClickListener {
             val overlay = LayoutInflater.from(this).inflate(R.layout.ui_custom_view, null)
             LiveNessSDK.setCustomView(overlay, null)
-            LiveNessSDK.startLiveNess(this, getLivenessRequest(), object : CallbackLivenessListener {
-                override fun onCallbackLiveness(data: LivenessModel?) {
-                    val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
-
-                    val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
-                    imvImage.setImageBitmap(bitmap)
-                    showDefaultDialog(this@MainActivity, data?.data?.toString())
-                }
-            })
+            LiveNessSDK.startLiveNess(this, getLivenessRequest(), null)
         }
         btnRegisterFace.setOnClickListener {
             val overlay = LayoutInflater.from(this).inflate(R.layout.ui_register_face, null)
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity() {
                 }
             })
         }
+
     }
 
     private fun getLivenessRequest(): LivenessRequest {
@@ -122,7 +124,7 @@ class MainActivity : AppCompatActivity() {
 //        if (deviceId.isNullOrEmpty()) {
 //            deviceId = UUID.randomUUID().toString()
 //        }
-        deviceId = "f8552f6d-35da-45f0-9761-f38fe1ea33d1"
+//        deviceId = "f8552f6d-35da-45f0-9761-f38fe1ea33d1"
         val optionHeader: HashMap<String, String> = HashMap()
         optionHeader["header1"] = "test"
         optionHeader["header2"] = "TEST-02"
@@ -132,16 +134,10 @@ class MainActivity : AppCompatActivity() {
         //ABCDEFGHIJKLMNOP
         return LivenessRequest(
             duration = 600, privateKey = privateKey, appId = appId,
-            deviceId = deviceId, clientTransactionId = "TEST", secret = "ABCDEFGHIJKLMNOP",
+            clientTransactionId = "TEST",
             baseURL = "https://face-matching.vietplus.eu", publicKey = public_key, ownerId = "123",
             optionHeader = optionHeader, optionRequest = optionRequest, isDebug = true
         )
-// return LivenessRequest(
-//            duration = 600, privateKey = privateKey, appId = appId,
-//            deviceId = deviceId, clientTransactionId = "TEST", secret = "ABCDEFGHIJKLMNOP",
-//            baseURL = "https://ibmbdev.ncb-bank.vn/onboarding/khcn/face", publicKey = public_key, ownerId = "123",
-//            optionHeader = optionHeader, optionRequest = optionRequest
-//        )
 
     }
 
@@ -157,9 +153,9 @@ class MainActivity : AppCompatActivity() {
 
         }.create().show()
     }
-    private fun getImage(): String{
-        val bitmap = BitmapFactory.decodeResource(this.getResources(),
-        com.liveness.sdk.core.R.drawable.img_0)
+
+    private fun getImage(): String {
+        val bitmap = BitmapFactory.decodeResource(this.getResources(), com.liveness.sdk.core.R.drawable.img_0)
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
         val image = stream.toByteArray()

@@ -196,6 +196,9 @@ internal class MainLiveNessActivityVideo : Activity() {
                 super.onCameraOpened(options)
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
                     cameraViewVideo.takeVideoSnapshot(File(pathVideo))
+//                    Handler(Looper.myLooper()!!).postDelayed({
+//                        setUpFaceMatching()
+//                    }, 1000)
                 } else {
                     if (AppConfig.mCustomView == null) {
                         btnCapture.visibility = View.VISIBLE
@@ -347,7 +350,7 @@ internal class MainLiveNessActivityVideo : Activity() {
         if (result?.has("message") == true) {
             strMessage = result.getString("message")
         }
-        AppUtils.showLog("result: "+ result?.toString())
+        AppUtils.showLog("result: " + result?.toString())
         if (status == 200) {
             val liveNessModel = Gson().fromJson<LivenessModel>(response, LivenessModel::class.java)
 //            if (liveNessModel.success == true) {

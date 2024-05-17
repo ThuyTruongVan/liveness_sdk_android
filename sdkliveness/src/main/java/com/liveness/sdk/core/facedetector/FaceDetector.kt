@@ -3,6 +3,7 @@ package com.liveness.sdk.core.facedetector
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.RectF
+import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
@@ -79,11 +80,14 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
                         )
                     onError(exception)
                 } else {
-                    faceDetectionExecutor.execute { frame.detectFaces() }
+                    faceDetectionExecutor.execute {
+                        frame.detectFaces()
+                    }
                 }
             }
         }
     }
+
     fun Bitmap.toByteArray(): ByteArray {
         val stream = ByteArrayOutputStream()
         this.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -93,6 +97,7 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
     fun ByteArray.toBitmap(): Bitmap {
         return BitmapFactory.decodeByteArray(this, 0, this.size)
     }
+
     private fun Frame.detectFaces() {
         val dataImage = data ?: return
         val inputImage = InputImage.fromByteArray(dataImage, size.width, size.height, rotation, format)
@@ -104,12 +109,15 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
 
                 // Correct the detected faces so that they're correctly rendered on the UI, then
                 // pass them to [faceBoundsOverlay] to be drawn.
-                if(faces.size > 0) {
+                if (faces.size > 0) {
                     for (face in faces) {
                         if (face.smilingProbability != null) {
                             val smile = face.smilingProbability ?: 0.0f
                             if (smile > 0.95) {
-                                onFaceDetectionResultListener?.onSuccess(face)
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    onFaceDetectionResultListener?.onSuccess(face)
+                                }, 1000)
+
                                 isProcessing = true
                             } else {
                                 val faceBounds = faces.map { face -> face.toFaceBounds(this) }
@@ -117,7 +125,7 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
                             }
                         }
                     }
-                }else {
+                } else {
 //                    val faceBounds = faces.map { face -> face.toFaceBounds(this) }
 //                    mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
                 }

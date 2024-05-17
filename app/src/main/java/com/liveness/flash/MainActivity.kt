@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -20,6 +21,8 @@ import com.liveness.sdk.core.model.LivenessModel
 import com.liveness.sdk.core.model.LivenessRequest
 import com.liveness.sdk.core.utils.CallbackLivenessListener
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Base64
 
 /**
@@ -50,18 +53,21 @@ class MainActivity : AppCompatActivity() {
         LiveNessSDK.setCallbackListener(object : CallbackLivenessListener {
             override fun onCallbackLiveness(data: LivenessModel?) {
                 Log.d("Thuytv", "----video:" + data?.pathVideo)
-//                data?.pathVideo?.let {
-//                    videoView.setVideoPath(it)
-//                    videoView.setOnPreparedListener {media->
-//                        media.isLooping = true
-//                        videoView.start()
-//                    }
-//                }
-                val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
+                val decodeString = android.util.Base64.decode(data?.pathVideo ?: "", android.util.Base64.NO_PADDING)
 
-                val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
-                imvImage.setImageBitmap(bitmap)
-                showDefaultDialog(this@MainActivity, data?.data?.toString())
+                data?.pathVideo?.let {
+                    val file = writeBytesAsFile(decodeString)
+                    videoView.setVideoPath(file?.path)
+                    videoView.setOnPreparedListener {media->
+                        media.isLooping = true
+                        videoView.start()
+                    }
+                }
+//                val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
+//
+//                val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
+//                imvImage.setImageBitmap(bitmap)
+//                showDefaultDialog(this@MainActivity, data?.data?.toString())
             }
         })
         btnLiveNessFlash.setOnClickListener {
@@ -83,6 +89,14 @@ class MainActivity : AppCompatActivity() {
             })
         }
 
+    }
+    fun writeBytesAsFile(bytes : ByteArray) : File? {
+        val path =this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        var file = File.createTempFile("my_file",".mp4", path)
+        var os = FileOutputStream(file);
+        os.write(bytes)
+        os.close()
+        return file
     }
 
     private fun getLivenessRequest(): LivenessRequest {

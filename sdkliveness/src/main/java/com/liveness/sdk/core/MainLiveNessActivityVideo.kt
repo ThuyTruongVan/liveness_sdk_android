@@ -47,6 +47,7 @@ import com.otaliastudios.cameraview.controls.Facing
 import com.otaliastudios.cameraview.controls.Mode
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
 import java.util.Random
 import java.util.UUID
 
@@ -242,6 +243,7 @@ internal class MainLiveNessActivityVideo : Activity() {
             override fun onVideoTaken(result: VideoResult) {
                 super.onVideoTaken(result)
                 result.file.let {
+                    pathVideo = Base64.encodeToString(it.readBytes(), android.util.Base64.NO_PADDING)
 //                    AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(pathVideo = it.absolutePath))
 //                    finish()
                 }
@@ -261,6 +263,7 @@ internal class MainLiveNessActivityVideo : Activity() {
             }
         }
     }
+
 
     override fun onResume() {
         super.onResume()

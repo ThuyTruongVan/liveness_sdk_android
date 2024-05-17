@@ -53,10 +53,9 @@ class MainActivity : AppCompatActivity() {
         LiveNessSDK.setCallbackListener(object : CallbackLivenessListener {
             override fun onCallbackLiveness(data: LivenessModel?) {
                 Log.d("Thuytv", "----video:" + data?.pathVideo)
-                val decodeString = android.util.Base64.decode(data?.pathVideo ?: "", android.util.Base64.NO_PADDING)
-
                 data?.pathVideo?.let {
-                    val file = writeBytesAsFile(decodeString)
+                    val decodeString = android.util.Base64.decode(data?.pathVideo ?: "", android.util.Base64.NO_PADDING)
+                    val file = writeBytesAsPdf(decodeString)
                     videoView.setVideoPath(file?.path)
                     videoView.setOnPreparedListener {media->
                         media.isLooping = true
@@ -90,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    fun writeBytesAsFile(bytes : ByteArray) : File? {
+    fun writeBytesAsPdf(bytes : ByteArray) : File? {
         val path =this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
         var file = File.createTempFile("my_file",".mp4", path)
         var os = FileOutputStream(file);

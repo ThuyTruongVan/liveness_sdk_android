@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
 import android.util.Log
 import android.util.Size
 import android.view.View
@@ -162,7 +163,9 @@ internal class MainLiveNessActivityVideo : Activity() {
 
     private fun initCamera() {
         apply {
-            pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
+//            pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
+            val fileCache = File(this.cacheDir, "VideoLiveNess" + System.currentTimeMillis() + ".mp4")
+            pathVideo = fileCache.absolutePath
             val lensFacing = Facing.FRONT
             setupCamera(lensFacing)
         }

@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.VideoView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.liveness.sdk.core.LiveNessSDK
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnRegisterFace: Button
     private lateinit var btnLiveNessFlash: Button
     private lateinit var imvImage: ImageView
+    private lateinit var videoView: VideoView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         btnRegisterFace = findViewById(R.id.btn_register_face)
         btnLiveNessFlash = findViewById(R.id.btn_live_ness_flash)
         imvImage = findViewById(R.id.imv_image)
+        videoView = findViewById(R.id.video_view)
 
 //        val mDeviceId = LiveNessSDK.getDeviceId(this)
 //        if (mDeviceId?.isNotEmpty() == true) {
@@ -46,6 +49,14 @@ class MainActivity : AppCompatActivity() {
 
         LiveNessSDK.setCallbackListener(object : CallbackLivenessListener {
             override fun onCallbackLiveness(data: LivenessModel?) {
+                Log.d("Thuytv", "----video:" + data?.pathVideo)
+//                data?.pathVideo?.let {
+//                    videoView.setVideoPath(it)
+//                    videoView.setOnPreparedListener {media->
+//                        media.isLooping = true
+//                        videoView.start()
+//                    }
+//                }
                 val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
 
                 val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)

@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d("Thuytv", "----video:" + data?.pathVideo)
                 data?.pathVideo?.let {
                     val decodeString = android.util.Base64.decode(data?.pathVideo ?: "", android.util.Base64.NO_PADDING)
-                    val file = writeBytesAsPdf(decodeString)
+                    val file = writeBytesAsFile(decodeString)
                     videoView.setVideoPath(file?.path)
                     videoView.setOnPreparedListener {media->
                         media.isLooping = true
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    fun writeBytesAsPdf(bytes : ByteArray) : File? {
+    fun writeBytesAsFile(bytes : ByteArray) : File? {
         val path =this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
         var file = File.createTempFile("my_file",".mp4", path)
         var os = FileOutputStream(file);

@@ -21,6 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.core.api.HttpClientUtils
 import com.liveness.sdk.core.facedetector.FaceDetector
@@ -66,6 +67,7 @@ internal class MainLiveNessActivity : Fragment() {
     private var frameViewCustom: FrameLayout? = null
     private var mImgLiveNess: String = ""
     private var mFaceImage: String = ""
+    private var mFragmentManager: FragmentManager? = null
 
     private var permissions = arrayOf(
         Manifest.permission.CAMERA
@@ -327,12 +329,16 @@ internal class MainLiveNessActivity : Fragment() {
     }
 
     fun onBackFragment() {
-        val count = activity?.supportFragmentManager?.popBackStack()
+//        activity?.supportFragmentManager?.popBackStack()
+        mFragmentManager?.popBackStack()
 //        if (count > 0) {
 //            childFragmentManager.popBackStack()
 //        } else {
 ////            activity?.finish()
 //        }
+    }
+    fun setFragmentManager(fragmentManager: FragmentManager){
+        mFragmentManager = fragmentManager
     }
 
     fun callAPIGEtTOTP(imgLiveNess: String, bgColor: Int) {

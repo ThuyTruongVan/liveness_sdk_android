@@ -2,7 +2,10 @@ package com.liveness.flash
 
 import android.content.Context
 import android.content.DialogInterface
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +15,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.liveness.sdk.core.LiveNessSDK
 import com.liveness.sdk.core.R
+import com.liveness.sdk.core.model.LivenessModel
 import com.liveness.sdk.core.model.LivenessRequest
+import com.liveness.sdk.core.utils.CallbackLivenessListener
+import java.io.ByteArrayOutputStream
 
 /**
  * Created by Thuytv on 18/05/2024.
@@ -29,7 +35,34 @@ class MainFragment : Fragment() {
         imvImage = view.findViewById(com.liveness.flash.R.id.imv_image)
 
         btnLiveNessFlash.setOnClickListener {
-            LiveNessSDK.startLiveNess(requireContext(), getLivenessRequest(),childFragmentManager, com.liveness.flash.R.id.root_view_test, null)
+            LiveNessSDK.startLiveNess(requireContext(), getLivenessRequest(),childFragmentManager, com.liveness.flash.R.id.root_view_container, null)
+        }
+
+        LiveNessSDK.setCallbackListener(object : CallbackLivenessListener {
+            override fun onCallbackLiveness(data: LivenessModel?) {
+                val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
+
+                val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
+                imvImage.setImageBitmap(bitmap)
+                showDefaultDialog(requireContext(), data?.data?.toString())
+            }
+        })
+                btnRegisterFace.setOnClickListener {
+//            val overlay = LayoutInflater.from(this).inflate(R.layout.ui_register_face, null)
+//            LiveNessSDK.setCustomView(overlay, overlay.findViewById(R.id.btn_capture_face))
+            val request = getLivenessRequest()
+//            request.imageFace = getImage()
+            LiveNessSDK.registerFace(requireContext(), request, object : CallbackLivenessListener {
+                override fun onCallbackLiveness(data: LivenessModel?) {
+                    Log.d("Thuytv", "------faceImage: ${data?.message}")
+                    btnRegisterFace.isEnabled = false
+
+                    val decodeString = android.util.Base64.decode(data?.faceImage ?: "", android.util.Base64.NO_PADDING)
+
+                    val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
+                    imvImage.setImageBitmap(bitmap)
+                }
+            })
         }
         return view
     }
@@ -115,5 +148,12 @@ class MainFragment : Fragment() {
             }
 
         }.create().show()
+    }
+    private fun getImage(): String {
+        val bitmap = BitmapFactory.decodeResource(this.getResources(), com.liveness.sdk.core.R.drawable.img_0)
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
+        val image = stream.toByteArray()
+        return android.util.Base64.encodeToString(image, android.util.Base64.NO_PADDING)
     }
 }

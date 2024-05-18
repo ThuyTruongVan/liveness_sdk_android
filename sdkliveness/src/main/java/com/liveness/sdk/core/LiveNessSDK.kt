@@ -42,9 +42,10 @@ class LiveNessSDK {
                 val bundle = Bundle()
                 bundle.putString(AppConfig.KEY_BUNDLE_SCREEN, "")
                 val fragment = MainLiveNessActivity()
+                fragment.setFragmentManager(supportFragmentManager)
                 fragment.arguments = bundle
-                transaction.replace(frameView, fragment)
-//                transaction.addToBackStack(null)
+                transaction.add(frameView, fragment)
+                transaction.addToBackStack(null)
                 transaction.commit()
             }
 

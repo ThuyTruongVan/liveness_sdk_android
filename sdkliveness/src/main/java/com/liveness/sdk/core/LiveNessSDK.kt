@@ -2,9 +2,11 @@ package com.liveness.sdk.core
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.view.View
 import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentManager
 import com.liveness.sdk.core.api.HttpClientUtils
 import com.liveness.sdk.core.model.LivenessRequest
 import com.liveness.sdk.core.utils.AppConfig
@@ -18,21 +20,34 @@ import com.liveness.sdk.core.utils.CallbackLivenessListener
 class LiveNessSDK {
     companion object {
         @Keep
-        fun startLiveNess(context: Context, mLivenessRequest: LivenessRequest, livenessListener: CallbackLivenessListener?) {
+        fun startLiveNess(
+            context: Context,
+            mLivenessRequest: LivenessRequest,
+            supportFragmentManager: FragmentManager,
+            frameView: Int,
+            livenessListener: CallbackLivenessListener?
+        ) {
             livenessListener?.let {
                 AppConfig.livenessListener = it
             }
             AppConfig.mLivenessRequest = mLivenessRequest
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
-            val intent: Intent = if (mLivenessRequest.isVideo) {
-                Intent(context, MainLiveNessActivityVideo::class.java)
-
+            if (mLivenessRequest.isVideo) {
+                val intent = Intent(context, MainLiveNessActivityVideo::class.java)
+                intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, "")
+                ContextCompat.startActivity(context, intent, null)
             } else {
-                Intent(context, MainLiveNessActivity::class.java)
+                val transaction = supportFragmentManager.beginTransaction()
+                val bundle = Bundle()
+                bundle.putString(AppConfig.KEY_BUNDLE_SCREEN, "")
+                val fragment = MainLiveNessActivity()
+                fragment.arguments = bundle
+                transaction.add(frameView, fragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
             }
-            intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, "")
-            ContextCompat.startActivity(context, intent, null)
+
         }
 
         @Keep
@@ -73,13 +88,13 @@ class LiveNessSDK {
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
             if (mLivenessRequest.imageFace.isNullOrEmpty()) {
-                val intent: Intent = if (mLivenessRequest.isVideo) {
-                    Intent(context, MainLiveNessActivityVideo::class.java)
-                } else {
-                    Intent(context, MainLiveNessActivity::class.java)
-                }
-                intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
-                ContextCompat.startActivity(context, intent, null)
+//                val intent: Intent = if (mLivenessRequest.isVideo) {
+//                    Intent(context, MainLiveNessActivityVideo::class.java)
+//                } else {
+//                    Intent(context, MainLiveNessActivity::class.java)
+//                }
+//                intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
+//                ContextCompat.startActivity(context, intent, null)
             } else {
                 httpClientUtil?.registerDeviceAndFace(context, mLivenessRequest.imageFace ?: "")
             }

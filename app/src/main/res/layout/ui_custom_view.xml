@@ -3,16 +3,34 @@
     android:id="@+id/root_view_test"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:gravity="center"
     android:orientation="vertical">
 
-    <TextView
+    <Button
+        android:id="@+id/btn_live_ness_flash"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="bottom|center"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="80dp"
-        android:text="Xin hãy để khuôn mặt vào giữa khung hình và mỉm cười" />
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_button_all"
+        android:paddingHorizontal="30dp"
+        android:text="Liveness Flash"
+        android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/btn_register_face"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/background_button_all"
+        android:paddingHorizontal="30dp"
+        android:text="Register Face"
+        android:textColor="@color/white" />
+
+    <ImageView
+        android:id="@+id/imv_image"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_marginTop="20dp" />
 
 </LinearLayout>

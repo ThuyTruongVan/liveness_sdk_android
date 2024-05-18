@@ -8,7 +8,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Size
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -18,6 +20,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.Fragment
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.core.api.HttpClientUtils
 import com.liveness.sdk.core.facedetector.FaceDetector
@@ -45,7 +48,7 @@ import java.util.UUID
 /**
  * Created by Thuytv on 15/04/2024.
  */
-internal class MainLiveNessActivity : Activity() {
+internal class MainLiveNessActivity : Fragment() {
     private val REQUEST_PERMISSION_CODE = 1231
 
     //    private var pathVideo = ""
@@ -60,6 +63,7 @@ internal class MainLiveNessActivity : Activity() {
     private lateinit var prbLoading: ProgressBar
     private lateinit var bgFullScreenDefault: ImageView
     private lateinit var llVideo: RelativeLayout
+    private var frameViewCustom: FrameLayout? = null
     private var mImgLiveNess: String = ""
     private var mFaceImage: String = ""
 
@@ -67,22 +71,21 @@ internal class MainLiveNessActivity : Activity() {
         Manifest.permission.CAMERA
     )
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.ui_main_live_ness)
-
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view: View = inflater.inflate(R.layout.ui_main_live_ness, container, false)
         if (AppConfig.mCustomView != null) {
-            findViewById<FrameLayout>(R.id.frame_view_custom).addView(AppConfig.mCustomView)
+            view.findViewById<FrameLayout>(R.id.frame_view_custom).addView(AppConfig.mCustomView)
         }
-        cameraViewVideo = findViewById(R.id.camera_view_video)
-        btnCapture = findViewById(R.id.btn_capture)
-        prbLoading = findViewById(R.id.prb_loading)
-        bgFullScreenDefault = findViewById(R.id.bg_full_screen_default)
-        llVideo = findViewById(R.id.ll_video)
+        cameraViewVideo = view.findViewById(R.id.camera_view_video)
+        btnCapture = view.findViewById(R.id.btn_capture)
+        prbLoading = view.findViewById(R.id.prb_loading)
+        bgFullScreenDefault = view.findViewById(R.id.bg_full_screen_default)
+        llVideo = view.findViewById(R.id.ll_video)
+        frameViewCustom = view.findViewById(R.id.frame_view_custom)
 
-        typeScreen = intent.getStringExtra(AppConfig.KEY_BUNDLE_SCREEN) ?: ""
-        findViewById<ImageView>(R.id.imv_back).setOnClickListener {
-            finish()
+        typeScreen = arguments?.getString(AppConfig.KEY_BUNDLE_SCREEN) ?: ""
+        view.findViewById<ImageView>(R.id.imv_back).setOnClickListener {
+            activity?.finish()
         }
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             permissions = arrayOf(
@@ -91,7 +94,7 @@ internal class MainLiveNessActivity : Activity() {
             )
         }
 
-        initCamera()
+        initCamera(view)
         if (checkPermissions()) {
             cameraViewVideo.open()
         } else {
@@ -107,56 +110,57 @@ internal class MainLiveNessActivity : Activity() {
         AppConfig.mActionView?.setOnClickListener {
             cameraViewVideo.takePictureSnapshot()
         }
+        return view
     }
 
     private fun checkPermissions(): Boolean {
         return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            val resultCamera = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA)
-            val resultRead = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE)
-            val resultWrite = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            val resultCamera = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+            val resultRead = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+            val resultWrite = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
             (resultCamera == PackageManager.PERMISSION_GRANTED
                     && resultRead == PackageManager.PERMISSION_GRANTED
                     && resultWrite == PackageManager.PERMISSION_GRANTED)
         } else {
-            val resultCamera = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA)
+            val resultCamera = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
             resultCamera == PackageManager.PERMISSION_GRANTED
         }
     }
 
     private fun requestPermissions() {
-        ActivityCompat.requestPermissions(this@MainLiveNessActivity, permissions, REQUEST_PERMISSION_CODE)
+        ActivityCompat.requestPermissions(requireActivity(), permissions, REQUEST_PERMISSION_CODE)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSION_CODE) {
             if (checkPermissions()) {
-//                Toast.makeText(applicationContext, "Permission granted", Toast.LENGTH_LONG).show()
+//                Toast.makeText(requireContext(), "Permission granted", Toast.LENGTH_LONG).show()
                 cameraViewVideo.open()
             } else {
-                Toast.makeText(applicationContext, "Permission denied", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_LONG).show()
             }
 //            if (grantResults.isNotEmpty()) {
 //                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    Toast.makeText(applicationContext, "Permission granted", Toast.LENGTH_LONG).show()
+//                    Toast.makeText(requireContext(), "Permission granted", Toast.LENGTH_LONG).show()
 //                    init()
 //                } else {
-//                    Toast.makeText(applicationContext, "Permission denied", Toast.LENGTH_LONG).show()
+//                    Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_LONG).show()
 //                }
 //            }
         }
     }
 
-    private fun initCamera() {
+    private fun initCamera(view: View) {
         apply {
 //            pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
             val lensFacing = Facing.FRONT
-            setupCamera(lensFacing)
+            setupCamera(lensFacing, view)
         }
     }
 
-    private fun setupCamera(lensFacing: Facing) = apply {
-        val faceDetector = FaceDetector(findViewById(R.id.faceBoundsOverlay))
+    private fun setupCamera(lensFacing: Facing, view: View) = apply {
+        val faceDetector = FaceDetector(view.findViewById(R.id.faceBoundsOverlay))
         faceDetector.setonFaceDetectionFailureListener(object : FaceDetector.OnFaceDetectionResultListener {
             override fun onSuccess(faceBounds: Face) {
                 super.onSuccess(faceBounds)
@@ -166,7 +170,7 @@ internal class MainLiveNessActivity : Activity() {
                     bgFullScreenDefault.visibility = View.VISIBLE
                     llVideo.visibility = View.GONE
                     bgColor = Random().nextInt(3)
-                    bgFullScreenDefault.background = ResourcesCompat.getDrawable(resources, lstBgDefault[bgColor], this@MainLiveNessActivity.theme)
+                    bgFullScreenDefault.background = ResourcesCompat.getDrawable(resources, lstBgDefault[bgColor], requireContext().theme)
                     Handler(Looper.myLooper()!!).postDelayed({
                         cameraViewVideo.takePictureSnapshot()
                     }, 100)
@@ -257,12 +261,12 @@ internal class MainLiveNessActivity : Activity() {
         super.onDestroy()
         cameraViewVideo.destroy()
         if (AppConfig.mCustomView != null) {
-            findViewById<FrameLayout>(R.id.frame_view_custom).removeView(AppConfig.mCustomView)
+            frameViewCustom?.removeView(AppConfig.mCustomView)
         }
     }
 
     private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int) {
-        val response = HttpClientUtils.instance?.initTransaction(this)
+        val response = HttpClientUtils.instance?.initTransaction(requireContext())
         var result: JSONObject? = null
         if (!response.isNullOrEmpty()) {
             result = JSONObject(response)
@@ -285,7 +289,7 @@ internal class MainLiveNessActivity : Activity() {
     }
 
     private fun checkLiveNessFlash(tOTP: String, transactionID: String, imgLiveNess: String, bgColor: Int) {
-        val response = HttpClientUtils.instance?.checkLiveNessFlash(this, tOTP, transactionID, imgLiveNess, bgColor)
+        val response = HttpClientUtils.instance?.checkLiveNessFlash(requireContext(), tOTP, transactionID, imgLiveNess, bgColor)
         var result: JSONObject? = null
         if (response?.isNotEmpty() == true) {
             result = JSONObject(response)
@@ -303,29 +307,38 @@ internal class MainLiveNessActivity : Activity() {
 //            if (liveNessModel.success == true) {
 //            liveNessModel.pathVideo = pathVideo
             liveNessModel.livenessImage = mImgLiveNess
-            this.runOnUiThread {
+            activity?.runOnUiThread {
                 showLoading(false)
 //                AppUtils.showLog("Thuytv------pathVideo: $pathVideo")
                 AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
-                finish()
+                onBackFragment()
             }
 //            } else {
 //                showToast(result?.getString("message") ?: "Error")
 //            }
         } else {
 //            showToast(result?.getString("message") ?: "Error")
-            this.runOnUiThread {
+            activity?.runOnUiThread {
                 showLoading(false)
                 AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = status, message = strMessage))
-                finish()
+                onBackFragment()
             }
         }
+    }
+
+    fun onBackFragment() {
+        val count = activity?.supportFragmentManager?.popBackStack()
+//        if (count > 0) {
+//            childFragmentManager.popBackStack()
+//        } else {
+////            activity?.finish()
+//        }
     }
 
     fun callAPIGEtTOTP(imgLiveNess: String, bgColor: Int) {
         showLoading(true)
         Thread {
-            val tOTP = TotpUtils(this).getTotp()
+            val tOTP = TotpUtils(requireContext()).getTotp()
             if (tOTP.isNullOrEmpty() || tOTP == "-1") {
                 showToast("TOTP null")
             } else {
@@ -335,14 +348,14 @@ internal class MainLiveNessActivity : Activity() {
     }
 
     private fun showToast(strToast: String) {
-        this.runOnUiThread {
-            Toast.makeText(this, strToast, Toast.LENGTH_SHORT).show()
+        activity?.runOnUiThread {
+            Toast.makeText(requireContext(), strToast, Toast.LENGTH_SHORT).show()
             showLoading(false)
         }
     }
 
     private fun showLoading(isShow: Boolean) {
-        this.runOnUiThread {
+        activity?.runOnUiThread {
             if (isShow) {
                 if (AppConfig.mProgressView == null) {
                     prbLoading.visibility = View.VISIBLE
@@ -363,11 +376,11 @@ internal class MainLiveNessActivity : Activity() {
     private fun registerFace(faceImage: String) {
         showLoading(true)
         Thread {
-            var mSecret = AppPreferenceUtils(this).getTOTPSecret(this) ?: AppConfig.mLivenessRequest?.secret
+            var mSecret = AppPreferenceUtils(requireContext()).getTOTPSecret(requireContext()) ?: AppConfig.mLivenessRequest?.secret
             if (mSecret.isNullOrEmpty() || mSecret.length != 16) {
                 mSecret = AppUtils.getSecretValue()
             }
-            var mDeviceId = AppPreferenceUtils(this).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
+            var mDeviceId = AppPreferenceUtils(requireContext()).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
             if (mDeviceId.isNullOrEmpty()) {
                 mDeviceId = UUID.randomUUID().toString()
             }
@@ -391,9 +404,9 @@ internal class MainLiveNessActivity : Activity() {
                 strMessageDevice = result.getString("message")
             }
             if (statusDevice == 200) {
-                AppPreferenceUtils(this).setDeviceId(mDeviceId)
-                AppPreferenceUtils(this).setTOTPSecret(this, mSecret)
-                val response = HttpClientUtils.instance?.registerFace(this, faceImage)
+                AppPreferenceUtils(requireContext()).setDeviceId(mDeviceId)
+                AppPreferenceUtils(requireContext()).setTOTPSecret(requireContext(), mSecret)
+                val response = HttpClientUtils.instance?.registerFace(requireContext(), faceImage)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)
@@ -409,25 +422,25 @@ internal class MainLiveNessActivity : Activity() {
                 if (status == 200) {
                     showLoading(false)
 
-                    this.runOnUiThread {
+                    activity?.runOnUiThread {
                         AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(faceImage = mFaceImage))
                         showToast("Register Face Success")
-                        AppPreferenceUtils(this).setRegisterFace(true)
-                        finish()
+                        AppPreferenceUtils(requireContext()).setRegisterFace(true)
+                        onBackFragment()
                     }
 
                 } else {
                     showLoading(false)
 //                    showToast(result?.getString("message") ?: "Error")
-                    this.runOnUiThread {
+                    activity?.runOnUiThread {
                         AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(status = status, message = strMessage))
-                        finish()
+                        onBackFragment()
                     }
                 }
             } else {
-                this.runOnUiThread {
+                activity?.runOnUiThread {
                     AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(status = statusDevice, message = strMessageDevice))
-                    finish()
+                    onBackFragment()
                 }
             }
         }.start()

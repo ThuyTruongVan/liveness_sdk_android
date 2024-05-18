@@ -12,9 +12,9 @@
         android:name="android.hardware.camera"
         android:required="true" />
     <application android:requestLegacyExternalStorage="true">
-        <activity
-            android:name=".MainLiveNessActivity"
-            android:exported="true" />
+<!--        <activity-->
+<!--            android:name=".MainLiveNessActivity"-->
+<!--            android:exported="true" />-->
         <activity
             android:name=".MainLiveNessActivityVideo"
             android:exported="true" />

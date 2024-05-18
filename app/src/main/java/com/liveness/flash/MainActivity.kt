@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         btnLiveNessFlash.setOnClickListener {
             val overlay = LayoutInflater.from(this).inflate(R.layout.ui_custom_view, null)
             LiveNessSDK.setCustomView(overlay, null)
-            LiveNessSDK.startLiveNess(this, getLivenessRequest(), null)
+            LiveNessSDK.startLiveNess(this, getLivenessRequest(),supportFragmentManager, R.id.frame_view, null)
 
         }
         btnRegisterFace.setOnClickListener {

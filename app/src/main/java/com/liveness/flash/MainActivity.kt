@@ -50,29 +50,29 @@ class MainActivity : AppCompatActivity() {
 //        }
 //        if(LiveNessSDK.isRegisterFace(this))
 
-        LiveNessSDK.setCallbackListener(object : CallbackLivenessListener {
-            override fun onCallbackLiveness(data: LivenessModel?) {
-                Log.d("Thuytv", "----video:" + data?.pathVideo)
-                data?.pathVideo?.let {
-                    val decodeString = android.util.Base64.decode(data?.pathVideo ?: "", android.util.Base64.NO_PADDING)
-                    val file = writeBytesAsFile(decodeString)
-                    videoView.setVideoPath(file?.path)
-                    videoView.setOnPreparedListener {media->
-                        media.isLooping = true
-                        videoView.start()
+//        LiveNessSDK.setCallbackListener()
+        btnLiveNessFlash.setOnClickListener {
+            val overlay = LayoutInflater.from(this).inflate(R.layout.ui_custom_view, null)
+            LiveNessSDK.setCustomView(overlay, null)
+            LiveNessSDK.startLiveNess(this, getLivenessRequest(), object : CallbackLivenessListener {
+                override fun onCallbackLiveness(data: LivenessModel?) {
+                   Log.i("MainActivity","------onCallbackLiveness: ")
+                    data?.pathVideo?.let {
+                        val decodeString = android.util.Base64.decode(data?.pathVideo ?: "", android.util.Base64.NO_PADDING)
+                        val file = writeBytesAsFile(decodeString)
+                        videoView.setVideoPath(file?.path)
+                        videoView.setOnPreparedListener {media->
+                            media.isLooping = true
+                            videoView.start()
+                        }
                     }
-                }
 //                val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
 //
 //                val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
 //                imvImage.setImageBitmap(bitmap)
 //                showDefaultDialog(this@MainActivity, data?.data?.toString())
-            }
-        })
-        btnLiveNessFlash.setOnClickListener {
-            val overlay = LayoutInflater.from(this).inflate(R.layout.ui_custom_view, null)
-            LiveNessSDK.setCustomView(overlay, null)
-            LiveNessSDK.startLiveNess(this, getLivenessRequest(), null)
+                }
+            })
 
         }
         btnRegisterFace.setOnClickListener {

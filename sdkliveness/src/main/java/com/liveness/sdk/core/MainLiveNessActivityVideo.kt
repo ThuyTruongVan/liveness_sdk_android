@@ -178,7 +178,6 @@ internal class MainLiveNessActivityVideo : Activity() {
                 super.onSuccess(faceBounds)
                 if (!isCapture) {
                     isCapture = true
-                    cameraViewVideo.stopVideo()
                     bgFullScreenDefault.visibility = View.VISIBLE
                     llVideo.visibility = View.GONE
                     bgColor = Random().nextInt(3)
@@ -186,6 +185,7 @@ internal class MainLiveNessActivityVideo : Activity() {
                     Handler(Looper.myLooper()!!).postDelayed({
                         cameraViewVideo.takePictureSnapshot()
                     }, 300)
+
                 }
             }
 
@@ -198,10 +198,9 @@ internal class MainLiveNessActivityVideo : Activity() {
             override fun onCameraOpened(options: CameraOptions) {
                 super.onCameraOpened(options)
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-                    cameraViewVideo.takeVideoSnapshot(File(pathVideo))
-//                    Handler(Looper.myLooper()!!).postDelayed({
-//                        setUpFaceMatching()
-//                    }, 1000)
+                    Handler(Looper.myLooper()!!).postDelayed({
+                        cameraViewVideo.takeVideoSnapshot(File(pathVideo))
+                    }, 500)
                 } else {
                     if (AppConfig.mCustomView == null) {
                         btnCapture.visibility = View.VISIBLE
@@ -231,6 +230,7 @@ internal class MainLiveNessActivityVideo : Activity() {
                     bgFullScreenDefault.visibility = View.GONE
                     llVideo.visibility = View.VISIBLE
                     isCapture = false
+                    cameraViewVideo.stopVideo()
                 } else {
                     result.data.let {
                         mFaceImage = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
@@ -241,12 +241,14 @@ internal class MainLiveNessActivityVideo : Activity() {
 
             override fun onVideoTaken(result: VideoResult) {
                 super.onVideoTaken(result)
+                AppUtils.showLog("Thuytv-------onVideoTaken")
                 result.file.let {
                     pathVideo = Base64.encodeToString(it.readBytes(),Base64.NO_PADDING)
 //                    AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(pathVideo = it.absolutePath))
 //                    finish()
                 }
             }
+
         })
         if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
             cameraViewVideo.addFrameProcessor {

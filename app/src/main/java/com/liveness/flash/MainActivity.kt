@@ -59,9 +59,9 @@ class MainActivity : AppCompatActivity() {
 //            LiveNessSDK.setCustomProgress(overlay)
 //            LiveNessSDK.startLiveNess(this, getLivenessRequest(), supportFragmentManager, R.id.frame_view_main, null)
             val transaction = supportFragmentManager.beginTransaction()
-            val fragment = FaceFragment()
+            val fragment = MainFragment()
             transaction.replace(R.id.frame_view_main, fragment)
-            transaction.addToBackStack(FaceFragment::class.java.name)
+            transaction.addToBackStack(MainFragment::class.java.name)
             transaction.commit()
         }
         btnRegisterFace.setOnClickListener {

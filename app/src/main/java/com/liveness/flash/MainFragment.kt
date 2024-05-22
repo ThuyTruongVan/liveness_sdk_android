@@ -28,7 +28,7 @@ class MainFragment : Fragment() {
 //    private lateinit var btnLiveNessFlash: Button
 //    private lateinit var imvImage: ImageView
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view: View = inflater.inflate(com.liveness.flash.R.layout.ui_main_fragment_2, container, false)
+        val view: View = inflater.inflate(com.liveness.flash.R.layout.ui_main_live_ness, container, false)
 
 //        btnRegisterFace = view.findViewById(com.liveness.flash.R.id.btn_register_face)
 //        btnLiveNessFlash = view.findViewById(com.liveness.flash.R.id.btn_live_ness_flash)

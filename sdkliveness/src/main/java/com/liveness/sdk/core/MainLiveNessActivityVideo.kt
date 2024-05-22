@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
 import android.util.Log
 import android.util.Size
 import android.view.View
@@ -24,6 +25,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.core.api.HttpClientUtils
 import com.liveness.sdk.core.facedetector.FaceDetector
@@ -114,6 +116,7 @@ internal class MainLiveNessActivityVideo : Activity() {
             Log.d("Thuytv", "-----AppConfig.mActionView---setOnClickListener")
             cameraViewVideo.takePictureSnapshot()
         }
+        registerLocalBroadCast()
 
     }
 
@@ -160,7 +163,9 @@ internal class MainLiveNessActivityVideo : Activity() {
 
     private fun initCamera() {
         apply {
-            pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
+//            pathVideo = Environment.getExternalStorageDirectory().toString() + "/Download/" + "VideoLiveNess" + System.currentTimeMillis() + ".mp4"
+            val fileCache = File(this.cacheDir, "VideoLiveNess" + System.currentTimeMillis() + ".mp4")
+            pathVideo = fileCache.absolutePath
             val lensFacing = Facing.FRONT
             setupCamera(lensFacing)
         }
@@ -181,6 +186,7 @@ internal class MainLiveNessActivityVideo : Activity() {
                     Handler(Looper.myLooper()!!).postDelayed({
                         cameraViewVideo.takePictureSnapshot()
                     }, 300)
+
                 }
             }
 
@@ -193,7 +199,9 @@ internal class MainLiveNessActivityVideo : Activity() {
             override fun onCameraOpened(options: CameraOptions) {
                 super.onCameraOpened(options)
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-                    cameraViewVideo.takeVideoSnapshot(File(pathVideo))
+                    Handler(Looper.myLooper()!!).postDelayed({
+                        cameraViewVideo.takeVideoSnapshot(File(pathVideo))
+                    }, 500)
                 } else {
                     if (AppConfig.mCustomView == null) {
                         btnCapture.visibility = View.VISIBLE
@@ -223,6 +231,7 @@ internal class MainLiveNessActivityVideo : Activity() {
                     bgFullScreenDefault.visibility = View.GONE
                     llVideo.visibility = View.VISIBLE
                     isCapture = false
+                    cameraViewVideo.stopVideo()
                 } else {
                     result.data.let {
                         mFaceImage = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
@@ -234,10 +243,10 @@ internal class MainLiveNessActivityVideo : Activity() {
             override fun onVideoTaken(result: VideoResult) {
                 super.onVideoTaken(result)
                 result.file.let {
-//                    AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(pathVideo = it.absolutePath))
-//                    finish()
+//                    pathVideo = Base64.encodeToString(it.readBytes(),Base64.NO_PADDING)
                 }
             }
+
         })
         if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
             cameraViewVideo.addFrameProcessor {
@@ -270,7 +279,10 @@ internal class MainLiveNessActivityVideo : Activity() {
         if (AppConfig.mCustomView != null) {
             findViewById<FrameLayout>(R.id.frame_view_custom).removeView(AppConfig.mCustomView)
         }
+        unregisterLocalBroadCast()
     }
+
+
 
     private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int) {
         val response = HttpClientUtils.instance?.initTransaction(this)
@@ -442,6 +454,25 @@ internal class MainLiveNessActivityVideo : Activity() {
                 }
             }
         }.start()
+
+    }
+
+    private fun registerLocalBroadCast() {
+        val filter = IntentFilter()
+        filter.addAction(AppConfig.INTENT_VALUE_BACK)
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiverOnBack, filter)
+    }
+
+    private fun unregisterLocalBroadCast() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiverOnBack)
+    }
+
+    private var receiverOnBack = object : BroadcastReceiver() {
+        override fun onReceive(p0: Context?, intent: Intent?) {
+            if (intent?.action == AppConfig.INTENT_VALUE_BACK && !isFinishing) {
+                finish()
+            }
+        }
 
     }
 }

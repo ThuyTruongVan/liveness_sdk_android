@@ -1,16 +1,11 @@
 package com.liveness.flash
 
 import android.Manifest
-import android.content.Context
-import android.content.DialogInterface
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +16,6 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -33,7 +27,6 @@ import com.liveness.flash.facedetector.Frame
 import com.liveness.flash.facedetector.LensFacing
 import com.liveness.sdk.core.LiveNessSDK
 import com.liveness.sdk.core.R
-import com.liveness.sdk.core.model.LivenessModel
 import com.liveness.sdk.core.model.LivenessRequest
 import com.liveness.sdk.core.utils.CallbackAPIListener
 import com.otaliastudios.cameraview.CameraException
@@ -46,7 +39,6 @@ import com.otaliastudios.cameraview.controls.Facing
 import com.otaliastudios.cameraview.controls.Mode
 import org.json.JSONObject
 import java.util.Random
-import java.util.UUID
 
 /**
  * Created by Thuytv on 18/05/2024.
@@ -76,7 +68,7 @@ class FaceFragment : Fragment() {
     )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view: View = inflater.inflate(R.layout.ui_main_live_ness, container, false)
+        val view: View = inflater.inflate(com.liveness.flash.R.layout.ui_main_live_ness_demo, container, false)
 
         cameraViewVideo = view.findViewById(R.id.camera_view_video)
         btnCapture = view.findViewById(R.id.btn_capture)

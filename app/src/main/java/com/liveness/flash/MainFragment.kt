@@ -5,19 +5,12 @@ import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import com.liveness.sdk.core.LiveNessSDK
-import com.liveness.sdk.core.R
-import com.liveness.sdk.core.model.LivenessModel
 import com.liveness.sdk.core.model.LivenessRequest
-import com.liveness.sdk.core.utils.CallbackLivenessListener
 import java.io.ByteArrayOutputStream
 
 /**
@@ -28,7 +21,7 @@ class MainFragment : Fragment() {
 //    private lateinit var btnLiveNessFlash: Button
 //    private lateinit var imvImage: ImageView
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view: View = inflater.inflate(com.liveness.flash.R.layout.ui_main_live_ness, container, false)
+        val view: View = inflater.inflate(R.layout.ui_main_live_ness_demo, container, false)
 
 //        btnRegisterFace = view.findViewById(com.liveness.flash.R.id.btn_register_face)
 //        btnLiveNessFlash = view.findViewById(com.liveness.flash.R.id.btn_live_ness_flash)

@@ -58,10 +58,18 @@ class MainActivity : AppCompatActivity() {
 //            val overlay = LayoutInflater.from(this).inflate(R.layout.ui_custom_view, null)
 //            LiveNessSDK.setCustomProgress(overlay)
 //            LiveNessSDK.startLiveNess(this, getLivenessRequest(), supportFragmentManager, R.id.frame_view_main, null)
+//            val transaction = supportFragmentManager.beginTransaction()
+//            val fragment = MainFragment()
+//            transaction.replace(R.id.frame_view_main, fragment)
+//            transaction.addToBackStack(MainFragment::class.java.name)
+//            transaction.commit()
             val transaction = supportFragmentManager.beginTransaction()
-            val fragment = MainFragment()
+            val fragment = FaceFragment()
+            val bundle = Bundle()
+            bundle.putString("KEY_BUNDLE_SCREEN", "")
+            fragment?.arguments = bundle
             transaction.replace(R.id.frame_view_main, fragment)
-            transaction.addToBackStack(MainFragment::class.java.name)
+            transaction.addToBackStack(FaceFragment::class.java.name)
             transaction.commit()
         }
         btnRegisterFace.setOnClickListener {

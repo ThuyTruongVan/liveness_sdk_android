@@ -25,7 +25,6 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.core.api.HttpClientUtils
 import com.liveness.sdk.core.facedetector.FaceDetector
@@ -460,11 +459,11 @@ internal class MainLiveNessActivityVideo : Activity() {
     private fun registerLocalBroadCast() {
         val filter = IntentFilter()
         filter.addAction(AppConfig.INTENT_VALUE_BACK)
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiverOnBack, filter)
+//        LocalBroadcastManager.getInstance(this).registerReceiver(receiverOnBack, filter)
     }
 
     private fun unregisterLocalBroadCast() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiverOnBack)
+//        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiverOnBack)
     }
 
     private var receiverOnBack = object : BroadcastReceiver() {

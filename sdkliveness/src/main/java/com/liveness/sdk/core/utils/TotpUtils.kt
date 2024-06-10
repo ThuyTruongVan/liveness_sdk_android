@@ -35,21 +35,21 @@ internal class TotpUtils(private val mContext: Context) {
                 return secret
             }
             try {
-                var mSecret = AppPreferenceUtils(mContext).getTOTPSecret(mContext) ?: AppConfig.mLivenessRequest?.secret
-                if (mSecret.isNullOrEmpty() || mSecret.length != 16) {
-                    mSecret = AppUtils.getSecretValue()
+                var a = AppPreferenceUtils(mContext).getTOTPSecret(mContext) ?: AppConfig.mLivenessRequest?.secret
+                if (a.isNullOrEmpty() || a.length != 16) {
+                    a = AppUtils.getSecretValue()
                 }
-                var mDeviceId = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
-                if (mDeviceId.isNullOrEmpty()) {
-                    mDeviceId = UUID.randomUUID().toString()
+                var b = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
+                if (b.isNullOrEmpty()) {
+                    b = UUID.randomUUID().toString()
                 }
                 val request = JSONObject()
-                request.put("deviceId", mDeviceId)
-                request.put("deviceOs", "Android")
-                request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
-                request.put("period", AppConfig.mLivenessRequest?.duration)
-                request.put("secret", mSecret)
-                val response = instance?.postV3("/eid/v3/registerDevice", request)
+                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_deviceId), b)
+                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_deviceOS), "Android")
+                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_device_name), Build.MANUFACTURER + " " + Build.MODEL)
+                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_period), AppConfig.mLivenessRequest?.duration)
+                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_secret), a)
+                val response = instance?.postV3(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_register_device), request)
                 var result: JSONObject? = null
                 if (response != null && response.length > 0) {
                     result = JSONObject(response)

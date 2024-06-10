@@ -77,7 +77,8 @@ internal class AppPreferenceUtils(context: Context?) {
     fun removeValue(key: String) {
         IShare?.edit()?.remove(key)?.apply()
     }
-    fun removeAllValue(){
+
+    fun removeAllValue() {
         removeValue(KEY_DEVICE_ID)
         removeValue(KEY_TOTP_SECRET)
         removeValue(KEY_REGISTER_FACE)

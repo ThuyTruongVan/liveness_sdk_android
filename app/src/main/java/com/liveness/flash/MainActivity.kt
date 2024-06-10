@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity() {
 //            transaction.replace(R.id.frame_view_main, fragment)
 //            transaction.addToBackStack(MainFragment::class.java.name)
 //            transaction.commit()
+
             val transaction = supportFragmentManager.beginTransaction()
             val fragment = FaceFragment()
             val bundle = Bundle()
@@ -71,6 +73,25 @@ class MainActivity : AppCompatActivity() {
             transaction.replace(R.id.frame_view_main, fragment)
             transaction.addToBackStack(FaceFragment::class.java.name)
             transaction.commit()
+//            LiveNessSDK.testRSA()
+
+//            val encrypted_register_face = encryptAndEncode("/eid/v3/registerFace")
+//            val encrypted_init_transaction = encryptAndEncode("/eid/v3/initTransaction")
+//            val encrypted_register_device = encryptAndEncode("/eid/v3/registerDevice")
+//            val encrypted_verify_face = encryptAndEncode("/eid/v3/verifyFace")
+//            Log.d("Thuytv","-----encrypted_register_face: $encrypted_register_face")
+//            Log.d("Thuytv","-----encrypted_init_transaction: $encrypted_init_transaction")
+//            Log.d("Thuytv","-----encrypted_register_device: $encrypted_register_device")
+//            Log.d("Thuytv","-----encrypted_verify_face: $encrypted_verify_face")
+//            val decryptedRegisterFace = decodeAndDecrypt(encrypted_register_face!!)
+//            val decryptedInitTransaction = decodeAndDecrypt(encrypted_init_transaction!!)
+//            val decryptedRegisterDevice = decodeAndDecrypt(encrypted_register_device!!)
+//            val decryptedVerifyFace = decodeAndDecrypt(encrypted_verify_face!!)
+//            Log.d("Thuytv","-----decryptedRegisterFace: $decryptedRegisterFace")
+//            Log.d("Thuytv","-----decryptedInitTransaction: $decryptedInitTransaction")
+//            Log.d("Thuytv","-----decryptedRegisterDevice: $decryptedRegisterDevice")
+//            Log.d("Thuytv","-----decryptedVerifyFace: $decryptedVerifyFace")
+
         }
         btnRegisterFace.setOnClickListener {
 //            val overlay = LayoutInflater.from(this).inflate(R.layout.ui_register_face, null)
@@ -96,8 +117,16 @@ class MainActivity : AppCompatActivity() {
             transaction.replace(R.id.frame_view_main, fragment)
             transaction.addToBackStack(FaceFragment::class.java.name)
             transaction.commit()
+
         }
 
+    }
+    fun encryptAndEncode(data: String): String? {
+        return Base64.encodeToString(data.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
+    }
+
+    fun decodeAndDecrypt(data: String): String? {
+        return String(Base64.decode(data, Base64.DEFAULT))
     }
 
     private fun getLivenessRequest(): LivenessRequest {

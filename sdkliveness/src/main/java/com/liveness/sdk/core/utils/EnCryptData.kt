@@ -92,5 +92,21 @@ class EnCryptData {
         return this.encryption
     }
 
+    fun setEncryptValue(context: Context?, keyAlias: String, textToEncrypt: String) {
+        try {
+            context?.apply {
+                cipher = Cipher.getInstance(TRANSFORMATION)
+                cipher?.init(Cipher.ENCRYPT_MODE, getSecretKey(keyAlias, context)) //AppConfig.KEY_ALIAS
+
+                iv = cipher?.iv
+
+//                encryption = cipher?.doFinal(textToEncrypt.toByteArray(charset("UTF-8")))
+                SecurityRepository.setProperty(keyAlias, textToEncrypt, iv, context)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
 
 }// Do some things

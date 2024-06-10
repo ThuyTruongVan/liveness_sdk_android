@@ -3,6 +3,7 @@ package com.liveness.sdk.core
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
@@ -13,6 +14,8 @@ import com.liveness.sdk.core.utils.AppConfig
 import com.liveness.sdk.core.utils.AppPreferenceUtils
 import com.liveness.sdk.core.utils.CallbackAPIListener
 import com.liveness.sdk.core.utils.CallbackLivenessListener
+import com.liveness.sdk.core.utils.EnCryptData
+import com.liveness.sdk.core.utils.RSACryptData
 
 /**
  * Created by Thuytv on 15/04/2024.
@@ -20,13 +23,33 @@ import com.liveness.sdk.core.utils.CallbackLivenessListener
 @Keep
 class LiveNessSDK {
     companion object {
+        @Keep
         fun setConfigSDK(context: Context, mLivenessRequest: LivenessRequest) {
             AppConfig.mLivenessRequest = mLivenessRequest
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
+//            val enCryptData = EnCryptData()
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_init_transaction, AppConfig.encrypted_init_transaction)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_register_device, AppConfig.encrypted_register_device)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_register_face, AppConfig.encrypted_register_face)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_verify_face, AppConfig.encrypted_verify_face)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_deviceId, AppConfig.encrypted_deviceId)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_deviceOS, AppConfig.encrypted_deviceOS)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_device_name, AppConfig.encrypted_device_name)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_period, AppConfig.encrypted_period)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_secret, AppConfig.encrypted_secret)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_face_image, AppConfig.encrypted_face_image)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_device_id, AppConfig.encrypted_device_id)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_totp, AppConfig.encrypted_totp)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_transaction_id, AppConfig.encrypted_transaction_id)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_image_live, AppConfig.encrypted_image_live)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_color, AppConfig.encrypted_color)
+//            enCryptData.encryptText(context, AppConfig.key_encrypted_transaction_id, AppConfig.encrypted_transaction_id)
+
         }
 
-        fun registerDevice(context: Context,mRequest: LivenessRequest?,  callbackAPIListener: CallbackAPIListener?) {
+        @Keep
+        fun registerDevice(context: Context, mRequest: LivenessRequest?, callbackAPIListener: CallbackAPIListener?) {
             mRequest?.let {
                 AppConfig.mOptionRequest = mRequest
             }
@@ -34,7 +57,8 @@ class LiveNessSDK {
             httpClientUtil?.registerDevice(context, callbackAPIListener)
         }
 
-        fun registerFace(context: Context, faceImage: String,mRequest: LivenessRequest?, callbackAPIListener: CallbackAPIListener?) {
+        @Keep
+        fun registerFace(context: Context, faceImage: String, mRequest: LivenessRequest?, callbackAPIListener: CallbackAPIListener?) {
             mRequest?.let {
                 AppConfig.mOptionRequest = mRequest
             }
@@ -42,7 +66,8 @@ class LiveNessSDK {
             httpClientUtil?.registerFace(context, faceImage, callbackAPIListener)
         }
 
-        fun initTransaction(context: Context,mRequest: LivenessRequest?, callbackAPIListener: CallbackAPIListener?) {
+        @Keep
+        fun initTransaction(context: Context, mRequest: LivenessRequest?, callbackAPIListener: CallbackAPIListener?) {
             mRequest?.let {
                 AppConfig.mOptionRequest = mRequest
             }
@@ -50,7 +75,15 @@ class LiveNessSDK {
             httpClientUtil?.initTransaction(context, callbackAPIListener)
         }
 
-        fun checkLiveNessFlash(context: Context, transactionId: String, liveImage: String, colorBg: Int,mRequest: LivenessRequest?, callbackAPIListener: CallbackAPIListener?) {
+        @Keep
+        fun checkLiveNessFlash(
+            context: Context,
+            transactionId: String,
+            liveImage: String,
+            colorBg: Int,
+            mRequest: LivenessRequest?,
+            callbackAPIListener: CallbackAPIListener?
+        ) {
             mRequest?.let {
                 AppConfig.mOptionRequest = mRequest
             }
@@ -115,6 +148,7 @@ class LiveNessSDK {
             }
         }
 
+        @Keep
         fun clearAllData(context: Context) {
             AppPreferenceUtils(context).removeAllValue()
         }
@@ -185,6 +219,46 @@ class LiveNessSDK {
         @Keep
         fun checkVersion(): String {
             return "v1.1.7"
+        }
+
+        fun testRSA() {
+            val rsa = RSACryptData()
+//            val deviceId = rsa.encrypt("deviceId")
+//            val period = rsa.encrypt("period")
+//            val clientTransactionId = rsa.encrypt("clientTransactionId")
+//            val url_init_transaction = rsa.encrypt("/eid/v3/initTransaction")
+//            val totp = rsa.encrypt("totp")
+//            val transaction_id = rsa.encrypt("transaction_id")
+//            val image_live = rsa.encrypt("image_live")
+//            val color = rsa.encrypt("color")
+//            val deviceid = rsa.encrypt("deviceid")
+//            val url_verify_face = rsa.encrypt("/eid/v3/verifyFace")
+//            val face_image = rsa.encrypt("face_image")
+//            val url_register_face = rsa.encrypt("/eid/v3/registerFace")
+//            val deviceOs = rsa.encrypt("deviceOs")
+//            val deviceName = rsa.encrypt("deviceName")
+//            val secret = rsa.encrypt("secret")
+//            val url_register_device = rsa.encrypt("/eid/v3/registerDevice")
+//
+//            Log.d("Thuytv", "-----deviceId: " + deviceId)
+//            Log.d("Thuytv", "-----period: " + period)
+//            Log.d("Thuytv", "-----clientTransactionId: " + clientTransactionId)
+//            Log.d("Thuytv", "-----url_init_transaction: " + url_init_transaction)
+//            Log.d("Thuytv", "-----totp: " + totp)
+//            Log.d("Thuytv", "-----transaction_id: " + transaction_id)
+//            Log.d("Thuytv", "-----image_live: " + image_live)
+//            Log.d("Thuytv", "-----color: " + color)
+//            Log.d("Thuytv", "-----deviceid: " + deviceid)
+//            Log.d("Thuytv", "-----url_verify_face: " + url_verify_face)
+//            Log.d("Thuytv", "-----face_image: " + face_image)
+//            Log.d("Thuytv", "-----url_register_face: " + url_register_face)
+//            Log.d("Thuytv", "-----deviceOs: " + deviceOs)
+//            Log.d("Thuytv", "-----deviceName: " + deviceName)
+//            Log.d("Thuytv", "-----secret: " + secret)
+//            Log.d("Thuytv", "-----url_register_device: " + url_register_device)
+
+//            val strDecrypte = rsa.decrypt(AppConfig.encrypted_transaction_id)
+//            Log.d("Thuytv", "-----strDecrypte: " + strDecrypte)
         }
 
     }

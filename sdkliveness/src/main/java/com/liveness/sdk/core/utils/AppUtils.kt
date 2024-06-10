@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -16,6 +17,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -147,6 +149,23 @@ internal object AppUtils {
             sb.append(LATIN_LETTERS[index])
         }
         return sb.toString()
+    }
+
+    fun encryptAndEncode(data: String): String? {
+        return Base64.encodeToString(data.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
+    }
+
+    private fun decodeAndDecrypt(data: String): String {
+        val rsa = RSACryptData()
+        return rsa.decrypt(data)
+    }
+
+    fun decodeAndDecrypt(context: Context, data: String): String {
+//        val strEncryted = AppPreferenceUtils(context).getValueString(key)
+//        val deCryptData = DeCryptData()
+//        val data = deCryptData.decryptData(context, key)
+        val rsa = RSACryptData()
+        return rsa.decrypt(data)
     }
 
 }

@@ -1,6 +1,7 @@
 plugins {
     id('com.android.library')
     id('org.jetbrains.kotlin.android')
+    id "com.klaxit.hiddensecrets" version "0.2.1"
 //    id ('maven-publish')
 }
 
@@ -13,9 +14,11 @@ android {
     }
 
     buildTypes {
+
         release {
             minifyEnabled true
             proguardFiles(getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro')
+
         }
         debug {
             minifyEnabled true
@@ -28,6 +31,14 @@ android {
     }
     buildFeatures {
         viewBinding true
+    }
+    buildFeatures {
+        buildConfig true
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
     }
 //    libraryVariants.all { variant ->
 //        variant.outputs.all { output ->

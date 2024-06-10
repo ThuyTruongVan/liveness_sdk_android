@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
+import com.liveness.sdk.core.R
 import com.liveness.sdk.core.jws.JwsUtils
 import com.liveness.sdk.core.model.LivenessModel
 import com.liveness.sdk.core.model.LivenessRequest
@@ -331,44 +332,52 @@ internal class HttpClientUtils {
     }
 
     fun initTransaction(mContext: Context): String? {
-        var mDeviceId = AppConfig.mLivenessRequest?.deviceId ?: AppPreferenceUtils(mContext).getDeviceId()
-        if (mDeviceId.isNullOrEmpty()) {
-            mDeviceId = UUID.randomUUID().toString()
+        var b = AppConfig.mLivenessRequest?.deviceId ?: AppPreferenceUtils(mContext).getDeviceId()
+        if (b.isNullOrEmpty()) {
+            b = UUID.randomUUID().toString()
+        }
+        var strC = AppConfig.mLivenessRequest?.clientTransactionId ?: ""
+        return initTransaction(mContext, b, strC)
+    }
+
+    fun initTransaction(mContext: Context, a: String, b: String): String? {
+        val request = JSONObject()
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceId), a)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_period), AppConfig.mLivenessRequest?.duration)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_clientTransactionId), b)
+        return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_init_transaction), request)
+    }
+
+    fun checkLiveNessFlash(mContext: Context, a: String, b: String, c: String, d: Int): String? {
+        val request = JSONObject()
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_totp), a)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_transaction_id), b)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live), c)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_color), d)
+        val optionalHeader = HashMap<String, String>()
+        optionalHeader.put(
+            AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_device_id),
+            AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: ""
+        )
+        return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_verify_face), request, optionalHeader)
+    }
+
+    fun registerFace(mContext: Context, a: String): String? {
+        var b = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
+        if (b.isNullOrEmpty()) {
+            b = UUID.randomUUID().toString()
         }
         val request = JSONObject()
-        request.put("deviceId", mDeviceId)
-        request.put("period", AppConfig.mLivenessRequest?.duration)
-        request.put("clientTransactionId", AppConfig.mLivenessRequest?.clientTransactionId)
-        return instance?.postV3("/eid/v3/initTransaction", request)
-    }
-
-    fun checkLiveNessFlash(mContext: Context, totp: String, transactionId: String, imageLive: String, color: Int): String? {
-        val request = JSONObject()
-        request.put("totp", totp)
-        request.put("transaction_id", transactionId)
-        request.put("image_live", imageLive)
-        request.put("color", color)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceId), b)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_face_image), a)
         val optionalHeader = HashMap<String, String>()
-        optionalHeader.put("deviceid", AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: "")
-        return instance?.postV3("/eid/v3/verifyFace", request, optionalHeader)
+        optionalHeader.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_device_id), b)
+        return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_register_face), request, optionalHeader)
     }
 
-    fun registerFace(mContext: Context, faceImage: String): String? {
-        var mDeviceId = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
-        if (mDeviceId.isNullOrEmpty()) {
-            mDeviceId = UUID.randomUUID().toString()
-        }
-        val request = JSONObject()
-        request.put("deviceId", mDeviceId)
-        request.put("face_image", faceImage)
-        val optionalHeader = HashMap<String, String>()
-        optionalHeader.put("deviceid", mDeviceId)
-        return instance?.postV3("/eid/v3/registerFace", request, optionalHeader)
-    }
-
-    fun registerFace(mContext: Context, faceImage: String, callbackAPIListener: CallbackAPIListener?) {
+    fun registerFace(mContext: Context, a: String, callbackAPIListener: CallbackAPIListener?) {
         Thread {
-            val response = registerFace(mContext, faceImage)
+            val response = registerFace(mContext, a)
             Handler(Looper.getMainLooper()).post {
                 callbackAPIListener?.onCallbackResponse(response)
             }
@@ -388,15 +397,15 @@ internal class HttpClientUtils {
 
     }
 
-    fun checkLiveNessFlash(mContext: Context, transactionId: String, imageLive: String, color: Int, callbackAPIListener: CallbackAPIListener?) {
+    fun checkLiveNessFlash(mContext: Context, a: String, b: String, c: Int, callbackAPIListener: CallbackAPIListener?) {
         Thread {
-            val tOTP = TotpUtils(mContext).getTotp()
-            if (tOTP.isNullOrEmpty() || tOTP == "-1") {
+            val d = TotpUtils(mContext).getTotp()
+            if (d.isNullOrEmpty() || d == "-1") {
                 Handler(Looper.getMainLooper()).post {
                     callbackAPIListener?.onCallbackResponse("TOTP null")
                 }
             } else {
-                val response = checkLiveNessFlash(mContext, tOTP, transactionId, imageLive, color)
+                val response = checkLiveNessFlash(mContext, d, a, b, c)
                 Handler(Looper.getMainLooper()).post {
                     callbackAPIListener?.onCallbackResponse(response)
                 }
@@ -407,21 +416,21 @@ internal class HttpClientUtils {
 
     fun registerDevice(mContext: Context, callbackAPIListener: CallbackAPIListener?) {
         Thread {
-            var mSecret = AppConfig.mLivenessRequest?.secret ?: AppPreferenceUtils(mContext).getTOTPSecret(mContext)
-            if (mSecret.isNullOrEmpty() || mSecret.length != 16) {
-                mSecret = AppUtils.getSecretValue()
+            var a = AppConfig.mLivenessRequest?.secret ?: AppPreferenceUtils(mContext).getTOTPSecret(mContext)
+            if (a.isNullOrEmpty() || a.length != 16) {
+                a = AppUtils.getSecretValue()
             }
-            var mDeviceId = AppConfig.mLivenessRequest?.deviceId ?: AppPreferenceUtils(mContext).getDeviceId()
-            if (mDeviceId.isNullOrEmpty()) {
-                mDeviceId = UUID.randomUUID().toString()
+            var b = AppConfig.mLivenessRequest?.deviceId ?: AppPreferenceUtils(mContext).getDeviceId()
+            if (b.isNullOrEmpty()) {
+                b = UUID.randomUUID().toString()
             }
             val request = JSONObject()
-            request.put("deviceId", mDeviceId)
-            request.put("deviceOs", "Android")
-            request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
-            request.put("period", AppConfig.mLivenessRequest?.duration)
-            request.put("secret", mSecret)
-            val responseDevice = instance?.postV3("/eid/v3/registerDevice", request)
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceId), b)
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceOS), "Android")
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_device_name), Build.MANUFACTURER + " " + Build.MODEL)
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_period), AppConfig.mLivenessRequest?.duration)
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_secret), a)
+            val responseDevice = instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_register_device), request)
             Handler(Looper.getMainLooper()).post {
                 var result: JSONObject? = null
                 if (responseDevice != null && responseDevice.length > 0) {
@@ -432,30 +441,30 @@ internal class HttpClientUtils {
                     statusDevice = result.getInt("status")
                 }
                 if (statusDevice == 200) {
-                    AppPreferenceUtils(mContext).setDeviceId(mDeviceId)
+                    AppPreferenceUtils(mContext).setDeviceId(b)
                 }
                 callbackAPIListener?.onCallbackResponse(responseDevice)
             }
         }.start()
     }
 
-    fun registerDeviceAndFace(mContext: Context, faceImage: String) {
+    fun registerDeviceAndFace(mContext: Context, a: String) {
         Thread {
-            var mSecret = AppPreferenceUtils(mContext).getTOTPSecret(mContext) ?: AppConfig.mLivenessRequest?.secret
-            if (mSecret.isNullOrEmpty() || mSecret.length != 16) {
-                mSecret = AppUtils.getSecretValue()
+            var b = AppPreferenceUtils(mContext).getTOTPSecret(mContext) ?: AppConfig.mLivenessRequest?.secret
+            if (b.isNullOrEmpty() || b.length != 16) {
+                b = AppUtils.getSecretValue()
             }
-            var mDeviceId = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
-            if (mDeviceId.isNullOrEmpty()) {
-                mDeviceId = UUID.randomUUID().toString()
+            var c = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
+            if (c.isNullOrEmpty()) {
+                c = UUID.randomUUID().toString()
             }
             val request = JSONObject()
-            request.put("deviceId", mDeviceId)
-            request.put("deviceOs", "Android")
-            request.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL)
-            request.put("period", AppConfig.mLivenessRequest?.duration)
-            request.put("secret", mSecret)
-            val responseDevice = instance?.postV3("/eid/v3/registerDevice", request)
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceId), c)
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceOS), "Android")
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_device_name), Build.MANUFACTURER + " " + Build.MODEL)
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_period), AppConfig.mLivenessRequest?.duration)
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_secret), b)
+            val responseDevice = instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_register_device), request)
             var result: JSONObject? = null
             if (responseDevice != null && responseDevice.length > 0) {
                 result = JSONObject(responseDevice)
@@ -469,7 +478,7 @@ internal class HttpClientUtils {
                 strMessageDevice = result.getString("message")
             }
             if (statusDevice == 200) {
-                val response = HttpClientUtils.instance?.registerFace(mContext, faceImage)
+                val response = HttpClientUtils.instance?.registerFace(mContext, a)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)
@@ -481,10 +490,10 @@ internal class HttpClientUtils {
                 }
                 if (status == 200) {
 //                    showLoading(false)
-                    AppPreferenceUtils(mContext).setDeviceId(mDeviceId)
+                    AppPreferenceUtils(mContext).setDeviceId(c)
 
                     Handler(Looper.getMainLooper()).post {
-                        AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(faceImage = faceImage))
+                        AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(faceImage = a))
                         AppPreferenceUtils(mContext).setRegisterFace(true)
                     }
 

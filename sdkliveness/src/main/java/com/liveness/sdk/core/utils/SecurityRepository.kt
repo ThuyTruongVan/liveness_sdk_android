@@ -31,4 +31,15 @@ object SecurityRepository {
             sharePreferenceUtils.setValueString("${key}_iv", ivString)
         }
     }
+    fun setProperty(key: String, encryptedValue: String?, iv: ByteArray?, context: Context) {
+        if (encryptedValue != null && iv != null) {
+            val sharePreferenceUtils = AppPreferenceUtils(context)
+            val ivString = Base64.encodeToString(iv, Base64.DEFAULT)
+//            val encryptedString = Base64.encodeToString(encryptedValue, Base64.DEFAULT)
+
+            sharePreferenceUtils.setValueString(key, encryptedValue)
+
+            sharePreferenceUtils.setValueString("${key}_iv", ivString)
+        }
+    }
 }

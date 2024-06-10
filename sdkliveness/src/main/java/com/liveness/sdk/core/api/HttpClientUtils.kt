@@ -362,6 +362,20 @@ internal class HttpClientUtils {
         return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_verify_face), request, optionalHeader)
     }
 
+    fun checkLiveNess(mContext: Context, a: String, b: String, c: String, d: Int): String? {
+        val request = JSONObject()
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_totp), a)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_transaction_id), b)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live), c)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_color), d)
+        val optionalHeader = HashMap<String, String>()
+        optionalHeader.put(
+            AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_device_id),
+            AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: ""
+        )
+        return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_check_live_ness), request, optionalHeader)
+    }
+
     fun registerFace(mContext: Context, a: String): String? {
         var b = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
         if (b.isNullOrEmpty()) {
@@ -406,6 +420,23 @@ internal class HttpClientUtils {
                 }
             } else {
                 val response = checkLiveNessFlash(mContext, d, a, b, c)
+                Handler(Looper.getMainLooper()).post {
+                    callbackAPIListener?.onCallbackResponse(response)
+                }
+            }
+        }.start()
+
+    }
+
+    fun checkLiveNess(mContext: Context, a: String, b: String, c: Int, callbackAPIListener: CallbackAPIListener?) {
+        Thread {
+            val d = TotpUtils(mContext).getTotp()
+            if (d.isNullOrEmpty() || d == "-1") {
+                Handler(Looper.getMainLooper()).post {
+                    callbackAPIListener?.onCallbackResponse("TOTP null")
+                }
+            } else {
+                val response = checkLiveNess(mContext, d, a, b, c)
                 Handler(Looper.getMainLooper()).post {
                     callbackAPIListener?.onCallbackResponse(response)
                 }

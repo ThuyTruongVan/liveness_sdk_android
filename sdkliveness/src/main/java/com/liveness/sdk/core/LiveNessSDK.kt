@@ -28,6 +28,7 @@ class LiveNessSDK {
             AppConfig.mLivenessRequest = mLivenessRequest
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
+//            testRSA()
 //            val enCryptData = EnCryptData()
 //            enCryptData.encryptText(context, AppConfig.key_encrypted_init_transaction, AppConfig.encrypted_init_transaction)
 //            enCryptData.encryptText(context, AppConfig.key_encrypted_register_device, AppConfig.encrypted_register_device)
@@ -89,6 +90,22 @@ class LiveNessSDK {
             }
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.checkLiveNessFlash(context, transactionId, liveImage, colorBg, callbackAPIListener)
+        }
+
+        @Keep
+        fun checkLiveNess(
+            context: Context,
+            transactionId: String,
+            liveImage: String,
+            colorBg: Int,
+            mRequest: LivenessRequest?,
+            callbackAPIListener: CallbackAPIListener?
+        ) {
+            mRequest?.let {
+                AppConfig.mOptionRequest = mRequest
+            }
+            val httpClientUtil = HttpClientUtils.instance
+            httpClientUtil?.checkLiveNess(context, transactionId, liveImage, colorBg, callbackAPIListener)
         }
 
         @Keep
@@ -223,6 +240,7 @@ class LiveNessSDK {
 
         fun testRSA() {
             val rsa = RSACryptData()
+            val url_check_liveness = rsa.encrypt("/eid/v3/checkLiveness")
 //            val deviceId = rsa.encrypt("deviceId")
 //            val period = rsa.encrypt("period")
 //            val clientTransactionId = rsa.encrypt("clientTransactionId")
@@ -240,6 +258,7 @@ class LiveNessSDK {
 //            val secret = rsa.encrypt("secret")
 //            val url_register_device = rsa.encrypt("/eid/v3/registerDevice")
 //
+            Log.d("Thuytv", "-----url_check_liveness: " + url_check_liveness)
 //            Log.d("Thuytv", "-----deviceId: " + deviceId)
 //            Log.d("Thuytv", "-----period: " + period)
 //            Log.d("Thuytv", "-----clientTransactionId: " + clientTransactionId)

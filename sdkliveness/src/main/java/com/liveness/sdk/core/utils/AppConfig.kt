@@ -36,6 +36,9 @@ internal object AppConfig {
     val encrypted_verify_face = "Zg7B5wh5ZwN5smyS6bMAi65s8+GviMTxKea2XKlvGvFEEz8e6DN4wco4HCBnKYdZNrhSlkx3E5s+\n" +
             "naqglipSC/ZmYkd9Ayb0y0I1gPM7uupKuZ4gnUSSflo89ty8twYTkgPR15h7fnnwNBgG+INQJMEz\n" +
             "8iintilD+m1lnQmvTL0="
+    val encrypted_check_live_ness = "M22TJoIQtxN9s4zxFby1QAWBdtT6auEbAfpzEt0soE/tSG6c9Dp9xr60rpQB99hGYOQ0W+pMqQNw\n" +
+            "vkv39fe24CoY2SnaBzT573cXwbVgSQqDmyMQCeSOwwd6THEwVg3mKvdoaaeMvivU4+f8mChfzHOv\n" +
+            "dIpX4WP7xOY71lnjsU4="
     val encrypted_deviceId = "YVKNrtJLcTNVm8DbMdo25IdRV4CCFRFD3vBt9gH6h4UudUjqjpVIsZNHtYXRIwFWOvwqYonbqvaz\n" +
             "hLrOU5nOGtK5ZUoBv1L5Pg8y/zw2r5TcD2RSQn5zV5BVmQ1KTEn2S2VyGI0UWrsg8ESLPMW2CmaG\n" +
             "PaOeALOmDUCkBf4wH2w="

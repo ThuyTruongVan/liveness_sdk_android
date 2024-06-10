@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
@@ -278,6 +279,16 @@ class FaceFragment : Fragment() {
                     onBackFragment()
                 }
             })
+
+//        LiveNessSDK.checkLiveNess(requireContext(), transactionID, imgLiveNess, bgColor, null,
+//            object : CallbackAPIListener {
+//                override fun onCallbackResponse(data: String?) {
+//                    Log.d("Thuytv","------checkLiveNess: $data" )
+//                    showToast(data ?: "")
+//                    showLoading(false)
+//                    onBackFragment()
+//                }
+//            })
     }
 
     private fun onBackFragment() {

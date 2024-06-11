@@ -362,10 +362,9 @@ internal class HttpClientUtils {
         return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_verify_face), request, optionalHeader)
     }
 
-    fun checkLiveNess(mContext: Context, a: String, b: String, c: String, d: Int): String? {
+    fun checkLiveNess(mContext: Context, a: String, c: String, d: Int): String? {
         val request = JSONObject()
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_totp), a)
-        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_transaction_id), b)
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live), c)
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_color), d)
         val optionalHeader = HashMap<String, String>()
@@ -428,7 +427,7 @@ internal class HttpClientUtils {
 
     }
 
-    fun checkLiveNess(mContext: Context, a: String, b: String, c: Int, callbackAPIListener: CallbackAPIListener?) {
+    fun checkLiveNess(mContext: Context,  b: String, c: Int, callbackAPIListener: CallbackAPIListener?) {
         Thread {
             val d = TotpUtils(mContext).getTotp()
             if (d.isNullOrEmpty() || d == "-1") {
@@ -436,7 +435,7 @@ internal class HttpClientUtils {
                     callbackAPIListener?.onCallbackResponse("TOTP null")
                 }
             } else {
-                val response = checkLiveNess(mContext, d, a, b, c)
+                val response = checkLiveNess(mContext, d, b, c)
                 Handler(Looper.getMainLooper()).post {
                     callbackAPIListener?.onCallbackResponse(response)
                 }

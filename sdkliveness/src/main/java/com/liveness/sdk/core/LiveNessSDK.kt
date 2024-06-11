@@ -95,7 +95,6 @@ class LiveNessSDK {
         @Keep
         fun checkLiveNess(
             context: Context,
-            transactionId: String,
             liveImage: String,
             colorBg: Int,
             mRequest: LivenessRequest?,
@@ -105,7 +104,7 @@ class LiveNessSDK {
                 AppConfig.mOptionRequest = mRequest
             }
             val httpClientUtil = HttpClientUtils.instance
-            httpClientUtil?.checkLiveNess(context, transactionId, liveImage, colorBg, callbackAPIListener)
+            httpClientUtil?.checkLiveNess(context, liveImage, colorBg, callbackAPIListener)
         }
 
         @Keep

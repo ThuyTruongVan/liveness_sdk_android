@@ -290,6 +290,17 @@ class FaceFragment : Fragment() {
 //                }
 //            })
     }
+    private fun checkLiveNess(imgLiveNess: String, bgColor: Int) {
+        LiveNessSDK.checkLiveNess(requireContext(),imgLiveNess, bgColor, null,
+            object : CallbackAPIListener {
+                override fun onCallbackResponse(data: String?) {
+                    Log.d("Thuytv","------checkLiveNess: $data" )
+                    showToast(data ?: "")
+                    showLoading(false)
+                    onBackFragment()
+                }
+            })
+    }
 
     private fun onBackFragment() {
         activity?.supportFragmentManager?.popBackStack()
@@ -297,7 +308,8 @@ class FaceFragment : Fragment() {
 
     fun callAPIGEtTOTP(imgLiveNess: String, bgColor: Int) {
         showLoading(true)
-        initTransaction(imgLiveNess, bgColor)
+//        initTransaction(imgLiveNess, bgColor)
+        checkLiveNess(imgLiveNess,bgColor)
     }
 
     private fun showToast(strToast: String) {

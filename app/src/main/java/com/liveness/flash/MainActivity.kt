@@ -19,6 +19,7 @@ import androidx.appcompat.widget.AppCompatButton
 import com.liveness.sdk.core.LiveNessSDK
 import com.liveness.sdk.core.model.LivenessModel
 import com.liveness.sdk.core.model.LivenessRequest
+import com.liveness.sdk.core.utils.CallbackAPIListener
 import com.liveness.sdk.core.utils.CallbackLivenessListener
 import java.io.ByteArrayOutputStream
 
@@ -67,6 +68,12 @@ class MainActivity : AppCompatActivity() {
 
             val transaction = supportFragmentManager.beginTransaction()
             val fragment = FaceFragment()
+            fragment.setCallBack(object : CallbackAPIListener{
+                override fun onCallbackResponse(data: String?) {
+                    showDefaultDialog(this@MainActivity, data)
+                }
+
+            })
             val bundle = Bundle()
             bundle.putString("KEY_BUNDLE_SCREEN", "")
             fragment?.arguments = bundle
@@ -203,7 +210,7 @@ class MainActivity : AppCompatActivity() {
 
         alertDialog.apply {
             //setIcon(R.drawable.ic_hello)
-            setTitle("Success")
+            setTitle("Response")
             setMessage(strContent)
             setPositiveButton("OK") { _: DialogInterface?, _: Int ->
             }

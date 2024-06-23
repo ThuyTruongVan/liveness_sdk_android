@@ -66,6 +66,7 @@ class FaceFragment : Fragment() {
     private var mImgLiveNess: String = ""
     private var mFaceImage: String = ""
     private var mFragmentManager: FragmentManager? = null
+    private var mCallbackAPIListener: CallbackAPIListener? = null
 
     private var permissions = arrayOf(
         Manifest.permission.CAMERA
@@ -101,7 +102,8 @@ class FaceFragment : Fragment() {
         if (typeScreen == "TYPE_SCREEN_REGISTER_FACE") {
             btnCapture.visibility = View.VISIBLE
             btnCapture.setOnClickListener {
-                cameraViewVideo.takePictureSnapshot()
+//                cameraViewVideo.takePictureSnapshot()
+                registerFace()
             }
         } else {
             btnCapture.visibility = View.GONE
@@ -290,11 +292,13 @@ class FaceFragment : Fragment() {
 //                }
 //            })
     }
+
     private fun checkLiveNess(imgLiveNess: String, bgColor: Int) {
-        LiveNessSDK.checkLiveNess(requireContext(),imgLiveNess, bgColor, null,
+        LiveNessSDK.checkLiveNess(requireContext(), imgLiveNess, bgColor, null,
             object : CallbackAPIListener {
                 override fun onCallbackResponse(data: String?) {
-                    Log.d("Thuytv","------checkLiveNess: $data" )
+                    Log.d("Thuytv", "------checkLiveNess: $data")
+                    mCallbackAPIListener?.onCallbackResponse(data)
                     showToast(data ?: "")
                     showLoading(false)
                     onBackFragment()
@@ -309,7 +313,7 @@ class FaceFragment : Fragment() {
     fun callAPIGEtTOTP(imgLiveNess: String, bgColor: Int) {
         showLoading(true)
 //        initTransaction(imgLiveNess, bgColor)
-        checkLiveNess(imgLiveNess,bgColor)
+        checkLiveNess(imgLiveNess, bgColor)
     }
 
     private fun showToast(strToast: String) {
@@ -356,8 +360,129 @@ class FaceFragment : Fragment() {
 
     private fun registerFace(faceImage: String) {
 //        showLoading(true)
+        val testImage = "/H8zXPeFvEN94Z1xLmA7W5SSNxww9CPqB+Ve8Rx7k5rxvxtYwweKp1iAG5g7f7x5NddGo2+VnHWo\n" +
+                "pe9E9903WdP1WNWs7uGRigcxq4LoD/eAOR1q9mvmWWWSMJcwMwmiOeD1Fd/4b+J1zEBHqam8iOMS\n" +
+                "KVEijvx0b9K7XBo5FJHrlJWNpvirRtVRPIvokkc4EUrBXz6YPX8K2cg9DUMoWikopAFFFFABRRSU\n" +
+                "wK1LSUEgDJ6CgB1A64rm9R8caJYK6rcfaZkOPLiU/wDoXT9a5DUPijfEn7NaW9upHVyXI/Hgfoap\n" +
+                "RbJbSPUpJI4Y2kldURRksxwAPc1yWteP9P0/MViBeT85IOEX8cfN+H515fe+ItV1PK3V5K8Z5w7H\n" +
+                "af8AgOcVmPtJy7O4/uluPy/CrVPuS5m/qnjbWtRZg2oPDHk4jhbZx6ccn8a50M7H5cjPVqd8h5CK\n" +
+                "PoKN1aqKRO5IMIuF4/GkLdMfT86QnIpuc5FMCNuuMfWtrwlqi6X4ht5ZHKxElX54wRjn9D+FYvf6\n" +
+                "0zO1w3cVM480Wioy5Xc901AZWsJ+HzirGiamNZ0OKbJMsYEcmf7wA5/HOaiuF2ua8OcXF2Z68JJq\n" +
+                "4qOOhpkik59PWow3NTow2+vsagu5lXVuJOuQ3qBXP3kBjPzID7jiutnjDZKnB9KxLtHHDpwema0i\n" +
+                "yWjkL5EYHjkdKo2r7JOc1vXdqrZxk/UVk/Y2WTOOM1snoYtam3ZSbyMKP51vWykqM9KwNPTaAe9d\n" +
+                "Db5KDLAVlI0iXUYDjr9KsICfaq8QAwc81aj64xWZZajHYCrsAORxVWEVoQR8jNAi/CPlzXhviG8F\n" +
+                "94mvZ1bcglYKQewOBXrniTVxoegzXQP73G2NT3JIH6da8NBJUs33nOfwrrw0Lyuc2InaNiyHKpnP\n" +
+                "QU6JUaRlx26iqzNxj14qxbffJPevTPPJUklhbAfcB0Ujn862rDxhrumlRbanMBgDypyHA9huyMfS\n" +
+                "sKXiUmkOHUggHHrQ4piues6P8U7aaRItXtTa4XBnjJdSf90DP5ZrurHUbLUoPPsrqK4j6bo2zj6+\n" +
+                "n4180qzoQVfOOm7kVoabquo6dOJLKaWJ8jLRSFc+x9R7Gs3S7FKfc+j6K81034olfLj1OzGScGSM\n" +
+                "lcfgeP1rttL8Q6Zq4H2S6VnxkxkEMPwPWs3FotNM1KKSlqRnBa58RtL06OSKyP2q46Kdp2Z9z1P4\n" +
+                "fnXnOt+JtT1qQvNNJsbkRhtqLz2XJ/XmshdqA4HP55ppOc5rpjBIycmwZ5X5eQjnOE4pBtU8Dn17\n" +
+                "0AjvSHGaskeG5NJnJpAOPeloGIeDnmlBpCaToaAH54oBpuaM0ADDOfXtUbDK8Gpf51GevtQBs+Ft\n" +
+                "d/sfUgZi5t5FKOoGfofz/rXpFyFljEsbBkYZBHQivGHXHzCur8LeJ/su2wvG/wBGJ+VscoSe/t1z\n" +
+                "XFiaPN7y3OrD1uX3WdaRg9OKkRwOOKlkhBG5SCp5B9arnIbmvNPRQsnIJFZ1w23OQPxFX2Hy1Qnj\n" +
+                "znihAzKuNjdQCfpVVY4wSGQHPrmr8kBOf61EtufQ/wBKq5NhsISM4CgDtxWjC/y1FHalkwFOaljh\n" +
+                "ZDhgaTY0i2jYq3AcnHeqiIfxxWhbRHjNIZdt1yRWrAu3Gaq28PT1rnfGviVdNsn021cG7mXa7DnY\n" +
+                "p/qRVRjd2IlKyOV8ea2usayLaBj9mtQUz0y2eT+grlM5Oe3amsecA/U0E54r1aUOSJ5lSpzMeuWO\n" +
+                "atQjBFQxrgVLGSX4rdGRJMOc1EKmlViQAKI4cHJpgMjiLn2q4ihRgU0DGOlP70wHg7cYp6beq5Rj\n" +
+                "/Ehwf/r1Ax5qaP7uadgOi0rxfrOkkKs/2qH/AJ53BJI+nP8AhXaW/wAS9H8hPtMVzDNj5kEW4A+x\n" +
+                "zyK8rBPWn5PoaiVOLBSaMfPFNpM4ozmmIM0uaTmkzQMeOlGTTM0oPbNADuo6UlLnikPNACZoHWgi\n" +
+                "igBc0HB7Z9aBS4NAERUjg8+lV3BVsirpjJ7fhUTwlQT1X1xUtAdB4a8XNpuLW7DSWp6AEZQ56j/C\n" +
+                "u/hNvqFstzayrJGwB4PI+vpXizoQciruma/f6PMHtp3Vf4kz8rfUdDXJWw6nqtzqo4hw0ex655Bz\n" +
+                "TGst1Yel+PtLuwFvwLV8cuMsrH6Y4/Wustr/AE27UGC9tnz0AkGfy61wSpTi9Ud0asZbMxpLE7un\n" +
+                "6UR2BJ6dfaulFoshBwp+hzUgs1AOFFRqXoYMViVOdv6VOdLMoyBg1ti3jQEuyqB3JoW90yM4k1Cz\n" +
+                "TH96df8AGmotg2kYYsGRvmUir8FqARxijUPFPhiyU+dqEEjgZAhG8n8Rx+tcHrPxLDb49KgMXpLI\n" +
+                "244+mMD9a2hRm9kYzrRS1Z1PiXxHBoVoY4wHumB2gEfLx1NeOXl7LeXUs0jFpJGLO3qTRcX13qMx\n" +
+                "kmlkdmPJY5pVt1VeTzXdSoqCv1OGrWc9OhAOBjvUsSEnNTLaA/X+VWkhRRgDmuhIwIVjzwBxU8Ke\n" +
+                "W3vT8AdKRBlwapIRK+PSmAVOy5XNNAx0HNUMQjA5pvenE+9MdsAn2pANB3y9OlTlsLUMAIX3pXcB\n" +
+                "sUxEqnP0p+72qJTgc04HigDJz3ozTM80ZqAJM8U3NNzThzQMWilCk0pXCE0wAGpUAxUS1ZjTpTAG\n" +
+                "iDDPSo9gzVhlwKiGGPNAChAB0pwXPalHAoGAKBEbLjNOXa/s2MZpJDUathsigCGe3KHpgVTkjGTk\n" +
+                "VsiQEH9Qaje2jlJwdpPp0qXG4zCaIjocULLcRfclYY9DWnJZlGwy7gO6kf1quYFLcOB7MMGocB3G\n" +
+                "x6xqcIAS7mXHo5/xqc+IdYYYOoXRH/XVv8ahW2ZuijHsRTlhYf8ALJv++ankHzMa2qahLw9xK31Y\n" +
+                "mojcXZ6M3vzV2OEnrGR9RUoUDjgfjVKmLmZmpDcPwWOPrU8diM5Y5q6ilm9vYVIIzv8AlA7fe5/+\n" +
+                "tVKArkSQBQdo6VII+eDx/eqUKB1Jb69qRid1XYQgGBgU4A5pFIzUn0oAMcZoQfMKU9Kav3ulAE+R\n" +
+                "jFNPHSlBOMUh57UwGk4Gc1Wkbc4Wp3OFqvENz7jQMsDjr2FQscsKlJOM1AxBlHsaQFlhhB/jSK3y\n" +
+                "/wD16ZK37vpTYm/digRnkUlKATS4INSAqLnoKnSLBGaIcelWMVSQEe3FMk4XvUvTpUUuelADEHIq\n" +
+                "4o6VWjHNWlPFAwcnacVCn3qfI3Bpic0wJSO1Np9NNICKT7tRpyaklHy1HHjdQIdIMcikjl6e1SlA\n" +
+                "V61RcGOT8aQzUBEi89ahKY4IyKjglyBVkHPpVAU3SFT86Ck22oHT8jVl0DdRxUXkqOMUmhEavagc\n" +
+                "Lk+9SrIB91cA+gpPLX0pRwcUDJgcqaQUgPFLkUCFLcU1qQZ65oJ59aAFT61KKhXrUimmA5uhpFNI\n" +
+                "xxQtAE46dqRjzSA4FMY5oAjnb5DTYQQuTSSctinj7uKAHtwo9aqqczYqeT7tVo/9dSAmnOIyRUcW\n" +
+                "fLFFy2I8UsR/djmgD//Z"
         LiveNessSDK.registerFace(requireContext(), faceImage, null, object : CallbackAPIListener {
             override fun onCallbackResponse(data: String?) {
+                showLoading(false)
+                var result: JSONObject? = null
+                if (data?.isNotEmpty() == true) {
+                    result = JSONObject(data)
+                }
+                var status = -1
+                if (result?.has("status") == true) {
+                    status = result.getInt("status")
+                }
+                if (status == 200) {
+                    showToast("Register Face Success")
+                    onBackFragment()
+                } else {
+                    showToast("Register Face Fail")
+                    onBackFragment()
+                }
+            }
+
+        })
+
+    }
+
+    private fun registerFace() {
+//        showLoading(true)
+        val testImage = "/H8zXPeFvEN94Z1xLmA7W5SSNxww9CPqB+Ve8Rx7k5rxvxtYwweKp1iAG5g7f7x5NddGo2+VnHWo\n" +
+                "pe9E9903WdP1WNWs7uGRigcxq4LoD/eAOR1q9mvmWWWSMJcwMwmiOeD1Fd/4b+J1zEBHqam8iOMS\n" +
+                "KVEijvx0b9K7XBo5FJHrlJWNpvirRtVRPIvokkc4EUrBXz6YPX8K2cg9DUMoWikopAFFFFABRRSU\n" +
+                "wK1LSUEgDJ6CgB1A64rm9R8caJYK6rcfaZkOPLiU/wDoXT9a5DUPijfEn7NaW9upHVyXI/Hgfoap\n" +
+                "RbJbSPUpJI4Y2kldURRksxwAPc1yWteP9P0/MViBeT85IOEX8cfN+H515fe+ItV1PK3V5K8Z5w7H\n" +
+                "af8AgOcVmPtJy7O4/uluPy/CrVPuS5m/qnjbWtRZg2oPDHk4jhbZx6ccn8a50M7H5cjPVqd8h5CK\n" +
+                "PoKN1aqKRO5IMIuF4/GkLdMfT86QnIpuc5FMCNuuMfWtrwlqi6X4ht5ZHKxElX54wRjn9D+FYvf6\n" +
+                "0zO1w3cVM480Wioy5Xc901AZWsJ+HzirGiamNZ0OKbJMsYEcmf7wA5/HOaiuF2ua8OcXF2Z68JJq\n" +
+                "4qOOhpkik59PWow3NTow2+vsagu5lXVuJOuQ3qBXP3kBjPzID7jiutnjDZKnB9KxLtHHDpwema0i\n" +
+                "yWjkL5EYHjkdKo2r7JOc1vXdqrZxk/UVk/Y2WTOOM1snoYtam3ZSbyMKP51vWykqM9KwNPTaAe9d\n" +
+                "Db5KDLAVlI0iXUYDjr9KsICfaq8QAwc81aj64xWZZajHYCrsAORxVWEVoQR8jNAi/CPlzXhviG8F\n" +
+                "94mvZ1bcglYKQewOBXrniTVxoegzXQP73G2NT3JIH6da8NBJUs33nOfwrrw0Lyuc2InaNiyHKpnP\n" +
+                "QU6JUaRlx26iqzNxj14qxbffJPevTPPJUklhbAfcB0Ujn862rDxhrumlRbanMBgDypyHA9huyMfS\n" +
+                "sKXiUmkOHUggHHrQ4piues6P8U7aaRItXtTa4XBnjJdSf90DP5ZrurHUbLUoPPsrqK4j6bo2zj6+\n" +
+                "n4180qzoQVfOOm7kVoabquo6dOJLKaWJ8jLRSFc+x9R7Gs3S7FKfc+j6K81034olfLj1OzGScGSM\n" +
+                "lcfgeP1rttL8Q6Zq4H2S6VnxkxkEMPwPWs3FotNM1KKSlqRnBa58RtL06OSKyP2q46Kdp2Z9z1P4\n" +
+                "fnXnOt+JtT1qQvNNJsbkRhtqLz2XJ/XmshdqA4HP55ppOc5rpjBIycmwZ5X5eQjnOE4pBtU8Dn17\n" +
+                "0AjvSHGaskeG5NJnJpAOPeloGIeDnmlBpCaToaAH54oBpuaM0ADDOfXtUbDK8Gpf51GevtQBs+Ft\n" +
+                "d/sfUgZi5t5FKOoGfofz/rXpFyFljEsbBkYZBHQivGHXHzCur8LeJ/su2wvG/wBGJ+VscoSe/t1z\n" +
+                "XFiaPN7y3OrD1uX3WdaRg9OKkRwOOKlkhBG5SCp5B9arnIbmvNPRQsnIJFZ1w23OQPxFX2Hy1Qnj\n" +
+                "znihAzKuNjdQCfpVVY4wSGQHPrmr8kBOf61EtufQ/wBKq5NhsISM4CgDtxWjC/y1FHalkwFOaljh\n" +
+                "ZDhgaTY0i2jYq3AcnHeqiIfxxWhbRHjNIZdt1yRWrAu3Gaq28PT1rnfGviVdNsn021cG7mXa7DnY\n" +
+                "p/qRVRjd2IlKyOV8ea2usayLaBj9mtQUz0y2eT+grlM5Oe3amsecA/U0E54r1aUOSJ5lSpzMeuWO\n" +
+                "atQjBFQxrgVLGSX4rdGRJMOc1EKmlViQAKI4cHJpgMjiLn2q4ihRgU0DGOlP70wHg7cYp6beq5Rj\n" +
+                "/Ehwf/r1Ax5qaP7uadgOi0rxfrOkkKs/2qH/AJ53BJI+nP8AhXaW/wAS9H8hPtMVzDNj5kEW4A+x\n" +
+                "zyK8rBPWn5PoaiVOLBSaMfPFNpM4ozmmIM0uaTmkzQMeOlGTTM0oPbNADuo6UlLnikPNACZoHWgi\n" +
+                "igBc0HB7Z9aBS4NAERUjg8+lV3BVsirpjJ7fhUTwlQT1X1xUtAdB4a8XNpuLW7DSWp6AEZQ56j/C\n" +
+                "u/hNvqFstzayrJGwB4PI+vpXizoQciruma/f6PMHtp3Vf4kz8rfUdDXJWw6nqtzqo4hw0ex655Bz\n" +
+                "TGst1Yel+PtLuwFvwLV8cuMsrH6Y4/Wustr/AE27UGC9tnz0AkGfy61wSpTi9Ud0asZbMxpLE7un\n" +
+                "6UR2BJ6dfaulFoshBwp+hzUgs1AOFFRqXoYMViVOdv6VOdLMoyBg1ti3jQEuyqB3JoW90yM4k1Cz\n" +
+                "TH96df8AGmotg2kYYsGRvmUir8FqARxijUPFPhiyU+dqEEjgZAhG8n8Rx+tcHrPxLDb49KgMXpLI\n" +
+                "244+mMD9a2hRm9kYzrRS1Z1PiXxHBoVoY4wHumB2gEfLx1NeOXl7LeXUs0jFpJGLO3qTRcX13qMx\n" +
+                "kmlkdmPJY5pVt1VeTzXdSoqCv1OGrWc9OhAOBjvUsSEnNTLaA/X+VWkhRRgDmuhIwIVjzwBxU8Ke\n" +
+                "W3vT8AdKRBlwapIRK+PSmAVOy5XNNAx0HNUMQjA5pvenE+9MdsAn2pANB3y9OlTlsLUMAIX3pXcB\n" +
+                "sUxEqnP0p+72qJTgc04HigDJz3ozTM80ZqAJM8U3NNzThzQMWilCk0pXCE0wAGpUAxUS1ZjTpTAG\n" +
+                "iDDPSo9gzVhlwKiGGPNAChAB0pwXPalHAoGAKBEbLjNOXa/s2MZpJDUathsigCGe3KHpgVTkjGTk\n" +
+                "VsiQEH9Qaje2jlJwdpPp0qXG4zCaIjocULLcRfclYY9DWnJZlGwy7gO6kf1quYFLcOB7MMGocB3G\n" +
+                "x6xqcIAS7mXHo5/xqc+IdYYYOoXRH/XVv8ahW2ZuijHsRTlhYf8ALJv++ankHzMa2qahLw9xK31Y\n" +
+                "mojcXZ6M3vzV2OEnrGR9RUoUDjgfjVKmLmZmpDcPwWOPrU8diM5Y5q6ilm9vYVIIzv8AlA7fe5/+\n" +
+                "tVKArkSQBQdo6VII+eDx/eqUKB1Jb69qRid1XYQgGBgU4A5pFIzUn0oAMcZoQfMKU9Kav3ulAE+R\n" +
+                "jFNPHSlBOMUh57UwGk4Gc1Wkbc4Wp3OFqvENz7jQMsDjr2FQscsKlJOM1AxBlHsaQFlhhB/jSK3y\n" +
+                "/wD16ZK37vpTYm/digRnkUlKATS4INSAqLnoKnSLBGaIcelWMVSQEe3FMk4XvUvTpUUuelADEHIq\n" +
+                "4o6VWjHNWlPFAwcnacVCn3qfI3Bpic0wJSO1Np9NNICKT7tRpyaklHy1HHjdQIdIMcikjl6e1SlA\n" +
+                "V61RcGOT8aQzUBEi89ahKY4IyKjglyBVkHPpVAU3SFT86Ck22oHT8jVl0DdRxUXkqOMUmhEavagc\n" +
+                "Lk+9SrIB91cA+gpPLX0pRwcUDJgcqaQUgPFLkUCFLcU1qQZ65oJ59aAFT61KKhXrUimmA5uhpFNI\n" +
+                "xxQtAE46dqRjzSA4FMY5oAjnb5DTYQQuTSSctinj7uKAHtwo9aqqczYqeT7tVo/9dSAmnOIyRUcW\n" +
+                "fLFFy2I8UsR/djmgD//Z"
+        LiveNessSDK.registerFace(requireContext(), testImage, null, object : CallbackAPIListener {
+            override fun onCallbackResponse(data: String?) {
+                Log.d("Thuytv", "------data: $data")
                 showLoading(false)
                 var result: JSONObject? = null
                 if (data?.isNotEmpty() == true) {
@@ -458,11 +583,16 @@ class FaceFragment : Fragment() {
         )
 
     }
+
     private fun getImage(): String {
         val bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.img_0)
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
         val image = stream.toByteArray()
         return android.util.Base64.encodeToString(image, android.util.Base64.NO_PADDING)
+    }
+
+    fun setCallBack(mCallbackAPIListener: CallbackAPIListener) {
+        this.mCallbackAPIListener = mCallbackAPIListener
     }
 }

@@ -61,7 +61,7 @@
             app:cameraMode="picture" />
         <!--app:cameraMode="video"-->
 
-        <com.liveness.sdk.core.facedetector.FaceBoundsOverlay
+        <com.liveness.sdk.corev3.facedetector.FaceBoundsOverlay
             android:id="@+id/faceBoundsOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

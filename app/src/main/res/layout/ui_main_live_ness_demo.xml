@@ -60,7 +60,7 @@
             app:cameraAudio="off"
             app:cameraMode="picture" />
 
-        <com.liveness.flash.facedetector.FaceBoundsOverlay
+        <com.liveness.flashv3.facedetector.FaceBoundsOverlay
             android:id="@+id/faceBoundsOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.liveness.flash'
+    namespace 'com.liveness.flashv3'
     compileSdk 33
 
     defaultConfig {
-        applicationId 'com.liveness.flash'
+        applicationId 'com.liveness.flashv3'
         minSdk 24
         targetSdk 33
         versionCode 1

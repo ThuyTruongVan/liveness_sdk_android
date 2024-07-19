@@ -124,7 +124,7 @@ class FaceFragment : Fragment() {
             val resultWrite = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
             (resultCamera == PackageManager.PERMISSION_GRANTED
                     && resultRead == PackageManager.PERMISSION_GRANTED
-                    && resultWrite == PackageManager.PERMISSION_GRANTED)
+                    && resultWrite == PackageManager.PERMISSION_GRANTED )
         } else {
             val resultCamera = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
             resultCamera == PackageManager.PERMISSION_GRANTED

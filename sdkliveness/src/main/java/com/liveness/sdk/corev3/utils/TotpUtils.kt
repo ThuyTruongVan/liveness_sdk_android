@@ -4,7 +4,10 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.liveness.sdk.corev3.api.HttpClientUtils.Companion.instance
+import com.liveness.sdk.corev3.jws.JwsUtils
 import com.liveness.sdk.corev3.jws.TOTPGenerator
+import com.liveness.sdk.corev3.model.BaseResponseEncrypt
+import com.nimbusds.jose.shaded.gson.Gson
 import org.json.JSONObject
 import java.util.UUID
 
@@ -66,9 +69,9 @@ internal class TotpUtils(private val mContext: Context) {
         }
 
     fun getTotp(): String {
+        AppUtils.showLog("-----totpSecret: $totpSecret")
         if (totpSecret?.isNotEmpty() == true) {
             val generator = TOTPGenerator()
-            Log.d("Thuytv", "-----totpSecret: $totpSecret")
             return generator.generateTOTP(totpSecret!!)
         }
         return ""

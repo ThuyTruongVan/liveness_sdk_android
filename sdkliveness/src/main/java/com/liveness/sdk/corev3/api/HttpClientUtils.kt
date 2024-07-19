@@ -5,7 +5,9 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
+import android.util.Log
 import com.liveness.sdk.corev3.jws.JwsUtils
+import com.liveness.sdk.corev3.model.BaseResponseEncrypt
 import com.liveness.sdk.corev3.model.LivenessModel
 import com.liveness.sdk.corev3.model.LivenessRequest
 import com.liveness.sdk.corev3.utils.AppConfig
@@ -14,6 +16,7 @@ import com.liveness.sdk.corev3.utils.AppUtils
 import com.liveness.sdk.corev3.utils.AppUtils.showLog
 import com.liveness.sdk.corev3.utils.CallbackAPIListener
 import com.liveness.sdk.corev3.utils.TotpUtils
+import com.nimbusds.jose.shaded.gson.Gson
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.json.JSONException
 import org.json.JSONObject
@@ -105,7 +108,9 @@ internal class HttpClientUtils {
                 urlConnection.doOutput = true
                 urlConnection.setRequestProperty("Content-Type", "application/json")
                 urlConnection.setRequestProperty("appid", appId)
-//                urlConnection.setRequestProperty("devicetype", "android")
+                if (AppConfig.mLivenessRequest?.isEncrypt == true) {
+                    urlConnection.setRequestProperty("encrypted", "true")
+                }
 //                urlConnection.setRequestProperty("sendDate", toISO8601UTC(Date()))
                 if (requestId != null) {
                     urlConnection.setRequestProperty("request_id", requestId)
@@ -137,7 +142,17 @@ internal class HttpClientUtils {
                     val inputStream: InputStream = BufferedInputStream(urlConnection.inputStream)
                     val response = readStream(inputStream)
                     showLog("HttpClientUtilEND ==> Result : [$response]")
-                    return response
+                    if (AppConfig.mLivenessRequest?.isEncrypt == true) {
+                        val decryptResponse = if (response.isNotEmpty()) {
+                            decryptResponse(response)
+                        } else {
+                            ""
+                        }
+                        showLog("HttpClientUtilEND ==> decryptResponse : [$decryptResponse]")
+                        return decryptResponse
+                    } else {
+                        return response
+                    }
                 }
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -424,7 +439,7 @@ internal class HttpClientUtils {
 
     }
 
-    fun checkLiveNess(mContext: Context,  b: String, c: Int, callbackAPIListener: CallbackAPIListener?) {
+    fun checkLiveNess(mContext: Context, b: String, c: Int, callbackAPIListener: CallbackAPIListener?) {
         Thread {
             val d = TotpUtils(mContext).getTotp()
             if (d.isNullOrEmpty() || d == "-1") {
@@ -549,5 +564,13 @@ internal class HttpClientUtils {
         }.start()
 
     }
+
+    private fun decryptResponse(response: String?): String {
+        if (response.isNullOrEmpty()) return ""
+        val baseResponse = Gson().fromJson<BaseResponseEncrypt>(response, BaseResponseEncrypt::class.java)
+//        Log.d("Thuytv","----decryptResponse: " + baseResponse.jws)
+        return JwsUtils.getInstance().decryptJWS(baseResponse.jws ?: "")
+    }
+
 
 }

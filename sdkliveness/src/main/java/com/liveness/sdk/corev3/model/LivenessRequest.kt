@@ -35,5 +35,7 @@ data class LivenessRequest(
     @field:SerializedName("is_debug")
     var isDebug: Boolean? = null,
     @field:SerializedName("is_video")
-    var isVideo: Boolean = false
+    var isVideo: Boolean = false,
+    @field:SerializedName("is_encrypt")
+    var isEncrypt: Boolean = false
 )

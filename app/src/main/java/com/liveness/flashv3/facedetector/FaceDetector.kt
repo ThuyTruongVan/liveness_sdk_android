@@ -43,6 +43,8 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
 
     @GuardedBy("lock")
     private var isProcessing = false
+    private var isSmiled = false
+    private var isDetectSuccess = false
 
     init {
         faceBoundsOverlay.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
@@ -84,6 +86,7 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
             }
         }
     }
+
     fun Bitmap.toByteArray(): ByteArray {
         val stream = ByteArrayOutputStream()
         this.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -93,6 +96,7 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
     fun ByteArray.toBitmap(): Bitmap {
         return BitmapFactory.decodeByteArray(this, 0, this.size)
     }
+
     private fun Frame.detectFaces() {
         val dataImage = data ?: return
         val inputImage = InputImage.fromByteArray(dataImage, size.width, size.height, rotation, format)
@@ -104,20 +108,34 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
 
                 // Correct the detected faces so that they're correctly rendered on the UI, then
                 // pass them to [faceBoundsOverlay] to be drawn.
-                if(faces.size > 0) {
+                if (faces.size > 0) {
                     for (face in faces) {
-                        if (face.smilingProbability != null) {
-                            val smile = face.smilingProbability ?: 0.0f
-                            if (smile > 0.95) {
-                                onFaceDetectionResultListener?.onSuccess(face)
-                                isProcessing = true
-                            } else {
-                                val faceBounds = faces.map { face -> face.toFaceBounds(this) }
+                        if (!isDetectSuccess) {
+                            if (isSmiled) {
+                                if (face.leftEyeOpenProbability != null && face.rightEyeOpenProbability != null) {
+                                    if (checkEyeBlink(face)) {
+                                        onFaceDetectionResultListener?.onSuccess(face)
+                                        isSmiled = false
+                                        onFaceDetectionResultListener?.onProcessing(false)
+                                        isProcessing = true
+                                        isDetectSuccess = true
+                                    } else {
+//                                val faceBounds = faces.map { face -> face.toFaceBounds(this) }
 //                                mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
+                                    }
+                                }
+                            } else {
+                                if (face.smilingProbability != null) {
+                                    val smile = face.smilingProbability ?: 0.0f
+                                    if (smile > 0.95) {
+                                        isSmiled = true
+                                        onFaceDetectionResultListener?.onProcessing(true)
+                                    }
+                                }
                             }
                         }
                     }
-                }else {
+                } else {
 //                    val faceBounds = faces.map { face -> face.toFaceBounds(this) }
 //                    mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
                 }
@@ -194,10 +212,23 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
          * frame.
          */
         fun onFailure(exception: Exception) {}
+
+        fun onProcessing(isSmile: Boolean) {}
+    }
+
+    fun setDetectSuccess(isDetect: Boolean) {
+        isDetectSuccess = isDetect
     }
 
     companion object {
         private const val TAG = "FaceDetector"
         private const val MIN_FACE_SIZE = 0.15F
+    }
+
+    private fun checkEyeBlink(face: Face): Boolean {
+        val leftEyeOpenProbability: Float = face.leftEyeOpenProbability ?: 0f
+        val rightEyeOpenProbability: Float = face.rightEyeOpenProbability ?: 0f
+        Log.d("Thuytv", "-----left: $leftEyeOpenProbability ---right: $rightEyeOpenProbability")
+        return leftEyeOpenProbability < 0.4 || rightEyeOpenProbability < 0.4
     }
 }

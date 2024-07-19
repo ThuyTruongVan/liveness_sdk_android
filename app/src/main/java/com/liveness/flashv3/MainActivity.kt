@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.liveness.sdk.corev3.LiveNessSDK
 import com.liveness.sdk.corev3.model.LivenessRequest
 import com.liveness.sdk.corev3.utils.CallbackAPIListener
 import java.io.ByteArrayOutputStream
@@ -71,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             transaction.replace(R.id.frame_view_main, fragment)
             transaction.addToBackStack(FaceFragment::class.java.name)
             transaction.commit()
-//            LiveNessSDK.testRSA()
+//            LiveNessSDK.testDecrypt()
 
 //            val encrypted_register_face = encryptAndEncode("/eid/v3/registerFace")
 //            val encrypted_init_transaction = encryptAndEncode("/eid/v3/initTransaction")

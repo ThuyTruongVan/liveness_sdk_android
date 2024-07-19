@@ -89,5 +89,12 @@
             android:text="Capture"
             android:textColor="#FFFFFF"
             android:visibility="gone" />
+        <TextView
+            android:id="@+id/vl_status_detect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="Smiling" />
     </RelativeLayout>
 </FrameLayout>

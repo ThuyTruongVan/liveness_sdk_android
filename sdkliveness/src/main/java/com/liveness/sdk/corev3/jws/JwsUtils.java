@@ -1,7 +1,12 @@
 package com.liveness.sdk.corev3.jws;
 
+import android.util.Base64;
+import android.util.Log;
+
 import com.liveness.sdk.corev3.utils.AppConfig;
+import com.liveness.sdk.corev3.utils.AppUtils;
 import com.nimbusds.jose.EncryptionMethod;
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
@@ -10,37 +15,37 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
 
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.text.ParseException;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 
 public class JwsUtils {
-
+    private static final String LINE_SEPARATOR = "\r\n";
+    private static final String BEGIN_CERTIFICATE = "-----BEGIN CERTIFICATE-----";
+    private static final String END_CERTIFICATE = "-----END CERTIFICATE-----";
+    private static final String BEGIN_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----";
+    private static final String END_PUBLIC_KEY = "-----END PUBLIC KEY-----";
+    private static final String BEGIN_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----";
+    private static final String END_PRIVATE_KEY = "-----END PRIVATE KEY-----";
     private static JwsUtils jwsUtils;
 
-    private static final String EID_PUB = "-----BEGIN CERTIFICATE-----\n" +
-            "MIIDjzCCAnegAwIBAgIEPhgWFTANBgkqhkiG9w0BAQsFADBbMScwJQYDVQQDDB5SZWdlcnkgU2Vs\n" +
-            "Zi1TaWduZWQgQ2VydGlmaWNhdGUxIzAhBgNVBAoMGlJlZ2VyeSwgaHR0cHM6Ly9yZWdlcnkuY29t\n" +
-            "MQswCQYDVQQGEwJVQTAgFw0yNDA0MTEwMDAwMDBaGA8yMTI0MDQxMTAzMTMwOVowUTEdMBsGA1UE\n" +
-            "AwwUcXVhbmd0cnVuZ3F0cy5jb20udm4xIzAhBgNVBAoMGlJlZ2VyeSwgaHR0cHM6Ly9yZWdlcnku\n" +
-            "Y29tMQswCQYDVQQGEwJVQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIfK7LjzjqCo\n" +
-            "VSzXz/ROHc2IyBMc89GwnR0slF1Lenavs+r+lnjFAxkVonBRTjtMj1pWqlACnd3qiIAD/8GbSagG\n" +
-            "qsV43BDPbioDibWg/9wln82VLwEQohjLTl7VJtKuRAIUcg2nY4r5LNzpdClJx+k7zrIVDKSO8tRa\n" +
-            "onU1dU6KLSmC2ZOzT10zrK4qmjvN/LFp0rlXJtdw++MUOIM9kccyi+3MK7iiraNV7Tlazy9xF0OZ\n" +
-            "ytzgSX5R+oHE3aUS0M+W4p/dhihvLKjiejuw46E0dqEKxaqMJHXj2Qei1Ky1RrdRBNB0oQLCoUGx\n" +
-            "KRaYw1CbZ7QWAgnrbqTvs1Y8pwUCAwEAAaNjMGEwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8E\n" +
-            "BAMCAYYwHQYDVR0OBBYEFIlsqZHH0jmPvIjlF4YARXnamm7AMB8GA1UdIwQYMBaAFIlsqZHH0jmP\n" +
-            "vIjlF4YARXnamm7AMA0GCSqGSIb3DQEBCwUAA4IBAQBfSk1XtHU8ix87g+lVzRQrEf7qsqWiwkN9\n" +
-            "TW05qaPDMoMEoe/MW0YJZ+QwgvGMNLkEWjz/v0p1fVFF6kIolbo1o+1P6D4RCWvyB8S5zV9Mv+aR\n" +
-            "1uWbAYiAA2uql/NrIJ3V1pJhIgRgDsRNuVP8MhNZc6DgJQLZOMKLwXsNHDtGOHk+ZcPiyWcjb4a3\n" +
-            "voZCp4HN8+V2umO+QGuESZhTLihBnXv9HTpKxwWu4tK/4dgngDYM3UmChRjD/H7A3aYV4Xyxkqw2\n" +
-            "rnd2LAr/zUEhFkbs21iG3DF0cHGKI15YzIq5pEhb9l4ePcCIgWgnJDNJPA/QhxpRB1XhP4bpK8kP\n" +
-            "GJ8f\n" +
-            "-----END CERTIFICATE-----";
+    private static final String EID_PUB = "";
     private String appLicense = "";
 
     public static JwsUtils getInstance() {
@@ -75,26 +80,18 @@ public class JwsUtils {
 
             senderPayload = value.toString();
             senderJwePayload = new Payload(senderPayload);
-//			System.out.print("Payload : " + senderPayload + "\n");
             // pack JWE
             jweHeader = new JWEHeader(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM);
 //			jweHeader.setKeyID("PK.SD.KEK");
             jweObject = new JWEObject(jweHeader, senderJwePayload);
-//			System.out.print("JWEDecrypt: Header: " + jweHeader.toJSONObject().toString() + "\n");
             String publicKey = EID_PUB;
             if (AppConfig.INSTANCE.getMLivenessRequest() != null) {
                 publicKey = AppConfig.INSTANCE.getMLivenessRequest().getPublicKey();
-                if (publicKey == null || publicKey.isEmpty()) {
-                    publicKey = EID_PUB;
-                }
             }
             encrypter = new RSAEncrypter((RSAPublicKey) pubkeyEidReader_jws.getPublicKeyFromCertString(publicKey));
             jweObject.encrypt(encrypter);
             senderJwe = jweObject.serialize();
 
-//			System.out.print("JWE : " + senderJwe + "\n");
-//			System.out.print("PublicKey : " + EID_PUB + "\n");
-//			System.out.print("PrivateKey : " + this.appLicense + "\n");
             // pack JWS
             keySignJWS = (RSAPrivateKey) privatekeyEidReader_jwe.getPrivateKeyFromString(this.appLicense);
             signer = new RSASSASigner(keySignJWS);
@@ -115,4 +112,93 @@ public class JwsUtils {
             return "";
         }
     }
+
+    public String decryptJWS(String jwsString) {
+        String responseJwe = decryptJWE(jwsString);
+        AppUtils.INSTANCE.showLog("-decryptJWS----responseJwe:" + responseJwe);
+        if (!responseJwe.isEmpty()) {
+            String privateKey = "";
+            if (AppConfig.INSTANCE.getMLivenessRequest() != null) {
+                privateKey = AppConfig.INSTANCE.getMLivenessRequest().getPrivateKey();
+            }
+            AppUtils.INSTANCE.showLog("-decryptJWS----privateKey:" + privateKey);
+            try {
+                PrivateKeyReader privatekeyEidReader_jwe = new PrivateKeyReader();
+                RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) privatekeyEidReader_jwe.getPrivateKeyFromString(privateKey);
+
+                JWEObject jweObject = JWEObject.parse(responseJwe);
+                AppUtils.INSTANCE.showLog("-decryptJWS----44:");
+                JWEHeader header = jweObject.getHeader();
+                JWEAlgorithm jweAlgorithm = header.getAlgorithm();
+                AppUtils.INSTANCE.showLog("-decryptJWS----55:" + JWEAlgorithm.RSA_OAEP_256.equals(jweAlgorithm));
+                if (JWEAlgorithm.RSA_OAEP_256.equals(jweAlgorithm)) {
+                    jweObject.decrypt(new RSADecrypter(rsaPrivateKey));
+                    return jweObject.getPayload().toString();
+                } else {
+                    return "";
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return "";
+            }
+        }
+        return "";
+
+    }
+
+    //    public String decryptJWS(String encryptedMessage) {
+////        initFromStrings()
+//        byte[] encryptedBytes = Base64.decode(encryptedMessage, Base64.DEFAULT);
+//        Cipher cipher = null ;
+//        try {
+//            String privateKey = "";
+//            if (AppConfig.INSTANCE.getMLivenessRequest() != null) {
+//                privateKey = AppConfig.INSTANCE.getMLivenessRequest().getPrivateKey();
+//            }
+//            PrivateKeyReader privatekeyEidReader_jwe = new PrivateKeyReader();
+//            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) privatekeyEidReader_jwe.getPrivateKeyFromString(privateKey);
+//
+//            cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+//            cipher.init(Cipher.DECRYPT_MODE, rsaPrivateKey);
+//            byte[] decryptedMessage = cipher.doFinal(encryptedBytes);
+//            return new String(decryptedMessage, StandardCharsets.UTF_8);
+//        }catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return "";
+//    }
+    private String decryptJWE(String jweString) {
+        try {
+            String publicKey = "";
+            if (AppConfig.INSTANCE.getMLivenessRequest() != null) {
+                publicKey = AppConfig.INSTANCE.getMLivenessRequest().getPublicKey();
+            }
+            AppUtils.INSTANCE.showLog("-decryptJWE----publicKey:" + publicKey);
+            PublicKeyReader pubkeyEidReader_jws = new PublicKeyReader();
+
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) pubkeyEidReader_jws.getPublicKeyFromCertString(publicKey);
+
+
+            JWSObject jwsObject = JWSObject.parse(jweString);
+            AppUtils.INSTANCE.showLog("-decryptJWE----3:");
+
+
+            JWSHeader header = jwsObject.getHeader();
+
+//            JWEAlgorithm jweAlgorithm = header.getAlgorithm();
+            if (jwsObject.verify(new RSASSAVerifier(rsaPublicKey))) {
+//            jweObject.(new RSADecrypter(rsaPrivateKey));
+                String data = jwsObject.getPayload().toString();
+                return data;
+            } else {
+                return "";
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return "";
+        }
+    }
+
+
 }
+

@@ -68,12 +68,12 @@ class LiveNessSDK {
         }
 
         @Keep
-        fun initTransaction(context: Context, mRequest: LivenessRequest?, callbackAPIListener: CallbackAPIListener?) {
+        fun initTransaction(context: Context, mRequest: LivenessRequest?, readCardId: String?, callbackAPIListener: CallbackAPIListener?) {
             mRequest?.let {
                 AppConfig.mOptionRequest = mRequest
             }
             val httpClientUtil = HttpClientUtils.instance
-            httpClientUtil?.initTransaction(context, callbackAPIListener)
+            httpClientUtil?.initTransaction(context, readCardId, callbackAPIListener)
         }
 
         @Keep

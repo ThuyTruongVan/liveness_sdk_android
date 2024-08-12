@@ -282,9 +282,8 @@ internal class MainLiveNessActivityVideo : Activity() {
     }
 
 
-
-    private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int) {
-        val response = HttpClientUtils.instance?.initTransaction(this)
+    private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int, readCardId: String?) {
+        val response = HttpClientUtils.instance?.initTransaction(this, readCardId)
         var result: JSONObject? = null
         if (!response.isNullOrEmpty()) {
             result = JSONObject(response)
@@ -320,7 +319,7 @@ internal class MainLiveNessActivityVideo : Activity() {
         if (result?.has("message") == true) {
             strMessage = result.getString("message")
         }
-        AppUtils.showLog("result: "+ result?.toString())
+        AppUtils.showLog("result: " + result?.toString())
         if (status == 200) {
             val liveNessModel = Gson().fromJson<LivenessModel>(response, LivenessModel::class.java)
 //            if (liveNessModel.success == true) {
@@ -352,7 +351,7 @@ internal class MainLiveNessActivityVideo : Activity() {
             if (tOTP.isNullOrEmpty() || tOTP == "-1") {
                 showToast("TOTP null")
             } else {
-                initTransaction(tOTP, imgLiveNess, bgColor)
+                initTransaction(tOTP, imgLiveNess, bgColor, AppConfig.mLivenessRequest?.clientTransactionId)
             }
         }.start()
     }

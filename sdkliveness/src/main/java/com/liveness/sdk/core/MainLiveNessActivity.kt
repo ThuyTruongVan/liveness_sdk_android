@@ -272,8 +272,8 @@ internal class MainLiveNessActivity : Fragment() {
         }
     }
 
-    private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int) {
-        val response = HttpClientUtils.instance?.initTransaction(requireContext())
+    private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int, readCardId: String?) {
+        val response = HttpClientUtils.instance?.initTransaction(requireContext(), readCardId)
         var result: JSONObject? = null
         if (!response.isNullOrEmpty()) {
             result = JSONObject(response)
@@ -349,7 +349,7 @@ internal class MainLiveNessActivity : Fragment() {
             if (tOTP.isNullOrEmpty() || tOTP == "-1") {
                 showToast("TOTP null")
             } else {
-                initTransaction(tOTP, imgLiveNess, bgColor)
+                initTransaction(tOTP, imgLiveNess, bgColor, AppConfig.mLivenessRequest?.clientTransactionId)
             }
         }.start()
     }

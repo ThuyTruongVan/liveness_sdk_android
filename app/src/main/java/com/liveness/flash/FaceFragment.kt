@@ -244,8 +244,8 @@ class FaceFragment : Fragment() {
         cameraViewVideo.destroy()
     }
 
-    private fun initTransaction(imgLiveNess: String, bgColor: Int) {
-        val response = LiveNessSDK.initTransaction(requireContext(), null, object : CallbackAPIListener {
+    private fun initTransaction(imgLiveNess: String, bgColor: Int, readCardId: String?) {
+        val response = LiveNessSDK.initTransaction(requireContext(), null, readCardId, object : CallbackAPIListener {
             override fun onCallbackResponse(data: String?) {
                 var result: JSONObject? = null
                 if (!data.isNullOrEmpty()) {
@@ -312,8 +312,8 @@ class FaceFragment : Fragment() {
 
     fun callAPIGEtTOTP(imgLiveNess: String, bgColor: Int) {
         showLoading(true)
-//        initTransaction(imgLiveNess, bgColor)
-        checkLiveNess(imgLiveNess, bgColor)
+        initTransaction(imgLiveNess, bgColor,"123")
+//        checkLiveNess(imgLiveNess, bgColor)
     }
 
     private fun showToast(strToast: String) {

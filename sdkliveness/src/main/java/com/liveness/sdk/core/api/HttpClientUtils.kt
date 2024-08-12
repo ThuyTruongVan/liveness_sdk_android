@@ -336,16 +336,16 @@ internal class HttpClientUtils {
         if (b.isNullOrEmpty()) {
             b = UUID.randomUUID().toString()
         }
-        var strC = readCardId ?: AppConfig.mLivenessRequest?.clientTransactionId ?: ""
-        showLog("initTransaction---readCard--Id: $strC")
-        return initTransaction(mContext, b, strC)
+//        var strC = readCardId ?: AppConfig.mLivenessRequest?.clientTransactionId ?: ""
+        showLog("initTransaction-2--readCard--Id: $readCardId")
+        return initTransaction(mContext, b, readCardId ?: "")
     }
 
-    fun initTransaction(mContext: Context, a: String, b: String): String? {
+    fun initTransaction(mContext: Context, a: String, rId: String): String? {
         val request = JSONObject()
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceId), a)
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_period), AppConfig.mLivenessRequest?.duration)
-        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_clientTransactionId), b)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_clientTransactionId), rId)
         return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_init_transaction), request)
     }
 

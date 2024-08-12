@@ -277,7 +277,7 @@ internal class MainLiveNessActivity : Activity() {
     }
 
     private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int) {
-        val response = HttpClientUtils.instance?.initTransaction(this)
+        val response = HttpClientUtils.instance?.initTransaction(this,"123")
         var result: JSONObject? = null
         if (!response.isNullOrEmpty()) {
             result = JSONObject(response)

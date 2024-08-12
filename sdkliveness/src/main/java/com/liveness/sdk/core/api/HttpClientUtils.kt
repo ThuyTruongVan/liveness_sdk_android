@@ -318,7 +318,7 @@ internal class HttpClientUtils {
         return doPostV3(baseUrl + url, requestBody, optionalHeader)
     }
 
-    fun initTransaction(mContext: Context): String? {
+    fun initTransaction(mContext: Context, readCardRequestId: String?): String? {
         var mDeviceId = AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId
         if (mDeviceId.isNullOrEmpty()) {
             mDeviceId = UUID.randomUUID().toString()
@@ -326,7 +326,7 @@ internal class HttpClientUtils {
         val request = JSONObject()
         request.put("deviceId", mDeviceId)
         request.put("period", AppConfig.mLivenessRequest?.duration)
-        request.put("clientTransactionId", AppConfig.mLivenessRequest?.clientTransactionId)
+        request.put("clientTransactionId", readCardRequestId ?: AppConfig.mLivenessRequest?.clientTransactionId)
         return instance?.postV3("/eid/v3/initTransaction", request)
     }
 

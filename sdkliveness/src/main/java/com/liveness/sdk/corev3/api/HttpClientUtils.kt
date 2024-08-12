@@ -343,12 +343,13 @@ internal class HttpClientUtils {
         return doPostV3(baseUrl + url, requestBody, optionalHeader)
     }
 
-    fun initTransaction(mContext: Context): String? {
+    fun initTransaction(mContext: Context, requestIdReadCard: String?): String? {
         var b = AppConfig.mLivenessRequest?.deviceId ?: AppPreferenceUtils(mContext).getDeviceId()
         if (b.isNullOrEmpty()) {
             b = UUID.randomUUID().toString()
         }
-        var strC = AppConfig.mLivenessRequest?.clientTransactionId ?: ""
+        var strC = requestIdReadCard ?: AppConfig.clientTransactionIdReadCard ?: ""
+        showLog("clientTransactionId - ReadCard: $strC ")
         return initTransaction(mContext, b, strC)
     }
 
@@ -410,9 +411,9 @@ internal class HttpClientUtils {
 
     }
 
-    fun initTransaction(mContext: Context, callbackAPIListener: CallbackAPIListener?) {
+    fun initTransaction(mContext: Context,readCardId: String?,  callbackAPIListener: CallbackAPIListener?) {
         Thread {
-            val response = initTransaction(mContext)
+            val response = initTransaction(mContext,readCardId)
             Handler(Looper.getMainLooper()).post {
                 callbackAPIListener?.onCallbackResponse(response)
             }

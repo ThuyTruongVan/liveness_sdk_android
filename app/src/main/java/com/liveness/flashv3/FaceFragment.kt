@@ -260,7 +260,7 @@ class FaceFragment : Fragment() {
     }
 
     private fun initTransaction(imgLiveNess: String, bgColor: Int) {
-        val response = LiveNessSDK.initTransaction(requireContext(), null, object : CallbackAPIListener {
+        val response = LiveNessSDK.initTransaction(requireContext(), null, "123",object : CallbackAPIListener {
             override fun onCallbackResponse(data: String?) {
                 var result: JSONObject? = null
                 if (!data.isNullOrEmpty()) {

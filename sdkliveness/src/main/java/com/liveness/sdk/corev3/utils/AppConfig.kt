@@ -17,6 +17,7 @@ internal object AppConfig {
     var mCustomView: View? = null
     var mActionView: View? = null
     var mProgressView: View? = null
+    var clientTransactionIdReadCard: String? = null
 
     var KEY_BUNDLE_SCREEN = "KEY_BUNDLE_SCREEN"
     var TYPE_SCREEN_REGISTER_FACE = "TYPE_SCREEN_REGISTER_FACE"

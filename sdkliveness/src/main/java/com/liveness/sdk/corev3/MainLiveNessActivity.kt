@@ -272,7 +272,7 @@ internal class MainLiveNessActivity : Fragment() {
     }
 
     private fun initTransaction(tOTP: String, imgLiveNess: String, bgColor: Int) {
-        val response = HttpClientUtils.instance?.initTransaction(requireContext())
+        val response = HttpClientUtils.instance?.initTransaction(requireContext(),"123")
         var result: JSONObject? = null
         if (!response.isNullOrEmpty()) {
             result = JSONObject(response)

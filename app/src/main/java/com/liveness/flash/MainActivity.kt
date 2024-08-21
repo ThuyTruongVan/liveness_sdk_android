@@ -5,22 +5,13 @@ import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Base64
-import android.util.Log
-import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatButton
-import com.liveness.sdk.core.LiveNessSDK
-import com.liveness.sdk.core.model.LivenessModel
-import com.liveness.sdk.core.model.LivenessRequest
-import com.liveness.sdk.core.utils.CallbackAPIListener
-import com.liveness.sdk.core.utils.CallbackLivenessListener
+import com.liveness.sdk.corev4.model.LivenessRequest
+import com.liveness.sdk.corev4.utils.CallbackAPIListener
 import java.io.ByteArrayOutputStream
 
 /**
@@ -219,7 +210,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getImage(): String {
-        val bitmap = BitmapFactory.decodeResource(this.getResources(), com.liveness.sdk.core.R.drawable.img_0)
+        val bitmap = BitmapFactory.decodeResource(this.getResources(), com.liveness.sdk.corev4.R.drawable.img_0)
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
         val image = stream.toByteArray()

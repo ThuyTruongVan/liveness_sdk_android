@@ -10,7 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import com.liveness.sdk.core.model.LivenessRequest
+import com.liveness.sdk.corev4.model.LivenessRequest
 import java.io.ByteArrayOutputStream
 
 /**
@@ -143,7 +143,7 @@ class MainFragment : Fragment() {
         }.create().show()
     }
     private fun getImage(): String {
-        val bitmap = BitmapFactory.decodeResource(this.getResources(), com.liveness.sdk.core.R.drawable.img_0)
+        val bitmap = BitmapFactory.decodeResource(this.getResources(), com.liveness.sdk.corev4.R.drawable.img_0)
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
         val image = stream.toByteArray()

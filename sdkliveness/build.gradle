@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace 'com.liveness.sdk.core'
+    namespace 'com.liveness.sdk.corev4'
     compileSdk 33
 
     defaultConfig {

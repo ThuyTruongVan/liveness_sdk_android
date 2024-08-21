@@ -28,10 +28,9 @@ import com.google.mlkit.vision.face.Face
 import com.liveness.flash.facedetector.FaceDetector
 import com.liveness.flash.facedetector.Frame
 import com.liveness.flash.facedetector.LensFacing
-import com.liveness.sdk.core.LiveNessSDK
-import com.liveness.sdk.core.R
-import com.liveness.sdk.core.model.LivenessRequest
-import com.liveness.sdk.core.utils.CallbackAPIListener
+import com.liveness.sdk.corev4.LiveNessSDK
+import com.liveness.sdk.corev4.model.LivenessRequest
+import com.liveness.sdk.corev4.utils.CallbackAPIListener
 import com.otaliastudios.cameraview.CameraException
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraOptions

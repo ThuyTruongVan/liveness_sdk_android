@@ -23,3 +23,8 @@
 -keep class kotlin.Metadata { *; }
 -dontwarn kotlin.**
 -keep class org.apache.commons.** { *; }
+
+-repackageclasses 'com.liveness.sdk.corev4'
+-allowaccessmodification
+-useuniqueclassmembernames
+-keeppackagenames doNotKeepAThing

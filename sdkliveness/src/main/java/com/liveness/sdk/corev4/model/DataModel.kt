@@ -13,5 +13,7 @@ data class DataModel(
     @field:SerializedName("livenessType")
     var livenessType: String? = null,
     @field:SerializedName("livenesScore")
-    var livenesScore: Float? = null
+    var livenesScore: Float? = null,
+    @field:SerializedName("faceMatchingResult")
+    var faceMatchingResult: Int? = null
 )

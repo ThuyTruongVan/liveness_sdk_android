@@ -29,5 +29,13 @@ data class LivenessModel(
     @field:SerializedName("liveness_image")
     var livenessImage: String? = null,
     @field:SerializedName("transaction_id")
-    var transactionID: String? = null
+    var transactionID: String? = null,
+    @field:SerializedName("img_transparent")
+    var imgTransparent: String? = null,
+    @field:SerializedName("img_red")
+    var imgRed: String? = null,
+    @field:SerializedName("img_green")
+    var imgGreen: String? = null,
+    @field:SerializedName("img_blue")
+    var imgBlue: String? = null
 )

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="fm_black">#FF000000</color>
+    <color name="fm_white">#FFFFFFFF</color>
+    <color name="fm_transparent">#00000000</color>
+    <color name="fm_color_red">#FF0000</color>
+    <color name="fm_color_green">#00FF00</color>
+    <color name="fm_color_blue">#0000FF</color>
+</resources>

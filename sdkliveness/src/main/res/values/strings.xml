@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">DemoSDK</string>
+    <string name="fm_keep_face">Giữ yên</string>
+    <string name="fm_success">Hoàn thành</string>
+    <string name="fm_verifying">Đang xác minh…</string>
+    <string name="fm_look_straight">Nhìn thẳng</string>
+    <string name="fm_face_center_frame">Đưa khuôn mặt vào giữa khung hình</string>
+    <string name="fm_come_closer">Tiến lại gần hơn</string>
+    <string name="fm_move_face_farther">Đưa khuôn mặt xa hơn</string>
+</resources>

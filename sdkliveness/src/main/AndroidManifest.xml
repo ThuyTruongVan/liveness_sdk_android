@@ -16,7 +16,7 @@
 <!--            android:name=".MainLiveNessActivity"-->
 <!--            android:exported="true" />-->
         <activity
-            android:name=".MainLiveNessActivityVideo"
+            android:name=".FaceMatchActivity"
             android:exported="true" />
 
         <meta-data

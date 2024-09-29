@@ -71,6 +71,10 @@ internal class FaceBoundsOverlay @JvmOverloads constructor(ctx: Context, attrs: 
         return PointF(centerX, centerY)
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+    }
+
     companion object {
         private const val ANCHOR_RADIUS = 10f
         private const val ID_OFFSET = 50f

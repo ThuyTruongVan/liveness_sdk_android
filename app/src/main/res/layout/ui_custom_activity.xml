@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+  <androidx.appcompat.widget.LinearLayoutCompat
+      android:layout_width="match_parent"
+      android:layout_height="40dp"
+      android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/btStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:stateListAnimator="@null"
+        android:text="start"
+        android:textColor="@color/white" />
+
+    <Switch
+        android:id="@+id/swOffline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:checked="false"
+        android:text="OfflineMode"
+        android:visibility="visible" />
+    <Switch
+        android:id="@+id/swShowToolbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:checked="true"
+        android:text="Show Toolbar"
+        android:visibility="visible" />
+  </androidx.appcompat.widget.LinearLayoutCompat>
+
+  <FrameLayout
+      android:id="@+id/custom_container"
+      android:layout_marginTop="40dp"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_marginBottom="130dp" >
+    <TextView
+        android:id="@+id/tvResult"
+        android:layout_width="match_parent"
+        android:textColor="@color/fm_black"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="20dp"
+        android:layout_height="wrap_content"/>
+  </FrameLayout>
+
+  <androidx.appcompat.widget.LinearLayoutCompat
+      android:layout_width="match_parent"
+      android:layout_height="100dp"
+      android:layout_gravity="bottom">
+
+    <ImageView
+        android:id="@+id/ivTrans"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <ImageView
+        android:id="@+id/ivRed"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <ImageView
+        android:id="@+id/ivGreen"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <ImageView
+        android:id="@+id/ivBlue"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+  </androidx.appcompat.widget.LinearLayoutCompat>
+
+  <androidx.appcompat.widget.LinearLayoutCompat
+      android:layout_width="match_parent"
+      android:layout_height="30dp"
+      android:layout_gravity="bottom"
+      android:layout_marginBottom="100dp">
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Trans" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Red"
+        android:textColor="@color/fm_color_red" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Green"
+        android:textColor="@color/fm_color_green" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Blue"
+        android:textColor="@color/fm_color_blue" />
+
+
+  </androidx.appcompat.widget.LinearLayoutCompat>
+</FrameLayout>

@@ -22,6 +22,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".CustomActivity"
+            android:theme="@style/Theme.DemoLiveNess"
+            android:exported="true">
+        </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

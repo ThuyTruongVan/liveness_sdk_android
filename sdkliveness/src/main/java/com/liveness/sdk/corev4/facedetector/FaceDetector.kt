@@ -12,37 +12,39 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.otaliastudios.cameraview.CameraView
 import java.io.ByteArrayOutputStream
-import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
 
+    //    companion object {
+    private val TAG = "FaceDetector"
+    private val MIN_FACE_SIZE = 0.15F
+    private var mCameraView: CameraView? = null
+    private var mFrameViewMax: View? = null
+    private var mFrameViewMin: View? = null
+
+    //    }
     private val mlKitFaceDetector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
             .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
             .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+            .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
             .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
             .setMinFaceSize(MIN_FACE_SIZE)
             .enableTracking()
             .build()
     )
-
-    /** Listener that gets notified when a face detection result is ready. */
     private var onFaceDetectionResultListener: OnFaceDetectionResultListener? = null
-
-    /** [Executor] used to run the face detection on a background thread.  */
     private lateinit var faceDetectionExecutor: ExecutorService
-
-    /** [Executor] used to trigger the rendering of the detected face bounds on the UI thread. */
     private val mainExecutor = HandlerExecutor(Looper.getMainLooper())
-
-    /** Controls access to [isProcessing], since it can be accessed from different threads. */
     private val lock = Object()
 
     @GuardedBy("lock")
     private var isProcessing = false
+    private var isSmiled = false
 
     init {
         faceBoundsOverlay.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
@@ -58,15 +60,10 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
         })
     }
 
-    /** Sets a listener to receive face detection result callbacks. */
     fun setonFaceDetectionFailureListener(listener: OnFaceDetectionResultListener) {
         onFaceDetectionResultListener = listener
     }
 
-    /**
-     * Kick-starts a face detection operation on a camera frame. If a previous face detection
-     * operation is still ongoing, the frame is dropped until the face detector is no longer busy.
-     */
     fun process(frame: Frame) {
         synchronized(lock) {
             if (!isProcessing) {
@@ -84,6 +81,7 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
             }
         }
     }
+
     fun Bitmap.toByteArray(): ByteArray {
         val stream = ByteArrayOutputStream()
         this.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -93,6 +91,7 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
     fun ByteArray.toBitmap(): Bitmap {
         return BitmapFactory.decodeByteArray(this, 0, this.size)
     }
+
     private fun Frame.detectFaces() {
         val dataImage = data ?: return
         val inputImage = InputImage.fromByteArray(dataImage, size.width, size.height, rotation, format)
@@ -101,23 +100,38 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
                 synchronized(lock) {
                     isProcessing = false
                 }
-
-                // Correct the detected faces so that they're correctly rendered on the UI, then
-                // pass them to [faceBoundsOverlay] to be drawn.
-                if(faces.size > 0) {
+                if (faces.size > 0) {
                     for (face in faces) {
-                        if (face.smilingProbability != null) {
-                            val smile = face.smilingProbability ?: 0.0f
-                            if (smile > 0.95) {
-                                onFaceDetectionResultListener?.onSuccess(face)
-                                isProcessing = true
-                            } else {
-                                val faceBounds = faces.map { face -> face.toFaceBounds(this) }
+//                        if(checkFaceFrame(face)) {
+//                        val faceBounds = faces.map { face ->
+//                            Log.d("Thuytv", "----checkFaceFrame: " + checkFaceFrame(face.toFaceBounds(this)))
+//                        }
+
+//                        }
+
+                        if (isSmiled) {
+                            if (face.leftEyeOpenProbability != null && face.rightEyeOpenProbability != null) {
+                                if (checkEyeBlink(face)) {
+                                    onFaceDetectionResultListener?.onSuccess(face, faces.size)
+                                    isSmiled = false
+                                    onFaceDetectionResultListener?.onProcessing(false)
+                                    isProcessing = true
+                                } else {
+//                                val faceBounds = faces.map { face -> face.toFaceBounds(this) }
 //                                mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
+                                }
+                            }
+                        } else {
+                            if (face.smilingProbability != null && checkFaceFrame(face)) {
+                                val smile = face.smilingProbability ?: 0.0f
+                                if (smile > 0.95) {
+                                    isSmiled = true
+                                    onFaceDetectionResultListener?.onProcessing(true)
+                                }
                             }
                         }
                     }
-                }else {
+                } else {
 //                    val faceBounds = faces.map { face -> face.toFaceBounds(this) }
 //                    mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
                 }
@@ -130,74 +144,117 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
             }
     }
 
-    /**
-     * Converts a [Face] to an instance of [FaceBounds] while correctly transforming the face's
-     * bounding box by scaling it to match the overlay and mirroring it when the lens facing
-     * represents the front facing camera.
-     */
-    private fun Face.toFaceBounds(frame: Frame): FaceBounds {
-        // In order to correctly display the face bounds, the orientation of the processed image
-        // (frame) and that of the overlay have to match. Which is why the dimensions of
-        // the analyzed image are reversed if its rotation is 90 or 270.
+    fun setFaceProcessing(isProcess: Boolean) {
+        isProcessing = isProcess
+    }
+
+    fun setFrameImage(cameraView: CameraView, frameViewMax: View, frameViewMin: View) {
+        mCameraView = cameraView
+        mFrameViewMax = frameViewMax
+        mFrameViewMin = frameViewMin
+    }
+
+    private fun checkFaceFrame(face: Face): Boolean {
+        if (mFrameViewMax == null && mFrameViewMin == null) return true
+        val boundingBox = face.boundingBox
+        val left = boundingBox.left
+        val right = boundingBox.right
+        val top = boundingBox.top
+        val bottom = boundingBox.bottom
+        Log.d("Thuytv", "----bound--left: " + left + "---right: $right ---top: $top ----bottom: $bottom")
+        val mLeft = mFrameViewMax?.left ?: 0
+        val mRight = mFrameViewMax?.right ?: 0
+        val mTop = mFrameViewMax?.top ?: 0
+        val mBottom = mFrameViewMax?.bottom ?: 0
+//        Log.d("Thuytv", "----mFrameView--mLeft: " + mLeft + "---mRight: $mRight ---mTop: $mTop ----mBottom: $mBottom")
+        val isResultMax = left < mLeft && top > mTop && bottom < mBottom && right > mRight
+        Log.d("Thuytv", "----checkFaceFramev----isResultMax: $isResultMax")
+
+        val mLeftMin = mFrameViewMin?.left ?: 0
+        val mRightMin = mFrameViewMin?.right ?: 0
+        val mTopMin = mFrameViewMin?.top ?: 0
+        val mBottomMin = mFrameViewMin?.bottom ?: 0
+//        Log.d("Thuytv", "----mFrameView--mLeftMin: " + mLeftMin + "---mRightMin: $mRightMin ---mTopMin: $mTopMin ----mBottomMin: $mBottomMin")
+
+        val isResultMin = left < mLeftMin && top > mTopMin && bottom > mBottomMin && right < mRightMin
+        Log.d("Thuytv", "----checkFaceFramev----isResultMin: $isResultMin")
+
+
+        return isResultMax || isResultMin
+    }
+
+//    private fun checkFaceFrame(bound: RectF): Boolean {
+//        if (mCameraView == null || mFrameView == null) return false
+//        val offsetHorizontal = mCameraView?.top?.toFloat() ?: 0f
+//        bound.top = bound.top + offsetHorizontal
+//        bound.bottom = bound.bottom + offsetHorizontal
+//        val offset = 30F
+//        val borderline = RectF(
+//            mFrameView!!.left + offset,
+//            mFrameView!!.top + offset,
+//            mFrameView!!.right - offset,
+//            mFrameView!!.bottom.toFloat()
+//        )
+//        return (bound.left > borderline.left && bound.top > borderline.top
+//                && bound.right < borderline.right && bound.bottom < borderline.bottom)
+//    }
+
+    private fun Face.toFaceBounds(frame: Frame): RectF {
         val reverseDimens = frame.rotation == 90 || frame.rotation == 270
         val width = if (reverseDimens) frame.size.height else frame.size.width
         val height = if (reverseDimens) frame.size.width else frame.size.height
-
-        // Since the analyzed image (frame) probably has a different resolution (width and height)
-        // compared to the overlay view, we compute by how much we have to scale the bounding box
-        // so that it is displayed correctly on the overlay.
-        val scaleX = faceBoundsOverlay.width.toFloat() / width
-        val scaleY = faceBoundsOverlay.height.toFloat() / height
-
-        // If the front camera lens is being used, reverse the right/left coordinates
+        val scaleX = (mCameraView?.width?.toFloat() ?: 0f) / width
+        val scaleY = (mCameraView?.height?.toFloat() ?: 0f) / height
         val isFrontLens = frame.lensFacing == LensFacing.FRONT
         val flippedLeft = if (isFrontLens) width - boundingBox.right else boundingBox.left
         val flippedRight = if (isFrontLens) width - boundingBox.left else boundingBox.right
-
-        // Scale all coordinates to match the overlay
         val scaledLeft = scaleX * flippedLeft
         val scaledTop = scaleY * boundingBox.top
         val scaledRight = scaleX * flippedRight
         val scaledBottom = scaleY * boundingBox.bottom
-        val scaledBoundingBox = RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
-
-        // Return the scaled bounding box and a tracking id of the detected face. The tracking id
-        // remains the same as long as the same face continues to be detected.
-        return FaceBounds(
-            trackingId,
-            scaledBoundingBox
-        )
+        return RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
     }
+
+//    private fun Face.toFaceBounds(frame: Frame): RectF {
+//        val reverseDimens = frame.rotation == 90 || frame.rotation == 270
+//        val width = if (reverseDimens) frame.size.height else frame.size.width
+//        val height = if (reverseDimens) frame.size.width else frame.size.height
+//        val scaleX = faceBoundsOverlay.width.toFloat() / width
+//        val scaleY = faceBoundsOverlay.height.toFloat() / height
+//
+//        val isFrontLens = frame.lensFacing == LensFacing.FRONT
+//        val flippedLeft = if (isFrontLens) width - boundingBox.right else boundingBox.left
+//        val flippedRight = if (isFrontLens) width - boundingBox.left else boundingBox.right
+//
+//        val scaledLeft = scaleX * flippedLeft
+//        val scaledTop = scaleY * boundingBox.top
+//        val scaledRight = scaleX * flippedRight
+//        val scaledBottom = scaleY * boundingBox.bottom
+//        val scaledBoundingBox = RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
+//
+////        return FaceBounds(
+////            trackingId,
+////            scaledBoundingBox
+////        )
+//        return RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
+//    }
 
     private fun onError(exception: Exception) {
         onFaceDetectionResultListener?.onFailure(exception)
         Log.e(TAG, "An error occurred while running a face detection", exception)
     }
 
-    /**
-     * Interface containing callbacks that are invoked when the face detection process succeeds or
-     * fails.
-     */
     interface OnFaceDetectionResultListener {
-        /**
-         * Signals that the face detection process has successfully completed for a camera frame.
-         * It also provides the result of the face detection for further potential processing.
-         *
-         * @param faceBounds Detected faces from a camera frame
-         */
-        fun onSuccess(faceBounds: Face) {}
-
-        /**
-         * Invoked when an error is encountered while attempting to detect faces in a camera frame.
-         *
-         * @param exception Encountered [Exception] while attempting to detect faces in a camera
-         * frame.
-         */
+        fun onSuccess(faceBounds: Face, faceSize: Int) {}
+        fun onProcessing(isSmile: Boolean) {}
         fun onFailure(exception: Exception) {}
     }
 
-    companion object {
-        private const val TAG = "FaceDetector"
-        private const val MIN_FACE_SIZE = 0.15F
+    private fun checkEyeBlink(face: Face): Boolean {
+        val leftEyeOpenProbability: Float = face.leftEyeOpenProbability ?: 0f
+        val rightEyeOpenProbability: Float = face.rightEyeOpenProbability ?: 0f
+        Log.d("Thuytv", "-----left: $leftEyeOpenProbability ---right: $rightEyeOpenProbability")
+        return leftEyeOpenProbability < 0.4 || rightEyeOpenProbability < 0.4
     }
+
 }

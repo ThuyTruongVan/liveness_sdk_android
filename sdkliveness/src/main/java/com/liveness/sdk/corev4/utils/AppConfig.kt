@@ -14,13 +14,12 @@ internal object AppConfig {
     var mLivenessRequest: LivenessRequest? = null
     var mOptionRequest: LivenessRequest? = null
 
-    var mCustomView: View? = null
-    var mActionView: View? = null
-    var mProgressView: View? = null
 
     var KEY_BUNDLE_SCREEN = "KEY_BUNDLE_SCREEN"
     var TYPE_SCREEN_REGISTER_FACE = "TYPE_SCREEN_REGISTER_FACE"
     var INTENT_VALUE_BACK = "INTENT_VALUE_BACK"
+    val KEY_BUNDLE_BOOLEAN ="KE_BUNDLE_BOOLEAN"
+
 
     val encrypted_register_face = "gH7p6MLKXOZP/Ln6cYJYcq4cu0n/BF7I2WEf+B4h158NMOB+Ht9knp+qs0lFZebKdCPos0qfhMGH\n" +
             "oA0MSCkoHpW7/VF7GtJOhnVqSjHZcNrluk/Z8MYFcsrEPCik0dTy+VUBegbeD15cUzkY3B6aTUy6\n" +
@@ -67,6 +66,15 @@ internal object AppConfig {
     val encrypted_image_live = "TgWHr0tz5yeJl7R/LAwkNhbd0bXQqwIWJvgk7DGWc5WrotFpSKOvpwsnAWAw/ei/GepadhZ0Yf6C\n" +
             "NNCTu/AQBBqBeqs1vRcUWJ2MWcC3AKhfXYUBgIczGCW5R1TVMajDmgH5QOHejA+P3P/qn7zdbsJr\n" +
             "/V7I4/LK3Pbp+6xctP0="
+    val encrypted_image_live1 = "kSaTnlDmrgY5bryWDuOi3uF3p+We2O+WdAUYnVqeKwx2SWnBtat3si0no0uvLyu8pZ5wVHgNHHMs\n" +
+            "FhhM9q8qQJxpIaklcEf6P4TjB8LjnZ3l9x/7tkJwaffu2rUCvZtyGz3upUlFXB6X7iOHqWkoMv58\n" +
+            "8UbtzbP1UIfAjEf4WwA="
+    val encrypted_image_live2 = "lpNFMSwy+S/LlisXAWyAHK5KsJR6eLgNHD+dY7j6CSaYhE8ejMACOtYK1vUIWukhaWZmpgAxwQYl\n" +
+            "tloJc1Q/kOqz5PdVzQMiDkWDusQZgqVqcuxHLwiAakHvG3so2LKm6N0q1cDAoYQQpp046TAWCArB\n" +
+            "6XNwtuNJaihNpTSVt5Q="
+    val encrypted_image_live3 = "QFMpqtkzkmY57HTO7bURuY/rGbCkO3TSimI57QSxYXDG7bXDVZgBARnEWbd8SBHJvdCsTeo12/9a\n" +
+            "gGdV1uLAUNIWAf48oyB199Q7qoSSQ2rrCuYsb8SLYbKgAhbz6nrcowHMcvKxJOxwi0r0GPk9u67k\n" +
+            "o4A5i8E+N8L35MCMzhE="
     val encrypted_color = "Hil5dpT0hnrFWZklyVCvxi7JqX4P0daZcckCZjaROKZPTKoI1r11pu8WXgTO/I/4eDGKpR4CPkmy\n" +
             "KxpzxM/87fGOY0afrHRfIQeBspuNpzzFnyixxDwLQ/EL2QWn/6QPijIgOfyd+NqBzR2r9XBfhxRB\n" +
             "GkZfx9clZ8yvfM95Ouc="

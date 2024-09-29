@@ -49,7 +49,11 @@ class LiveNessSDK {
         }
 
         @Keep
-        fun registerDevice(context: Context, mRequest: LivenessRequest?, callbackAPIListener: CallbackAPIListener?) {
+        fun registerDevice(
+            context: Context,
+            mRequest: LivenessRequest?,
+            callbackAPIListener: CallbackAPIListener?
+        ) {
             mRequest?.let {
                 AppConfig.mOptionRequest = mRequest
             }
@@ -58,7 +62,12 @@ class LiveNessSDK {
         }
 
         @Keep
-        fun registerFace(context: Context, faceImage: String, mRequest: LivenessRequest?, callbackAPIListener: CallbackAPIListener?) {
+        fun registerFace(
+            context: Context,
+            faceImage: String,
+            mRequest: LivenessRequest?,
+            callbackAPIListener: CallbackAPIListener?
+        ) {
             mRequest?.let {
                 AppConfig.mOptionRequest = mRequest
             }
@@ -67,7 +76,12 @@ class LiveNessSDK {
         }
 
         @Keep
-        fun initTransaction(context: Context, mRequest: LivenessRequest?, readCardId: String?, callbackAPIListener: CallbackAPIListener?) {
+        fun initTransaction(
+            context: Context,
+            mRequest: LivenessRequest?,
+            readCardId: String?,
+            callbackAPIListener: CallbackAPIListener?
+        ) {
             mRequest?.let {
                 AppConfig.mOptionRequest = mRequest
             }
@@ -88,7 +102,13 @@ class LiveNessSDK {
                 AppConfig.mOptionRequest = mRequest
             }
             val httpClientUtil = HttpClientUtils.instance
-            httpClientUtil?.checkLiveNessFlash(context, transactionId, liveImage, colorBg, callbackAPIListener)
+            httpClientUtil?.checkLiveNessFlash(
+                context,
+                transactionId,
+                liveImage,
+                colorBg,
+                callbackAPIListener
+            )
         }
 
         @Keep
@@ -107,11 +127,62 @@ class LiveNessSDK {
         }
 
         @Keep
+        fun checkLiveNessFlashV2(
+            context: Context,
+            transactionId: String,
+            img: String,
+            img1: String,
+            img2: String,
+            img3: String,
+            mRequest: LivenessRequest?,
+            callbackAPIListener: CallbackAPIListener?
+        ) {
+            mRequest?.let {
+                AppConfig.mOptionRequest = mRequest
+            }
+            val httpClientUtil = HttpClientUtils.instance
+            httpClientUtil?.checkLiveNessFlashV2(
+                context,
+                transactionId,
+                img,
+                img1,
+                img2,
+                img3,
+                callbackAPIListener
+            )
+        }
+
+        @Keep
         fun startLiveNess(
             context: Context,
             mLivenessRequest: LivenessRequest,
             supportFragmentManager: FragmentManager,
-            frameView: Int,
+            container: Int,
+            livenessListener: CallbackLivenessListener?,
+            isShowToolbar: Boolean = true
+        ) {
+            livenessListener?.let {
+                AppConfig.livenessListener = it
+            }
+            AppConfig.mLivenessRequest = mLivenessRequest
+            val httpClientUtil = HttpClientUtils.instance
+            httpClientUtil?.setVariables(context, mLivenessRequest)
+            val transaction = supportFragmentManager.beginTransaction()
+            val bundle = Bundle()
+            bundle.putString(AppConfig.KEY_BUNDLE_SCREEN, "")
+            bundle.putBoolean(AppConfig.KEY_BUNDLE_BOOLEAN, isShowToolbar)
+            val fragment = FaceMatchFragment()
+            fragment.setFragmentManager(supportFragmentManager)
+            fragment.arguments = bundle
+            transaction.replace(container, fragment)
+            transaction.addToBackStack(FaceMatchFragment::class.java.name)
+            transaction.commit()
+        }
+
+        @Keep
+        fun startLiveNess(
+            context: Context,
+            mLivenessRequest: LivenessRequest,
             livenessListener: CallbackLivenessListener?
         ) {
             livenessListener?.let {
@@ -120,33 +191,8 @@ class LiveNessSDK {
             AppConfig.mLivenessRequest = mLivenessRequest
             val httpClientUtil = HttpClientUtils.instance
             httpClientUtil?.setVariables(context, mLivenessRequest)
-            if (mLivenessRequest.isVideo) {
-                val intent = Intent(context, MainLiveNessActivityVideo::class.java)
-                intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, "")
-                ContextCompat.startActivity(context, intent, null)
-            } else {
-                val transaction = supportFragmentManager.beginTransaction()
-                val bundle = Bundle()
-                bundle.putString(AppConfig.KEY_BUNDLE_SCREEN, "")
-                val fragment = MainLiveNessActivity()
-                fragment.setFragmentManager(supportFragmentManager)
-                fragment.arguments = bundle
-                transaction.replace(frameView, fragment)
-                transaction.addToBackStack(MainLiveNessActivity::class.java.name)
-                transaction.commit()
-            }
-
-        }
-
-        @Keep
-        fun setCustomView(mCustomView: View, mActionView: View?) {
-            AppConfig.mCustomView = mCustomView
-            AppConfig.mActionView = mActionView
-        }
-
-        @Keep
-        fun setCustomProgress(mProgressView: View?) {
-            AppConfig.mProgressView = mProgressView
+            val intent = Intent(context, FaceMatchActivity::class.java)
+            ContextCompat.startActivity(context, intent, null)
         }
 
         @Keep
@@ -168,29 +214,30 @@ class LiveNessSDK {
             AppPreferenceUtils(context).removeAllValue()
         }
 
-        @Keep
-        fun registerFace(context: Context, mLivenessRequest: LivenessRequest, livenessListener: CallbackLivenessListener?) {
-            livenessListener?.let {
-                AppConfig.livenessFaceListener = it
-            }
-            AppConfig.mLivenessRequest = mLivenessRequest
-            val httpClientUtil = HttpClientUtils.instance
-            httpClientUtil?.setVariables(context, mLivenessRequest)
-            if (mLivenessRequest.imageFace.isNullOrEmpty()) {
-//                if (mLivenessRequest.isVideo) {
-                val intent = Intent(context, MainLiveNessActivityVideo::class.java)
-                intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
-                ContextCompat.startActivity(context, intent, null)
-//                }
-            } else {
-                httpClientUtil?.registerDeviceAndFace(context, mLivenessRequest.imageFace ?: "")
-            }
-        }
+//        @Keep
+//        fun registerFace(context: Context, mLivenessRequest: LivenessRequest, livenessListener: CallbackLivenessListener?) {
+//            livenessListener?.let {
+//                AppConfig.livenessFaceListener = it
+//            }
+//            AppConfig.mLivenessRequest = mLivenessRequest
+//            val httpClientUtil = HttpClientUtils.instance
+//            httpClientUtil?.setVariables(context, mLivenessRequest)
+//            if (mLivenessRequest.imageFace.isNullOrEmpty()) {
+//                val intent = Intent(context, MainLiveNessActivityVideo::class.java)
+//                intent.putExtra(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
+//                ContextCompat.startActivity(context, intent, null)
+//            } else {
+//                httpClientUtil?.registerDeviceAndFace(context, mLivenessRequest.imageFace ?: "")
+//            }
+//        }
 
         @Keep
         fun registerFace(
-            context: Context, mLivenessRequest: LivenessRequest, supportFragmentManager: FragmentManager,
-            frameView: Int, livenessListener: CallbackLivenessListener?
+            context: Context,
+            mLivenessRequest: LivenessRequest,
+            supportFragmentManager: FragmentManager,
+            frameView: Int,
+            livenessListener: CallbackLivenessListener?
         ) {
             livenessListener?.let {
                 AppConfig.livenessFaceListener = it
@@ -202,11 +249,11 @@ class LiveNessSDK {
                 val transaction = supportFragmentManager.beginTransaction()
                 val bundle = Bundle()
                 bundle.putString(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
-                val fragment = MainLiveNessActivity()
+                val fragment = FaceMatchFragment()
                 fragment.setFragmentManager(supportFragmentManager)
                 fragment.arguments = bundle
                 transaction.add(frameView, fragment)
-                transaction.addToBackStack(MainLiveNessActivity::class.java.name)
+                transaction.addToBackStack(FaceMatchFragment::class.java.name)
                 transaction.commit()
             } else {
                 httpClientUtil?.registerDeviceAndFace(context, mLivenessRequest.imageFace ?: "")
@@ -222,14 +269,6 @@ class LiveNessSDK {
         fun isRegisterFace(context: Context): Boolean {
             return AppPreferenceUtils(context).isRegisterFace()
         }
-
-//        fun getDeviceId2(context: Context): String? {
-//            return AppPreferenceUtils(context).getDeviceId2()
-//        }
-//
-//        fun getTOTPSecret2(context: Context): String? {
-//            return KeyStoreUtils.getInstance(context)?.decryptData(AppPreferenceUtils(context).getTOTPSecret())
-//        }
 
         @Keep
         fun checkVersion(): String {
@@ -273,6 +312,9 @@ class LiveNessSDK {
             Log.d("Thuytv", "-----deviceName: " + deviceName)
             Log.d("Thuytv", "-----secret: " + secret)
             Log.d("Thuytv", "-----url_register_device: " + url_register_device)
+            Log.d("Thuytv", "-----live1: " + rsa.encrypt("image_live1"))
+            Log.d("Thuytv", "-----live2: " + rsa.encrypt("image_live2"))
+            Log.d("Thuytv", "-----live3: " + rsa.encrypt("image_live3"))
 
 //            val strDecrypte = rsa.decrypt(AppConfig.encrypted_transaction_id)
 //            Log.d("Thuytv", "-----strDecrypte: " + strDecrypte)

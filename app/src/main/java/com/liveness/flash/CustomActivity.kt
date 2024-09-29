@@ -2,12 +2,10 @@ package com.liveness.flash
 
 import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
-import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Switch
@@ -17,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.liveness.sdk.corev4.LiveNessSDK
 import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.model.LivenessRequest
-import com.liveness.sdk.corev4.utils.CallbackAPIListener
 import com.liveness.sdk.corev4.utils.CallbackLivenessListener
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -25,63 +22,40 @@ import java.io.InputStream
 /**
  * Created by Thuytv on 15/04/2024.
  */
-class MainActivity : AppCompatActivity() {
-    private var deviceId = ""
-    private lateinit var btnRegisterFace: Button
-    private lateinit var btnLiveNessFlash: Button
-    private lateinit var btTestFlashNew: Button
-    private lateinit var btTestFlashFragment: Button
+class CustomActivity : AppCompatActivity() {
 
-    private lateinit var imvImage: ImageView
     private lateinit var ivTrans: ImageView
     private lateinit var ivRed: ImageView
     private lateinit var ivGreen: ImageView
     private lateinit var ivBlue: ImageView
     private lateinit var swOffline: Switch
+    private lateinit var swShowToolbar: Switch
     private lateinit var tvResult: TextView
-
+    private lateinit var btStart: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.ui_main_activity)
-        btnRegisterFace = findViewById(R.id.btn_register_face)
-        btnLiveNessFlash = findViewById(R.id.btn_live_ness_flash)
-        btTestFlashNew = findViewById(R.id.btTestLiveFlashNew)
-        btTestFlashFragment = findViewById(R.id.btTestLiveFlashFragment)
-        imvImage = findViewById(R.id.imv_image)
+        setContentView(R.layout.ui_custom_activity)
+        btStart = findViewById(R.id.btStart)
         ivTrans = findViewById(R.id.ivTrans)
         ivRed = findViewById(R.id.ivRed)
         ivGreen = findViewById(R.id.ivGreen)
         ivBlue = findViewById(R.id.ivBlue)
         swOffline = findViewById(R.id.swOffline)
+        swShowToolbar = findViewById(R.id.swShowToolbar)
         tvResult = findViewById(R.id.tvResult)
-//        LiveNessSDK.setConfigSDK(this, getLivenessRequest())
-
-//        val mDeviceId = LiveNessSDK.getDeviceId(this)
-//        if (mDeviceId?.isNotEmpty() == true) {
-//            deviceId = mDeviceId
-//            btnRegisterFace.isEnabled = false
-//        }
-//        if(LiveNessSDK.isRegisterFace(this))
-
-//        LiveNessSDK.setCallbackListener(object : CallbackLivenessListener {
-//            override fun onCallbackLiveness(data: LivenessModel?) {
-//                Log.d("Thuytv", "------transactionID: ${data?.transactionID}")
-//
-//                val decodeString = android.util.Base64.decode(data?.livenessImage ?: "", android.util.Base64.NO_PADDING)
-//                val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
-//                imvImage.setImageBitmap(bitmap)
-//                showDefaultDialog(this@MainActivity, data?.data?.toString())
-//            }
-//        })
-
-        btTestFlashNew.setOnClickListener {
+        btStart.setOnClickListener {
+            btStart.isEnabled = false
             LiveNessSDK.startLiveNess(
                 this,
                 getLivenessRequest(),
+                supportFragmentManager,
+                R.id.custom_container,
                 object : CallbackLivenessListener {
                     override fun onCallbackLiveness(data: LivenessModel?) {
 //                        Log.d("AKKKKK", "-----data: $data")
+                        btStart.isEnabled = true
                         if (data?.status == 200) {
+
                             data.livenessImage?.apply {
                                 val img = base64ToBitmap(this)
                                 if (img != null) {
@@ -116,83 +90,14 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         }
+
                     }
-                })
+                },
+                swShowToolbar.isChecked
+            )
         }
 
-        btTestFlashFragment.setOnClickListener {
-            startActivity(Intent(this, CustomActivity::class.java))
-        }
-        btnLiveNessFlash.setOnClickListener {
-            val transaction = supportFragmentManager.beginTransaction()
-            val fragment = FaceFragment()
-            fragment.setCallBack(object : CallbackAPIListener {
-                override fun onCallbackResponse(data: String?) {
-                    showDefaultDialog(this@MainActivity, data)
-                }
 
-            })
-            val bundle = Bundle()
-            bundle.putString("KEY_BUNDLE_SCREEN", "")
-            fragment?.arguments = bundle
-            transaction.replace(R.id.frame_view_main, fragment)
-            transaction.addToBackStack(FaceFragment::class.java.name)
-            transaction.commit()
-//            LiveNessSDK.testRSA()
-
-//            val encrypted_register_face = encryptAndEncode("/eid/v3/registerFace")
-//            val encrypted_init_transaction = encryptAndEncode("/eid/v3/initTransaction")
-//            val encrypted_register_device = encryptAndEncode("/eid/v3/registerDevice")
-//            val encrypted_verify_face = encryptAndEncode("/eid/v3/verifyFace")
-//            Log.d("Thuytv","-----encrypted_register_face: $encrypted_register_face")
-//            Log.d("Thuytv","-----encrypted_init_transaction: $encrypted_init_transaction")
-//            Log.d("Thuytv","-----encrypted_register_device: $encrypted_register_device")
-//            Log.d("Thuytv","-----encrypted_verify_face: $encrypted_verify_face")
-//            val decryptedRegisterFace = decodeAndDecrypt(encrypted_register_face!!)
-//            val decryptedInitTransaction = decodeAndDecrypt(encrypted_init_transaction!!)
-//            val decryptedRegisterDevice = decodeAndDecrypt(encrypted_register_device!!)
-//            val decryptedVerifyFace = decodeAndDecrypt(encrypted_verify_face!!)
-//            Log.d("Thuytv","-----decryptedRegisterFace: $decryptedRegisterFace")
-//            Log.d("Thuytv","-----decryptedInitTransaction: $decryptedInitTransaction")
-//            Log.d("Thuytv","-----decryptedRegisterDevice: $decryptedRegisterDevice")
-//            Log.d("Thuytv","-----decryptedVerifyFace: $decryptedVerifyFace")
-
-        }
-        btnRegisterFace.setOnClickListener {
-//            val overlay = LayoutInflater.from(this).inflate(R.layout.ui_register_face, null)
-//            LiveNessSDK.setCustomView(overlay, overlay.findViewById(R.id.btn_capture_face))
-//            val request = getLivenessRequest()
-////            request.imageFace = getImage()
-//            LiveNessSDK.registerFace(this, request, supportFragmentManager, R.id.frame_view_main, object : CallbackLivenessListener {
-//                override fun onCallbackLiveness(data: LivenessModel?) {
-//                    Log.d("Thuytv", "------faceImage: ${data?.message}")
-//                    btnRegisterFace.isEnabled = false
-//
-//                    val decodeString = android.util.Base64.decode(data?.faceImage ?: "", android.util.Base64.NO_PADDING)
-//
-//                    val bitmap = BitmapFactory.decodeByteArray(decodeString, 0, decodeString.size)
-//                    imvImage.setImageBitmap(bitmap)
-//                }
-//            })
-            val transaction = supportFragmentManager.beginTransaction()
-            val fragment = FaceFragment()
-            val bundle = Bundle()
-            bundle.putString("KEY_BUNDLE_SCREEN", "TYPE_SCREEN_REGISTER_FACE")
-            fragment?.arguments = bundle
-            transaction.replace(R.id.frame_view_main, fragment)
-            transaction.addToBackStack(FaceFragment::class.java.name)
-            transaction.commit()
-
-        }
-
-    }
-
-    fun encryptAndEncode(data: String): String? {
-        return Base64.encodeToString(data.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
-    }
-
-    fun decodeAndDecrypt(data: String): String? {
-        return String(Base64.decode(data, Base64.DEFAULT))
     }
 
     private fun getLivenessRequest(): LivenessRequest {
@@ -218,7 +123,6 @@ class MainActivity : AppCompatActivity() {
         optionRequest["request-2"] = "TEST-02"
 //        val transactionId="TEST"
         val transactionId = "51219b1d-fc4e-4005-a988-4183e76fcd97"
-//        val transactionId = ""
         //ABCDEFGHIJKLMNOP
         return LivenessRequest(
             duration = 600,
@@ -259,6 +163,11 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
             null
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        btStart.isEnabled = true
     }
 
 }

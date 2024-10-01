@@ -239,7 +239,7 @@ internal class FaceMatchFragment : Fragment() {
                     if (mStepScan == 0) {
                         mStepScan = 1
                         showKeepDevice()
-                        takePicture(300)
+                        takePicture(500)
                         mSessionId = UUID.randomUUID().toString()
                     }
                 } else {
@@ -264,7 +264,7 @@ internal class FaceMatchFragment : Fragment() {
                         if (lstImageInit.size < 1) {
                             Log.d("capture strans", "------")
                             lstImageInit.add(mImage)
-                            takePicture(200)
+                            takePicture(100)
                         } else {
                             mStepScan = 2
                             updateUIWhenCapture()
@@ -272,7 +272,7 @@ internal class FaceMatchFragment : Fragment() {
                     } else if (mStepScan == 2) {
                         if (lstImageRed.size < 1) {
                             lstImageRed.add(mImage)
-                            takePicture(200)
+                            takePicture(100)
                         } else {
                             mStepScan = 3
                             updateUIWhenCapture()
@@ -280,7 +280,7 @@ internal class FaceMatchFragment : Fragment() {
                     } else if (mStepScan == 3) {
                         if (lstImageGreen.size < 1) {
                             lstImageGreen.add(mImage)
-                            takePicture(200)
+                            takePicture(100)
                         } else {
                             mStepScan = 4
                             updateUIWhenCapture()
@@ -288,7 +288,7 @@ internal class FaceMatchFragment : Fragment() {
                     } else if (mStepScan == 4) {
                         if (lstImageBlue.size < 1) {
                             lstImageBlue.add(mImage)
-                            takePicture(200)
+                            takePicture(100)
                         } else {
                             mStepScan = 5
                             updateUIWhenCapture()
@@ -335,10 +335,10 @@ internal class FaceMatchFragment : Fragment() {
         tvStatus.text = getString(R.string.fm_keep_face)
         prbLoading.visibility = View.GONE
         if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                Log.d("showSlide", "------")
-                slider.visibility = View.VISIBLE
-            }, 900)
+            slider.visibility = View.VISIBLE
+//            Handler(Looper.getMainLooper()).postDelayed({
+//                slider.visibility = View.VISIBLE
+//            }, 900)
         }
     }
 
@@ -475,7 +475,7 @@ internal class FaceMatchFragment : Fragment() {
         if (AppConfig.mLivenessRequest?.offlineMode == true) {
             AppConfig.livenessListener?.onCallbackLiveness(
                 LivenessModel(
-                    imgTransparent = image2B64,
+                    imgTransparent = imageB64,
                     imgRed = image2B64,
                     imgGreen = image3B64,
                     imgBlue = image4B64
@@ -702,10 +702,10 @@ internal class FaceMatchFragment : Fragment() {
     private fun updateUIWhenCapture() {
         slider.currentPagePosition = mStepScan - 1
         if (mStepScan == 1) {
-            takePicture(1000)
+            takePicture(1300)
         } else if (mStepScan == 2) {
             if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-                takePicture(1000)
+                takePicture(1300)
             } else {
                 cameraViewVideo.close()
                 slider.visibility = View.GONE
@@ -714,9 +714,9 @@ internal class FaceMatchFragment : Fragment() {
                 uploadFace()
             }
         } else if (mStepScan == 3) {
-            takePicture(1000)
+            takePicture(1300)
         } else if (mStepScan == 4) {
-            takePicture(1000)
+            takePicture(1300)
         } else {
             cameraViewVideo.close()
             slider.visibility = View.GONE

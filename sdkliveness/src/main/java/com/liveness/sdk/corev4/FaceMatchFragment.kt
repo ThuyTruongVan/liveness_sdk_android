@@ -238,7 +238,7 @@ internal class FaceMatchFragment : Fragment() {
                     if (mStepScan == 0) {
                         mStepScan = 1
                         showKeepDevice()
-                        takePicture(1000)
+                        takePicture(700)
                         mSessionId = UUID.randomUUID().toString()
                     }
                 } else {
@@ -296,15 +296,6 @@ internal class FaceMatchFragment : Fragment() {
                         uploadFile()
                         mStepScan++
                     }
-
-                    Log.d(
-                        "Thuytv",
-                        "---mStepScan : $mStepScan" + "----lstImageInit: ${lstImageInit.size}"
-                    )
-                    Log.d(
-                        "Thuytv",
-                        "---lstImageRed : ${lstImageRed.size}" + "----lstImageBlue: ${lstImageBlue.size}" + "----lstImageGreen: ${lstImageGreen.size}"
-                    )
                 }
 
             }
@@ -341,9 +332,11 @@ internal class FaceMatchFragment : Fragment() {
         tvStatus.visibility = View.VISIBLE
         tvStatus.text = getString(R.string.fm_keep_face)
         prbLoading.visibility = View.GONE
-        Handler(Looper.getMainLooper()).postDelayed({
-            slider.visibility = View.VISIBLE
-        }, 900)
+        if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                slider.visibility = View.VISIBLE
+            }, 900)
+        }
     }
 
     private fun saveBitmapToDisk(bitmap: Bitmap?) {
@@ -433,6 +426,14 @@ internal class FaceMatchFragment : Fragment() {
         activity?.window?.attributes = layoutParams
     }
 
+    private fun uploadFace(){
+        var imageB64 = ""
+        for (item in lstImageInit) {
+            imageB64 = item
+        }
+        registerFace(imageB64)
+    }
+
     private fun uploadFile() {
         var imageB64 = ""
         for (item in lstImageInit) {
@@ -467,24 +468,20 @@ internal class FaceMatchFragment : Fragment() {
         imageB64: String, image2B64: String, image3B64: String, image4B64: String
     ) {
         prbLoading.visibility = View.VISIBLE
-        if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-            if (AppConfig.mLivenessRequest?.offlineMode == true) {
-                AppConfig.livenessListener?.onCallbackLiveness(
-                    LivenessModel(
-                        imgTransparent = image2B64,
-                        imgRed = image2B64,
-                        imgGreen = image3B64,
-                        imgBlue = image4B64
-                    )
+        if (AppConfig.mLivenessRequest?.offlineMode == true) {
+            AppConfig.livenessListener?.onCallbackLiveness(
+                LivenessModel(
+                    imgTransparent = image2B64,
+                    imgRed = image2B64,
+                    imgGreen = image3B64,
+                    imgBlue = image4B64
                 )
-                onBackFragment()
-            } else {
-                getTOTP(imageB64, image2B64, image3B64, image4B64)
-            }
-
+            )
+            onBackFragment()
         } else {
-            registerFace(imageB64)
+            getTOTP(imageB64, image2B64, image3B64, image4B64)
         }
+
     }
 
     private fun getTOTP(imageB64: String, image2B64: String, image3B64: String, image4B64: String) {
@@ -648,7 +645,6 @@ internal class FaceMatchFragment : Fragment() {
                 }
                 if (status == 200) {
                     showLoading(false)
-
                     activity?.runOnUiThread {
                         AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(faceImage = faceImage))
                         AppPreferenceUtils(requireContext()).setRegisterFace(true)
@@ -694,7 +690,15 @@ internal class FaceMatchFragment : Fragment() {
         if (mStepScan == 1) {
             takePicture(1000)
         } else if (mStepScan == 2) {
-            takePicture(1000)
+            if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
+                takePicture(1000)
+            } else {
+                cameraViewVideo.close()
+                slider.visibility = View.GONE
+                tvStatus.visibility = View.VISIBLE
+                tvStatus.text = getString(R.string.fm_register_process)
+                uploadFace()
+            }
         } else if (mStepScan == 3) {
             takePicture(1000)
         } else if (mStepScan == 4) {

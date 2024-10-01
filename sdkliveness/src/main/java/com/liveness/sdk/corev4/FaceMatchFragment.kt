@@ -42,6 +42,7 @@ import com.otaliastudios.cameraview.PictureResult
 import com.otaliastudios.cameraview.controls.Facing
 import com.otaliastudios.cameraview.controls.Mode
 import com.liveness.sdk.corev4.api.HttpClientUtils
+import com.liveness.sdk.corev4.model.DataModel
 import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.utils.AppPreferenceUtils
 import com.liveness.sdk.corev4.utils.AppUtils
@@ -428,7 +429,7 @@ internal class FaceMatchFragment : Fragment() {
         activity?.window?.attributes = layoutParams
     }
 
-    private fun uploadFace(){
+    private fun uploadFace() {
         var imageB64 = ""
         Log.d("lstImageInit", lstImageInit.size.toString())
         for (item in lstImageInit) {
@@ -615,7 +616,7 @@ internal class FaceMatchFragment : Fragment() {
             )
             val responseDevice = HttpClientUtils.instance?.postV3(
                 AppUtils.decodeAndDecrypt(
-                    requireContext(), AppConfig.encrypted_register_face
+                    requireContext(), AppConfig.encrypted_register_device
                 ), request
             )
             var result: JSONObject? = null
@@ -633,7 +634,6 @@ internal class FaceMatchFragment : Fragment() {
             if (statusDevice == 200) {
                 AppPreferenceUtils(requireContext()).setDeviceId(mDeviceId)
                 AppPreferenceUtils(requireContext()).setTOTPSecret(requireContext(), mSecret)
-                Log.d("face", faceImage)
                 val response = HttpClientUtils.instance?.registerFace(requireContext(), faceImage)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
@@ -647,10 +647,20 @@ internal class FaceMatchFragment : Fragment() {
                 if (result?.has("message") == true) {
                     strMessage = result.getString("message")
                 }
+                var data: String? = null
+                if (result?.has("data") == true) {
+                    data = result.getString("data")
+                }
                 if (status == 200) {
                     showLoading(false)
                     activity?.runOnUiThread {
-                        AppConfig.livenessFaceListener?.onCallbackLiveness(LivenessModel(faceImage = faceImage))
+                        AppConfig.livenessFaceListener?.onCallbackLiveness(
+                            LivenessModel(
+                                status = status,
+                                faceRegisterId = data,
+                                faceImage = faceImage
+                            )
+                        )
                         AppPreferenceUtils(requireContext()).setRegisterFace(true)
                         onBackFragment()
                     }

@@ -24,8 +24,12 @@ data class LivenessModel(
     var success: Boolean? = null,
     @field:SerializedName("path_video")
     var pathVideo: String? = null,
+    //register field
     @field:SerializedName("face_image")
     var faceImage: String? = null,
+    @field:SerializedName("face_register_id")
+    var faceRegisterId: String? = null,
+    //register field
     @field:SerializedName("liveness_image")
     var livenessImage: String? = null,
     @field:SerializedName("transaction_id")

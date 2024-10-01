@@ -15,5 +15,8 @@ data class DataModel(
     @field:SerializedName("livenesScore")
     var livenesScore: Float? = null,
     @field:SerializedName("faceMatchingResult")
-    var faceMatchingResult: Int? = null
+    var faceMatchingResult: Int? = null,
+    @field:SerializedName("dataRegister")
+    var dataRegister: String? = null,
+
 )

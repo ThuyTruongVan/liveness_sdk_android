@@ -238,7 +238,7 @@ internal class FaceMatchFragment : Fragment() {
                     if (mStepScan == 0) {
                         mStepScan = 1
                         showKeepDevice()
-                        takePicture(700)
+                        takePicture(300)
                         mSessionId = UUID.randomUUID().toString()
                     }
                 } else {
@@ -261,6 +261,7 @@ internal class FaceMatchFragment : Fragment() {
                     Log.d("Thuytv", "------onPictureTaken--mStepScan: $mStepScan")
                     if (mStepScan == 1) {
                         if (lstImageInit.size < 1) {
+                            Log.d("capture strans", "------")
                             lstImageInit.add(mImage)
                             takePicture(200)
                         } else {
@@ -334,6 +335,7 @@ internal class FaceMatchFragment : Fragment() {
         prbLoading.visibility = View.GONE
         if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
             Handler(Looper.getMainLooper()).postDelayed({
+                Log.d("showSlide", "------")
                 slider.visibility = View.VISIBLE
             }, 900)
         }
@@ -428,6 +430,7 @@ internal class FaceMatchFragment : Fragment() {
 
     private fun uploadFace(){
         var imageB64 = ""
+        Log.d("lstImageInit", lstImageInit.size.toString())
         for (item in lstImageInit) {
             imageB64 = item
         }
@@ -630,6 +633,7 @@ internal class FaceMatchFragment : Fragment() {
             if (statusDevice == 200) {
                 AppPreferenceUtils(requireContext()).setDeviceId(mDeviceId)
                 AppPreferenceUtils(requireContext()).setTOTPSecret(requireContext(), mSecret)
+                Log.d("face", faceImage)
                 val response = HttpClientUtils.instance?.registerFace(requireContext(), faceImage)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {

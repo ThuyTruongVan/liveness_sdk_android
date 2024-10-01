@@ -13,11 +13,13 @@ internal class FaceMatchActivity : FragmentActivity() {
         setContentView(R.layout.ui_activity_fm)
 
         val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.fmContainer, FaceMatchFragment())
+        val fragment = FaceMatchFragment()
+        fragment.arguments = intent.extras
+        transaction.replace(R.id.fmContainer, fragment)
         transaction.addToBackStack(FaceMatchFragment::class.java.name)
         transaction.commit()
 
-        onBackPressedDispatcher.addCallback(this,object : OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 finish()
             }

@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnLiveNessFlash: Button
     private lateinit var btTestFlashNew: Button
     private lateinit var btTestFlashFragment: Button
+    private lateinit var btRegisterFace: Button
 
     private lateinit var imvImage: ImageView
     private lateinit var ivTrans: ImageView
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         btnLiveNessFlash = findViewById(R.id.btn_live_ness_flash)
         btTestFlashNew = findViewById(R.id.btTestLiveFlashNew)
         btTestFlashFragment = findViewById(R.id.btTestLiveFlashFragment)
+        btRegisterFace = findViewById(R.id.btRegisterFace)
         imvImage = findViewById(R.id.imv_image)
         ivTrans = findViewById(R.id.ivTrans)
         ivRed = findViewById(R.id.ivRed)
@@ -73,6 +75,24 @@ class MainActivity : AppCompatActivity() {
 //                showDefaultDialog(this@MainActivity, data?.data?.toString())
 //            }
 //        })
+
+        btRegisterFace.setOnClickListener {
+            LiveNessSDK.registerFace(this, getLivenessRequest(),object : CallbackLivenessListener {
+                override fun onCallbackLiveness(data: LivenessModel?) {
+//                        Log.d("AKKKKK", "-----data: $data")
+                    if (data?.status == 200) {
+                        data.faceImage?.apply {
+                            val img = base64ToBitmap(this)
+                            if (img != null) {
+                                ivTrans.setImageBitmap(img)
+                            }
+                        }
+                        data.faceImage = null
+                        tvResult.text = "$data"
+                    }
+                }
+            } )
+        }
 
         btTestFlashNew.setOnClickListener {
             LiveNessSDK.startLiveNess(

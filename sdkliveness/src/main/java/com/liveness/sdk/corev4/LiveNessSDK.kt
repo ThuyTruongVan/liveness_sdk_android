@@ -237,7 +237,8 @@ class LiveNessSDK {
             mLivenessRequest: LivenessRequest,
             supportFragmentManager: FragmentManager,
             frameView: Int,
-            livenessListener: CallbackLivenessListener?
+            livenessListener: CallbackLivenessListener?,
+            isShowToolbar: Boolean = true
         ) {
             livenessListener?.let {
                 AppConfig.livenessFaceListener = it
@@ -249,12 +250,36 @@ class LiveNessSDK {
                 val transaction = supportFragmentManager.beginTransaction()
                 val bundle = Bundle()
                 bundle.putString(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
+                bundle.putBoolean(AppConfig.KEY_BUNDLE_BOOLEAN, isShowToolbar)
                 val fragment = FaceMatchFragment()
                 fragment.setFragmentManager(supportFragmentManager)
                 fragment.arguments = bundle
                 transaction.add(frameView, fragment)
                 transaction.addToBackStack(FaceMatchFragment::class.java.name)
                 transaction.commit()
+            } else {
+                httpClientUtil?.registerDeviceAndFace(context, mLivenessRequest.imageFace ?: "")
+            }
+        }
+
+        @Keep
+        fun registerFace(
+            context: Context,
+            mLivenessRequest: LivenessRequest,
+            livenessListener: CallbackLivenessListener?
+        ) {
+            livenessListener?.let {
+                AppConfig.livenessFaceListener = it
+            }
+            AppConfig.mLivenessRequest = mLivenessRequest
+            val httpClientUtil = HttpClientUtils.instance
+            httpClientUtil?.setVariables(context, mLivenessRequest)
+            if (mLivenessRequest.imageFace.isNullOrEmpty()) {
+                val intent = Intent(context, FaceMatchActivity::class.java)
+                val bundle = Bundle()
+                bundle.putString(AppConfig.KEY_BUNDLE_SCREEN, AppConfig.TYPE_SCREEN_REGISTER_FACE)
+                intent.putExtras(bundle)
+                ContextCompat.startActivity(context, intent, null)
             } else {
                 httpClientUtil?.registerDeviceAndFace(context, mLivenessRequest.imageFace ?: "")
             }

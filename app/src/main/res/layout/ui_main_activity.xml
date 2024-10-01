@@ -78,6 +78,14 @@
         android:stateListAnimator="@null"
         android:text="Test Live Flash New Fragment"
         android:textColor="@color/white" />
+    <Button
+        android:id="@+id/btRegisterFace"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="30dp"
+        android:stateListAnimator="@null"
+        android:text="RegisterFace"
+        android:textColor="@color/white" />
 
     <ImageView
         android:id="@+id/imv_image"

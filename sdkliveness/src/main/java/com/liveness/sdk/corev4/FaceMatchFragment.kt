@@ -48,6 +48,7 @@ import com.liveness.sdk.corev4.utils.AppPreferenceUtils
 import com.liveness.sdk.corev4.utils.AppUtils
 import com.liveness.sdk.corev4.utils.TotpUtils
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -258,7 +259,7 @@ internal class FaceMatchFragment : Fragment() {
                 super.onPictureTaken(result)
                 result.data.let {
                     val mImage =
-                        android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
+                        android.util.Base64.encodeToString(it.scaleImage(), android.util.Base64.NO_PADDING)
                     Log.d("Thuytv", "------onPictureTaken--mStepScan: $mStepScan")
                     if (mStepScan == 1) {
                         if (lstImageInit.size < 1) {
@@ -763,6 +764,16 @@ internal class FaceMatchFragment : Fragment() {
             }.create().show()
         }
 
+    }
+
+    fun ByteArray.scaleImage(): ByteArray {
+        val stream = ByteArrayOutputStream()
+        val bitmap = BitmapFactory.decodeByteArray(this, 0, this.size)
+        val height = bitmap.height/3
+        val width = bitmap.width/3
+        val scaleBitmap =  Bitmap.createScaledBitmap(bitmap,width,height,true)
+        scaleBitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
+        return stream.toByteArray()
     }
 
     fun setFragmentManager(fragmentManager: FragmentManager) {

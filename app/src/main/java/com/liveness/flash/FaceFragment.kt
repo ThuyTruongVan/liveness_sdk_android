@@ -4,8 +4,10 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -42,7 +44,11 @@ import com.otaliastudios.cameraview.controls.Facing
 import com.otaliastudios.cameraview.controls.Mode
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.Random
+import java.util.concurrent.Executors
 
 /**
  * Created by Thuytv on 18/05/2024.
@@ -192,7 +198,8 @@ class FaceFragment : Fragment() {
                 super.onPictureTaken(result)
                 if (typeScreen != "TYPE_SCREEN_REGISTER_FACE") {
                     result.data.let {
-                        mImgLiveNess = android.util.Base64.encodeToString(it, android.util.Base64.NO_PADDING)
+                        val imageScale = it.scaleImage()
+                        mImgLiveNess = android.util.Base64.encodeToString(imageScale, android.util.Base64.NO_PADDING)
                         callAPIGEtTOTP(mImgLiveNess, bgColor)
                     }
                     bgFullScreenDefault.visibility = View.GONE
@@ -312,7 +319,7 @@ class FaceFragment : Fragment() {
 
     fun callAPIGEtTOTP(imgLiveNess: String, bgColor: Int) {
         showLoading(true)
-        initTransaction(imgLiveNess, bgColor,"123")
+        initTransaction(imgLiveNess, bgColor, "123")
 //        checkLiveNess(imgLiveNess, bgColor)
     }
 
@@ -354,7 +361,6 @@ class FaceFragment : Fragment() {
                     onBackFragment()
                 }
             }
-
         })
     }
 
@@ -595,4 +601,48 @@ class FaceFragment : Fragment() {
     fun setCallBack(mCallbackAPIListener: CallbackAPIListener) {
         this.mCallbackAPIListener = mCallbackAPIListener
     }
+
+    fun ByteArray.scaleImage(): ByteArray {
+        val stream = ByteArrayOutputStream()
+        val bitmap = BitmapFactory.decodeByteArray(this, 0, this.size)
+        val height = bitmap.height/3
+        val width = bitmap.width/3
+        val scaleBitmap =  Bitmap.createScaledBitmap(bitmap,width,height,true)
+        scaleBitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
+//        saveBitmapToDisk(scaleBitmap)
+        return stream.toByteArray()
+    }
+//    private fun saveBitmapToDisk(bitmap: Bitmap?) {
+//        val executor = Executors.newSingleThreadExecutor()
+//        val handler = Handler(Looper.getMainLooper())
+//        executor.execute {
+//            val root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+//            val appDir = File(root.absolutePath + File.separator + "SaveImage")
+//            if (!appDir.exists()) {
+//                val res: Boolean = appDir.mkdir()
+//                if (!res) {
+//                    Log.d("Thuytv", "------can't create folder---: ${appDir.absolutePath}")
+//
+//                }
+//            }
+//            val fileName = "ImageScan" + System.currentTimeMillis() + ".jpg"
+//            val file = File(appDir, fileName)
+//            try {
+//                val fos = FileOutputStream(file)
+//                bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+//                fos.flush()
+//                fos.close()
+////                val uri: Uri = Uri.fromFile(file)
+////                requireActivity().sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
+//                MediaScannerConnection.scanFile(
+//                    context, arrayOf(file.toString()), null, null
+//                )
+//            } catch (e: IOException) {
+//                e.printStackTrace()
+//            }
+//            handler.post {
+//
+//            }
+//        }
+//    }
 }

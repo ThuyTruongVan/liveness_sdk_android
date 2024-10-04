@@ -67,11 +67,11 @@ internal class TotpUtils(private val mContext: Context) {
         }
 
     fun getTotp(): String {
-        if (totpSecret?.isNotEmpty() == true) {
-            val generator = TOTPGenerator()
-            Log.d("Thuytv", "-----totpSecret: $totpSecret")
-            return generator.generateTOTP(totpSecret!!)
-        }
+//        if (totpSecret?.isNotEmpty() == true) {
+//            val generator = TOTPGenerator()
+//            Log.d("Thuytv", "-----totpSecret: $totpSecret")
+//            return generator.generateTOTP(totpSecret!!)
+//        }
         return ""
     }
 

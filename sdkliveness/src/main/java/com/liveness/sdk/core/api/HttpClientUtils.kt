@@ -414,16 +414,16 @@ internal class HttpClientUtils {
     fun checkLiveNessFlash(mContext: Context, a: String, b: String, c: Int, callbackAPIListener: CallbackAPIListener?) {
         Thread {
             val d = TotpUtils(mContext).getTotp()
-            if (d.isNullOrEmpty() || d == "-1") {
-                Handler(Looper.getMainLooper()).post {
-                    callbackAPIListener?.onCallbackResponse("TOTP null")
-                }
-            } else {
+//            if (d.isNullOrEmpty() || d == "-1") {
+//                Handler(Looper.getMainLooper()).post {
+//                    callbackAPIListener?.onCallbackResponse("TOTP null")
+//                }
+//            } else {
                 val response = checkLiveNessFlash(mContext, d, a, b, c)
                 Handler(Looper.getMainLooper()).post {
                     callbackAPIListener?.onCallbackResponse(response)
                 }
-            }
+//            }
         }.start()
 
     }
@@ -431,16 +431,16 @@ internal class HttpClientUtils {
     fun checkLiveNess(mContext: Context, b: String, c: Int, callbackAPIListener: CallbackAPIListener?) {
         Thread {
             val d = TotpUtils(mContext).getTotp()
-            if (d.isNullOrEmpty() || d == "-1") {
-                Handler(Looper.getMainLooper()).post {
-                    callbackAPIListener?.onCallbackResponse("TOTP null")
-                }
-            } else {
+//            if (d.isNullOrEmpty() || d == "-1") {
+//                Handler(Looper.getMainLooper()).post {
+//                    callbackAPIListener?.onCallbackResponse("TOTP null")
+//                }
+//            } else {
                 val response = checkLiveNess(mContext, d, b, c)
                 Handler(Looper.getMainLooper()).post {
                     callbackAPIListener?.onCallbackResponse(response)
                 }
-            }
+//            }
         }.start()
 
     }

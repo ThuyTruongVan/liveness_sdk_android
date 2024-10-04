@@ -93,6 +93,7 @@ internal class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
     fun ByteArray.toBitmap(): Bitmap {
         return BitmapFactory.decodeByteArray(this, 0, this.size)
     }
+
     private fun Frame.detectFaces() {
         val dataImage = data ?: return
         val inputImage = InputImage.fromByteArray(dataImage, size.width, size.height, rotation, format)

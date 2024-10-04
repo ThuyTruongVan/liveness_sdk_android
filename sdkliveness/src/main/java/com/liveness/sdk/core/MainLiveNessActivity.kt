@@ -346,11 +346,11 @@ internal class MainLiveNessActivity : Fragment() {
         showLoading(true)
         Thread {
             val tOTP = TotpUtils(requireContext()).getTotp()
-            if (tOTP.isNullOrEmpty() || tOTP == "-1") {
-                showToast("TOTP null")
-            } else {
+//            if (tOTP.isNullOrEmpty() || tOTP == "-1") {
+//                showToast("TOTP null")
+//            } else {
                 initTransaction(tOTP, imgLiveNess, bgColor, AppConfig.mLivenessRequest?.clientTransactionId)
-            }
+//            }
         }.start()
     }
 

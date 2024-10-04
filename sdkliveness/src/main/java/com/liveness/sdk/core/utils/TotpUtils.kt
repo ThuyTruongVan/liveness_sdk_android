@@ -44,12 +44,12 @@ internal class TotpUtils(private val mContext: Context) {
                     b = UUID.randomUUID().toString()
                 }
                 val request = JSONObject()
-                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_deviceId), b)
-                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_deviceOS), "Android")
-                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_device_name), Build.MANUFACTURER + " " + Build.MODEL)
-                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_period), AppConfig.mLivenessRequest?.duration)
-                request.put(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_secret), a)
-                val response = instance?.postV3(AppUtils.decodeAndDecrypt(mContext,AppConfig.encrypted_register_device), request)
+                request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceId), b)
+                request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceOS), "Android")
+                request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_device_name), Build.MANUFACTURER + " " + Build.MODEL)
+                request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_period), AppConfig.mLivenessRequest?.duration)
+                request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_secret), a)
+                val response = instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_register_device), request)
                 var result: JSONObject? = null
                 if (response != null && response.length > 0) {
                     result = JSONObject(response)
@@ -67,11 +67,11 @@ internal class TotpUtils(private val mContext: Context) {
         }
 
     fun getTotp(): String {
-//        if (totpSecret?.isNotEmpty() == true) {
-//            val generator = TOTPGenerator()
-//            Log.d("Thuytv", "-----totpSecret: $totpSecret")
-//            return generator.generateTOTP(totpSecret!!)
-//        }
+        if (totpSecret?.isNotEmpty() == true) {
+            val generator = TOTPGenerator()
+            Log.d("Thuytv", "-----totpSecret: $totpSecret")
+            return generator.generateTOTP(totpSecret!!)
+        }
         return ""
     }
 

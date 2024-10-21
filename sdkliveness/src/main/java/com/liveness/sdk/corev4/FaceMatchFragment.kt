@@ -90,8 +90,10 @@ internal class FaceMatchFragment : Fragment() {
     private var typeScreen: String? = null
     private var mFragmentManager: FragmentManager? = null
     private var mImageList: MutableList<String> = ArrayList()
-    private lateinit var listColorDefault: ArrayList<Long>
+    private val listColorDefault: ArrayList<Long> =
+        arrayListOf(0xFFFF0000L, 0xFF00FF00L, 0xFF0000FFL)
     private var isInit = false
+    private var mCount: Int? = 1
 
 
     override fun onCreateView(
@@ -126,14 +128,7 @@ internal class FaceMatchFragment : Fragment() {
         } else {
             requestPermissions()
         }
-        listColorDefault = arrayListOf(
-            ContextCompat.getColor(requireContext(), R.color.fm_transparent).toLong(),
-            ContextCompat.getColor(requireContext(), R.color.fm_color_red).toLong(),
-            ContextCompat.getColor(requireContext(), R.color.fm_color_green).toLong(),
-            ContextCompat.getColor(requireContext(), R.color.fm_color_blue).toLong()
-        )
-        Log.d("list", listColorDefault.toString())
-        initListColor()
+//        initListColor()
         setScreenBrightness(1f)
         return view
     }
@@ -150,9 +145,21 @@ internal class FaceMatchFragment : Fragment() {
         }
     }
 
-    private fun initListColor() {
+    private fun getColor(color: Int): Long{
+        var result= listColorDefault.last()
+        if(color>listColorDefault.size-1){
+            listColorDefault.removeAt(listColorDefault.size-1)
+        }else{
+            result= listColorDefault[color]
+            listColorDefault.removeAt(color)
+        }
+        return result;
+    }
+
+    private fun initListColor(color: Int) {
+        listColor.add(0x00000000L)
+        listColor.add(getColor(color))
         if (AppConfig.mLivenessRequest?.colorConfig != null && checkColor()) {
-            listColor.add(listColorDefault[0])
             AppConfig.mLivenessRequest?.colorConfig?.apply {
                 for (i in indices) {
                     listColor.add(this[i])
@@ -160,12 +167,13 @@ internal class FaceMatchFragment : Fragment() {
                 }
             }
         } else {
-            listColor.addAll(listColorDefault)
+//            listColor.addAll(listColorDefault)
         }
         sliderAdapter = SliderAdapter()
         sliderAdapter.renewItems(listColor)
         slider.setSliderAdapter(sliderAdapter)
     }
+
 
     private fun checkColor(): Boolean {
         AppConfig.mLivenessRequest?.colorConfig?.forEach {
@@ -692,8 +700,12 @@ internal class FaceMatchFragment : Fragment() {
                         data = result.getJSONObject("data")
                     }
                     val color = data?.getInt("randomColor")
-                    val count = data?.getInt("randomFrame")
-                    isInit = true
+                    mCount = data?.getInt("randomFrame")
+                    color?.apply {
+                        initListColor(this)
+                        isInit = true
+
+                    }
                     showLoading(false)
                 } else {
                     showLoading(false)
@@ -840,7 +852,7 @@ internal class FaceMatchFragment : Fragment() {
         if (mStepScan <= listColor.size) {
             if (mStepScan == 2) {
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-                    takePicture(1200)
+                    takePicture(mCount!!*1000L)
                 } else {
                     cameraViewVideo.close()
                     slider.visibility = View.GONE

@@ -12,6 +12,7 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.liveness.sdk.corev4.LiveNessSDK
 import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.model.LivenessRequest
@@ -24,10 +25,7 @@ import java.io.InputStream
  */
 class CustomActivity : AppCompatActivity() {
 
-    private lateinit var ivTrans: ImageView
-    private lateinit var ivRed: ImageView
-    private lateinit var ivGreen: ImageView
-    private lateinit var ivBlue: ImageView
+    private lateinit var rvResult: RecyclerView
     private lateinit var swOffline: Switch
     private lateinit var swShowToolbar: Switch
     private lateinit var tvResult: TextView
@@ -36,10 +34,8 @@ class CustomActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.ui_custom_activity)
         btStart = findViewById(R.id.btStart)
-        ivTrans = findViewById(R.id.ivTrans)
-        ivRed = findViewById(R.id.ivRed)
-        ivGreen = findViewById(R.id.ivGreen)
-        ivBlue = findViewById(R.id.ivBlue)
+
+        rvResult = findViewById(R.id.rvResult)
         swOffline = findViewById(R.id.swOffline)
         swShowToolbar = findViewById(R.id.swShowToolbar)
         tvResult = findViewById(R.id.tvResult)
@@ -57,38 +53,15 @@ class CustomActivity : AppCompatActivity() {
                         if (data?.status == 200) {
 
                             data.livenessImage?.apply {
-                                val img = base64ToBitmap(this)
-                                if (img != null) {
-                                    ivTrans.setImageBitmap(img)
-                                }
+                                val map = hashMapOf(
+                                    0x00000000L to this
+                                )
+                                createAdapter(map)
                             }
                             data.livenessImage = null
                             tvResult.text = "$data"
                         } else {
-                            data?.imgTransparent?.apply {
-                                val img = base64ToBitmap(this)
-                                if (img != null) {
-                                    ivTrans.setImageBitmap(img)
-                                }
-                            }
-                            data?.imgRed?.apply {
-                                val img = base64ToBitmap(this)
-                                if (img != null) {
-                                    ivRed.setImageBitmap(img)
-                                }
-                            }
-                            data?.imgGreen?.apply {
-                                val img = base64ToBitmap(this)
-                                if (img != null) {
-                                    ivGreen.setImageBitmap(img)
-                                }
-                            }
-                            data?.imgBlue?.apply {
-                                val img = base64ToBitmap(this)
-                                if (img != null) {
-                                    ivBlue.setImageBitmap(img)
-                                }
-                            }
+                            data?.imageResult?.let { it1 -> createAdapter(it1) }
                         }
 
                     }
@@ -97,7 +70,12 @@ class CustomActivity : AppCompatActivity() {
             )
         }
 
+    }
 
+    private fun createAdapter(data: HashMap<Long, String>) {
+        val adapter = ResultAdapter(data)
+        rvResult.adapter = adapter
+        adapter.notifyDataSetChanged()
     }
 
     private fun getLivenessRequest(): LivenessRequest {
@@ -136,7 +114,8 @@ class CustomActivity : AppCompatActivity() {
             optionHeader = optionHeader,
             optionRequest = optionRequest,
             isDebug = true,
-            offlineMode = swOffline.isChecked
+            offlineMode = swOffline.isChecked,
+            colorConfig = listOf(0xFFFFFF00, 0xFF800080, 0xFFFFA500)
         )
 
     }

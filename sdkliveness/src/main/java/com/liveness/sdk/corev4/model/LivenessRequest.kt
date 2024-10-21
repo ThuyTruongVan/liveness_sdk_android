@@ -37,5 +37,7 @@ data class LivenessRequest(
     @field:SerializedName("is_video")
     var isVideo: Boolean = false,
     @field:SerializedName("offline_mode")
-    var offlineMode: Boolean = false
-)
+    var offlineMode: Boolean = false,
+    @field:SerializedName("color_config")
+    var colorConfig: List<Long>? = null
+    )

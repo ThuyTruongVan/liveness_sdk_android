@@ -9,8 +9,8 @@ import com.liveness.sdk.corev4.R
 
 class SliderAdapter :
     SliderViewAdapter<SliderAdapter.SliderAdapterVH>() {
-    private var mSliderItems: MutableList<Int> = ArrayList()
-    fun renewItems(sliderItems: MutableList<Int>) {
+    private var mSliderItems: MutableList<Long> = ArrayList()
+    fun renewItems(sliderItems: MutableList<Long>) {
         mSliderItems = sliderItems
         notifyDataSetChanged()
     }
@@ -22,7 +22,7 @@ class SliderAdapter :
     }
 
     override fun onBindViewHolder(viewHolder: SliderAdapterVH, position: Int) {
-        viewHolder.imageViewBackground.setBackgroundColor(mSliderItems[position])
+        viewHolder.imageViewBackground.setBackgroundColor(mSliderItems[position].toInt())
     }
 
     override fun getCount(): Int {

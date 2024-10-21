@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity() {
 //        })
 
         btRegisterFace.setOnClickListener {
+            LiveNessSDK.testRSA()
             LiveNessSDK.registerFace(this, getLivenessRequest(), object : CallbackLivenessListener {
                 override fun onCallbackLiveness(data: LivenessModel?) {
 //                        Log.d("AKKKKK", "-----data: $data")

@@ -345,6 +345,17 @@ internal class HttpClientUtils {
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_clientTransactionId), rId)
         return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_init_transaction), request)
     }
+    fun initTransaction(mContext: Context): String? {
+        val request = JSONObject()
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_duration), AppConfig.mLivenessRequest?.duration)
+        return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_init_transaction), request)
+    }
+
+    fun initAttemp(mContext: Context, d: String): String? {
+        val request = JSONObject()
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_transaction_id), d)
+        return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_init_attemp), request)
+    }
 
     fun checkLiveNessFlash(mContext: Context, a: String, b: String, c: String, d: Int): String? {
         val request = JSONObject()

@@ -340,6 +340,8 @@ class LiveNessSDK {
             Log.d("Thuytv", "-----live1: " + rsa.encrypt("image_live1"))
             Log.d("Thuytv", "-----live2: " + rsa.encrypt("image_live2"))
             Log.d("Thuytv", "-----live3: " + rsa.encrypt("image_live3"))
+            Log.d("Thuytv", "-----attemp: " + rsa.encrypt("/eid/v3/initLivenessAttemp"))
+            Log.d("Thuytv", "-----duration: " + rsa.encrypt("duration"))
 
 //            val strDecrypte = rsa.decrypt(AppConfig.encrypted_transaction_id)
 //            Log.d("Thuytv", "-----strDecrypte: " + strDecrypte)

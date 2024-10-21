@@ -90,6 +90,8 @@ internal class FaceMatchFragment : Fragment() {
     private var typeScreen: String? = null
     private var mFragmentManager: FragmentManager? = null
     private var mImageList: MutableList<String> = ArrayList()
+    private lateinit var listColorDefault: ArrayList<Long>
+    private var isInit = false
 
 
     override fun onCreateView(
@@ -124,6 +126,13 @@ internal class FaceMatchFragment : Fragment() {
         } else {
             requestPermissions()
         }
+        listColorDefault = arrayListOf(
+            ContextCompat.getColor(requireContext(), R.color.fm_transparent).toLong(),
+            ContextCompat.getColor(requireContext(), R.color.fm_color_red).toLong(),
+            ContextCompat.getColor(requireContext(), R.color.fm_color_green).toLong(),
+            ContextCompat.getColor(requireContext(), R.color.fm_color_blue).toLong()
+        )
+        Log.d("list", listColorDefault.toString())
         initListColor()
         setScreenBrightness(1f)
         return view
@@ -132,7 +141,7 @@ internal class FaceMatchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        initAttemp()
     }
 
     private fun initRunnable() {
@@ -143,14 +152,15 @@ internal class FaceMatchFragment : Fragment() {
 
     private fun initListColor() {
         if (AppConfig.mLivenessRequest?.colorConfig != null && checkColor()) {
-            AppConfig.mLivenessRequest?.colorConfig?.forEach {
-                listColor.add(it)
+            listColor.add(listColorDefault[0])
+            AppConfig.mLivenessRequest?.colorConfig?.apply {
+                for (i in indices) {
+                    listColor.add(this[i])
+                    if (listColor.size >= 4) break
+                }
             }
         } else {
-            listColor.add(ContextCompat.getColor(requireContext(), R.color.fm_transparent).toLong())
-            listColor.add(ContextCompat.getColor(requireContext(), R.color.fm_color_red).toLong())
-            listColor.add(ContextCompat.getColor(requireContext(), R.color.fm_color_green).toLong())
-            listColor.add(ContextCompat.getColor(requireContext(), R.color.fm_color_blue).toLong())
+            listColor.addAll(listColorDefault)
         }
         sliderAdapter = SliderAdapter()
         sliderAdapter.renewItems(listColor)
@@ -210,7 +220,7 @@ internal class FaceMatchFragment : Fragment() {
             }
 
             override fun onFaceStatus(status: Int, percent: Int?) {
-
+                if (!isInit) return
                 restartSection()
                 when (status) {
                     0 -> { // small
@@ -253,6 +263,7 @@ internal class FaceMatchFragment : Fragment() {
 
             override fun onProcessing(isFace: Boolean) {
                 super.onProcessing(isFace)
+                if (!isInit) return
                 if (isFace) {
                     Log.d("Thuytv", "------onProcessing--mStepScan: $mStepScan")
                     if (mStepScan == 0) {
@@ -275,11 +286,9 @@ internal class FaceMatchFragment : Fragment() {
             override fun onPictureTaken(result: PictureResult) {
                 super.onPictureTaken(result)
                 result.data.let {
-                    val mImage =
-                        android.util.Base64.encodeToString(
-                            it.scaleImage(),
-                            android.util.Base64.NO_PADDING
-                        )
+                    val mImage = android.util.Base64.encodeToString(
+                        it.scaleImage(), android.util.Base64.NO_PADDING
+                    )
                     Log.d("Thuytv", "------onPictureTaken--mStepScan: $mStepScan")
                     mImageList.add(mStepScan - 1, mImage)
                     if (mStepScan <= listColor.size) {
@@ -643,6 +652,75 @@ internal class FaceMatchFragment : Fragment() {
         }
     }
 
+    private fun initAttemp() {
+        showLoading(true)
+        Thread {
+            val response = HttpClientUtils.instance?.initTransaction(requireContext())
+            var result: JSONObject? = null
+            if (response?.isNotEmpty() == true) {
+                result = JSONObject(response)
+            }
+            var status = -1
+            if (result?.has("status") == true) {
+                status = result.getInt("status")
+            }
+            var strMessage = "Error"
+            if (result?.has("message") == true) {
+                strMessage = result.getString("message")
+            }
+            var data: String? = null
+            if (result?.has("data") == true) {
+                data = result.getString("data")
+            }
+            if (status == 200) {
+                val response = HttpClientUtils.instance?.initAttemp(requireContext(), data!!)
+                var result: JSONObject? = null
+                if (response?.isNotEmpty() == true) {
+                    result = JSONObject(response)
+                }
+                var status = -1
+                if (result?.has("status") == true) {
+                    status = result.getInt("status")
+                }
+                var strMessage = "Error"
+                if (result?.has("message") == true) {
+                    strMessage = result.getString("message")
+                }
+                if (status == 200) {
+                    var data: JSONObject? = null
+                    if (result?.has("data") == true) {
+                        data = result.getJSONObject("data")
+                    }
+                    val color = data?.getInt("randomColor")
+                    val count = data?.getInt("randomFrame")
+                    isInit = true
+                    showLoading(false)
+                } else {
+                    showLoading(false)
+                    activity?.runOnUiThread {
+                        AppConfig.livenessListener?.onCallbackLiveness(
+                            LivenessModel(
+                                status = status, message = strMessage
+                            )
+                        )
+                        onBackFragment()
+                    }
+                }
+            } else {
+                showLoading(false)
+                activity?.runOnUiThread {
+                    AppConfig.livenessListener?.onCallbackLiveness(
+                        LivenessModel(
+                            status = status, message = strMessage
+                        )
+                    )
+                    onBackFragment()
+                }
+            }
+        }.start()
+
+    }
+
     private fun registerFace(faceImage: String) {
         showLoading(true)
         Thread {
@@ -716,9 +794,7 @@ internal class FaceMatchFragment : Fragment() {
                     activity?.runOnUiThread {
                         AppConfig.livenessFaceListener?.onCallbackLiveness(
                             LivenessModel(
-                                status = status,
-                                faceRegisterId = data,
-                                faceImage = faceImage
+                                status = status, faceRegisterId = data, faceImage = faceImage
                             )
                         )
                         AppPreferenceUtils(requireContext()).setRegisterFace(true)

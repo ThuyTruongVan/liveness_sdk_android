@@ -75,6 +75,12 @@ internal object AppConfig {
     val encrypted_image_live3 = "QFMpqtkzkmY57HTO7bURuY/rGbCkO3TSimI57QSxYXDG7bXDVZgBARnEWbd8SBHJvdCsTeo12/9a\n" +
             "gGdV1uLAUNIWAf48oyB199Q7qoSSQ2rrCuYsb8SLYbKgAhbz6nrcowHMcvKxJOxwi0r0GPk9u67k\n" +
             "o4A5i8E+N8L35MCMzhE="
+    val encrypted_duration = "kyVlUd1HO+k5EHS+CmeAHn3uTe/9ZtIFv3atSdpIQtyVogtwgxKXgED+JRWZOuFBn+1vPzNT7fAd\n" +
+            "ejV+WHiznhdvtzXpOUPSaUjQ2xu5oBhAaTmAw/q8fPjshRjxjh2n7vFmMMZv8JPjlmd2ICYyPVCX\n" +
+            "dRze/yyTTtdy5cwDFtc="
+    val encrypted_init_attemp = "g/VU9cN6rL73qqqqyVIIKpsk+XLZqjztrd71pmDb5u743RV7PojiI8LjUQihfQm6vZcF+mZ9xK6D\n" +
+            "mYPCyVMbu4J8A91ciTMKIutmiTXdfHtcFDB21QSIruAwppEg5AVPoKuhwZJJYP0wKmVZFUvmgUcG\n" +
+            "K/f8yNTY3VYZFB0297k="
     val encrypted_color = "Hil5dpT0hnrFWZklyVCvxi7JqX4P0daZcckCZjaROKZPTKoI1r11pu8WXgTO/I/4eDGKpR4CPkmy\n" +
             "KxpzxM/87fGOY0afrHRfIQeBspuNpzzFnyixxDwLQ/EL2QWn/6QPijIgOfyd+NqBzR2r9XBfhxRB\n" +
             "GkZfx9clZ8yvfM95Ouc="

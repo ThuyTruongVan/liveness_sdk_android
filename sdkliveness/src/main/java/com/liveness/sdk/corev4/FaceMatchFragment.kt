@@ -295,9 +295,9 @@ internal class FaceMatchFragment : Fragment() {
                     if (mStepScan == 0) {
                         mStepScan = 1
                         showKeepDevice()
-                        Handler(Looper.getMainLooper()).post {
-                            test.visibility = View.INVISIBLE
-                        }
+//                        Handler(Looper.getMainLooper()).post {
+//                            test.visibility = View.INVISIBLE
+//                        }
                         takePicture(500)
                         mSessionId = UUID.randomUUID().toString()
                     }
@@ -315,9 +315,9 @@ internal class FaceMatchFragment : Fragment() {
             override fun onPictureTaken(result: PictureResult) {
                 super.onPictureTaken(result)
                 result.data.let {
-                    Handler(Looper.getMainLooper()).post {
-                        test.visibility = View.VISIBLE
-                    }
+//                    Handler(Looper.getMainLooper()).post {
+//                        test.visibility = View.VISIBLE
+//                    }
                     val mImage = Base64.encodeToString(
                         it.scaleImage(), Base64.NO_PADDING
                     )
@@ -805,9 +805,9 @@ internal class FaceMatchFragment : Fragment() {
         if (mStepScan <= listColor.size) {
             if (mStepScan == 2) {
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-                    Handler(Looper.getMainLooper()).post {
-                        test.visibility = View.INVISIBLE
-                    }
+//                    Handler(Looper.getMainLooper()).post {
+//                        test.visibility = View.INVISIBLE
+//                    }
                     takePicture(mCount!! * 1000L)
                 } else {
                     cameraViewVideo.close()
@@ -817,9 +817,9 @@ internal class FaceMatchFragment : Fragment() {
                     uploadFace()
                 }
             } else {
-                Handler(Looper.getMainLooper()).post {
-                    test.visibility = View.INVISIBLE
-                }
+//                Handler(Looper.getMainLooper()).post {
+//                    test.visibility = View.INVISIBLE
+//                }
                 takePicture(1500)
             }
         } else {

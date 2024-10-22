@@ -149,7 +149,12 @@ internal class FaceMatchFragment : Fragment() {
             }
             isInit = true
         } else {
-            initAttemp()
+            if (typeScreen == AppConfig.TYPE_SCREEN_REGISTER_FACE) {
+                initListColor(0)
+                isInit = true
+            } else {
+                initAttemp()
+            }
         }
     }
 

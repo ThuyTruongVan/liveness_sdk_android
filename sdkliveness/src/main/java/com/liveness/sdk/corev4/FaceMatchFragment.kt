@@ -141,11 +141,13 @@ internal class FaceMatchFragment : Fragment() {
                 initListColor(AppConfig.mLivenessRequest?.dataConfig?.randomColor!!)
             } else {
                 showToast("Data config fail")
+                onBackFragment()
             }
             if (AppConfig.mLivenessRequest?.dataConfig?.randomFrame != null) {
                 mCount = AppConfig.mLivenessRequest?.dataConfig?.randomFrame
             } else {
                 showToast("Data config fail")
+                onBackFragment()
             }
             isInit = true
         } else {
@@ -179,7 +181,7 @@ internal class FaceMatchFragment : Fragment() {
         listColor.add(0x00000000L)
         listColor.add(getColor(color))
         if (AppConfig.mLivenessRequest?.colorConfig != null) {
-            if (checkColor() && AppConfig.mLivenessRequest?.colorConfig!!.size < 3) {
+            if (checkColor() && AppConfig.mLivenessRequest?.colorConfig!!.size >= 3) {
                 AppConfig.mLivenessRequest?.colorConfig?.apply {
                     for (i in indices) {
                         listColor.add(this[i])
@@ -188,6 +190,7 @@ internal class FaceMatchFragment : Fragment() {
                 }
             } else {
                 showToast("color config not math")
+                onBackFragment()
             }
 
         } else {
@@ -662,7 +665,6 @@ internal class FaceMatchFragment : Fragment() {
                     color?.apply {
                         initListColor(this)
                         isInit = true
-
                     }
                     showLoading(false)
                 } else {

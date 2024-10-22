@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
 import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
@@ -33,6 +34,7 @@ import com.liveness.sdk.corev4.api.HttpClientUtils
 import com.liveness.sdk.corev4.facedetector.FaceDetectorScan
 import com.liveness.sdk.corev4.facedetector.Frame
 import com.liveness.sdk.corev4.facedetector.LensFacing
+import com.liveness.sdk.corev4.model.ImageResult
 import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.slider.SliderAdapter
 import com.liveness.sdk.corev4.slider.SliderView
@@ -72,14 +74,11 @@ internal class FaceMatchFragment : Fragment() {
     private lateinit var toolbar: LinearLayout
     private lateinit var btBack: ImageView
     private lateinit var slider: SliderView
+    private lateinit var test: TextView
 
     private var mFaceDetector: FaceDetectorScan? = null
     private var mStepScan = 0
 
-    //    private var lstImageInit: ArrayList<String> = java.util.ArrayList()
-//    private var lstImageRed: ArrayList<String> = java.util.ArrayList()
-//    private var lstImageGreen: ArrayList<String> = java.util.ArrayList()
-//    private var lstImageBlue: ArrayList<String> = java.util.ArrayList()
     private var permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
     private val listColor: ArrayList<Long> = arrayListOf()
 
@@ -109,6 +108,7 @@ internal class FaceMatchFragment : Fragment() {
         swSaveImage = view.findViewById(R.id.swSaveImage)
         toolbar = view.findViewById(R.id.llToolbar)
         btBack = view.findViewById(R.id.ivBack)
+        test = view.findViewById(R.id.tvTest)
         if (arguments?.containsKey(AppConfig.KEY_BUNDLE_BOOLEAN) == true) {
             isShowToolbar = arguments?.getBoolean(AppConfig.KEY_BUNDLE_BOOLEAN, true) == true
         }
@@ -136,7 +136,21 @@ internal class FaceMatchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initAttemp()
+        if (AppConfig.mLivenessRequest?.offlineMode == true) {
+            if (AppConfig.mLivenessRequest?.dataConfig?.randomColor != null) {
+                initListColor(AppConfig.mLivenessRequest?.dataConfig?.randomColor!!)
+            } else {
+                showToast("Data config fail")
+            }
+            if (AppConfig.mLivenessRequest?.dataConfig?.randomFrame != null) {
+                mCount = AppConfig.mLivenessRequest?.dataConfig?.randomFrame
+            } else {
+                showToast("Data config fail")
+            }
+            isInit = true
+        } else {
+            initAttemp()
+        }
     }
 
     private fun initRunnable() {
@@ -145,27 +159,32 @@ internal class FaceMatchFragment : Fragment() {
         }
     }
 
-    private fun getColor(color: Int): Long{
-        var result= listColorDefault.last()
-        if(color>listColorDefault.size-1){
-            listColorDefault.removeAt(listColorDefault.size-1)
-        }else{
-            result= listColorDefault[color]
+    private fun getColor(color: Int): Long {
+        var result = listColorDefault.last()
+        if (color > listColorDefault.size - 1) {
+            listColorDefault.removeAt(listColorDefault.size - 1)
+        } else {
+            result = listColorDefault[color]
             listColorDefault.removeAt(color)
         }
-        return result;
+        return result
     }
 
     private fun initListColor(color: Int) {
         listColor.add(0x00000000L)
         listColor.add(getColor(color))
-        if (AppConfig.mLivenessRequest?.colorConfig != null && checkColor()) {
-            AppConfig.mLivenessRequest?.colorConfig?.apply {
-                for (i in indices) {
-                    listColor.add(this[i])
-                    if (listColor.size >= 4) break
+        if (AppConfig.mLivenessRequest?.colorConfig != null) {
+            if (checkColor()) {
+                AppConfig.mLivenessRequest?.colorConfig?.apply {
+                    for (i in indices) {
+                        listColor.add(this[i])
+                        if (listColor.size >= 4) break
+                    }
                 }
+            } else {
+                showToast("color config not math")
             }
+
         } else {
 //            listColor.addAll(listColorDefault)
         }
@@ -273,10 +292,12 @@ internal class FaceMatchFragment : Fragment() {
                 super.onProcessing(isFace)
                 if (!isInit) return
                 if (isFace) {
-                    Log.d("Thuytv", "------onProcessing--mStepScan: $mStepScan")
                     if (mStepScan == 0) {
                         mStepScan = 1
                         showKeepDevice()
+                        Handler(Looper.getMainLooper()).post {
+                            test.visibility = View.INVISIBLE
+                        }
                         takePicture(500)
                         mSessionId = UUID.randomUUID().toString()
                     }
@@ -294,56 +315,22 @@ internal class FaceMatchFragment : Fragment() {
             override fun onPictureTaken(result: PictureResult) {
                 super.onPictureTaken(result)
                 result.data.let {
-                    val mImage = android.util.Base64.encodeToString(
-                        it.scaleImage(), android.util.Base64.NO_PADDING
+                    Handler(Looper.getMainLooper()).post {
+                        test.visibility = View.VISIBLE
+                    }
+                    val mImage = Base64.encodeToString(
+                        it.scaleImage(), Base64.NO_PADDING
                     )
                     Log.d("Thuytv", "------onPictureTaken--mStepScan: $mStepScan")
-                    mImageList.add(mStepScan - 1, mImage)
+                    val index = mStepScan - 1
+                    if (index < 0) return
+                    mImageList.add(index, mImage)
                     if (mStepScan <= listColor.size) {
                         mStepScan++
                         updateUIWhenCapture(true)
                     } else {
                         updateUIWhenCapture(false)
                     }
-
-//                    if (mStepScan == 1) {
-//                        if (lstImageInit.size < 1) {
-//                            Log.d("capture strans", "------")
-//                            lstImageInit.add(mImage)
-//                            takePicture(100)
-//                        } else {
-//                            mStepScan = 2
-//                            updateUIWhenCapture()
-//                        }
-//                    } else if (mStepScan == 2) {
-//                        if (lstImageRed.size < 1) {
-//                            lstImageRed.add(mImage)
-//                            takePicture(100)
-//                        } else {
-//                            mStepScan = 3
-//                            updateUIWhenCapture()
-//                        }
-//                    } else if (mStepScan == 3) {
-//                        if (lstImageGreen.size < 1) {
-//                            lstImageGreen.add(mImage)
-//                            takePicture(100)
-//                        } else {
-//                            mStepScan = 4
-//                            updateUIWhenCapture()
-//                        }
-//                    } else if (mStepScan == 4) {
-//                        if (lstImageBlue.size < 1) {
-//                            lstImageBlue.add(mImage)
-//                            takePicture(100)
-//                        } else {
-//                            mStepScan = 5
-//                            updateUIWhenCapture()
-//                        }
-//                    } else if (mStepScan == 5) {
-//                        Log.d("Thuytv", "------uploadFile--start")
-//                        uploadFile()
-//                        mStepScan++
-//                    }
                 }
 
             }
@@ -365,10 +352,6 @@ internal class FaceMatchFragment : Fragment() {
     private fun restartSection() {
         mStepScan = 0
         mImageList.clear()
-//        lstImageRed.clear()
-//        lstImageInit.clear()
-//        lstImageBlue.clear()
-//        lstImageGreen.clear()
         mSessionId = ""
         tvStatus.visibility = View.GONE
         prbLoading.visibility = View.GONE
@@ -383,9 +366,6 @@ internal class FaceMatchFragment : Fragment() {
         prbLoading.visibility = View.GONE
         if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
             slider.visibility = View.VISIBLE
-//            Handler(Looper.getMainLooper()).postDelayed({
-//                slider.visibility = View.VISIBLE
-//            }, 900)
         }
     }
 
@@ -409,8 +389,6 @@ internal class FaceMatchFragment : Fragment() {
                 bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, fos)
                 fos.flush()
                 fos.close()
-//                val uri: Uri = Uri.fromFile(file)
-//                requireActivity().sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
                 MediaScannerConnection.scanFile(
                     context, arrayOf(file.toString()), null, null
                 )
@@ -486,34 +464,11 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun uploadFile() {
-//        var imageB64 = ""
-//        for (item in lstImageInit) {
-//            imageB64 = item
-//        }
-//        var image2B64 = ""
-//        for (item in lstImageRed) {
-//            image2B64 = item
-//        }
-//        var image3B64 = ""
-//        for (item in lstImageGreen) {
-//            image3B64 = item
-//        }
-//        var image4B64 = ""
-//        for (item in lstImageBlue) {
-//            image4B64 = item
-//        }
-//        if (image4B64.isEmpty()) {
-//            showToastError("Image Init null")
-//        } else if (image2B64.isEmpty()) {
-//            showToastError("Image RED null")
-//        } else if (image3B64.isEmpty()) {
-//            showToastError("Image GREEN null")
-//        } else if (image4B64.isEmpty()) {
-//            showToastError("Image BLUE null")
-//        } else {
-//            callApiUploadSession(imageB64, image2B64, image3B64, image4B64)
-//        }
-        callApiUploadSession()
+        if (mImageList.size > 2) {
+            callApiUploadSession(mImageList[1], mImageList[0], mImageList[2], mImageList[3])
+        } else {
+            callApiUploadSession(mImageList[1], null, null, null)
+        }
 
     }
 
@@ -537,35 +492,32 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun callApiUploadSession(
-        imageB64: String, image2B64: String, image3B64: String, image4B64: String
+        imageB64: String, image2B64: String?, image3B64: String?, image4B64: String?
     ) {
         prbLoading.visibility = View.VISIBLE
         if (AppConfig.mLivenessRequest?.offlineMode == true) {
-            AppConfig.livenessListener?.onCallbackLiveness(
-                LivenessModel(
-                    imageResult = getImageResult(),
-//                    imgTransparent = imageB64,
-//                    imgRed = image2B64,
-//                    imgGreen = image3B64,
-//                    imgBlue = image4B64
-                )
-            )
+            AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(imageResult = getImageResult()))
             onBackFragment()
         } else {
-//            getTOTP(imageB64, image2B64, image3B64, image4B64)
+            getTOTP(imageB64, image2B64, image3B64, image4B64)
         }
     }
 
-    private fun getImageResult(): HashMap<Long, String> {
-        val result = HashMap<Long, String>()
+    private fun getImageResult(): List<ImageResult> {
+        val result: MutableList<ImageResult> = mutableListOf()
         for (i in 0 until mImageList.size) {
-            result[listColor[i]] = mImageList[i]
+            result.add(ImageResult(listColor[i], mImageList[i]))
         }
         return result
     }
 
 
-    private fun getTOTP(imageB64: String, image2B64: String, image3B64: String, image4B64: String) {
+    private fun getTOTP(
+        imageB64: String,
+        image2B64: String?,
+        image3B64: String?,
+        image4B64: String?
+    ) {
         showLoading(true)
         Thread {
             val tOTP = TotpUtils(requireContext()).getTotp()
@@ -589,9 +541,9 @@ internal class FaceMatchFragment : Fragment() {
         tOTP: String,
         readCardId: String?,
         imageB64: String,
-        image2B64: String,
-        image3B64: String,
-        image4B64: String
+        image2B64: String?,
+        image3B64: String?,
+        image4B64: String?
     ) {
         val response = HttpClientUtils.instance?.initTransaction(requireContext(), readCardId)
         var result: JSONObject? = null
@@ -618,9 +570,9 @@ internal class FaceMatchFragment : Fragment() {
         tOTP: String,
         transactionID: String,
         imageB64: String,
-        image2B64: String,
-        image3B64: String,
-        image4B64: String
+        image2B64: String?,
+        image3B64: String?,
+        image4B64: String?
     ) {
         val response = HttpClientUtils.instance?.checkLiveNessFlashV2(
             requireContext(), tOTP, transactionID, imageB64, image2B64, image3B64, image4B64
@@ -641,6 +593,7 @@ internal class FaceMatchFragment : Fragment() {
             val liveNessModel = Gson().fromJson(response, LivenessModel::class.java)
             liveNessModel.livenessImage = imageB64
             liveNessModel.transactionID = transactionID
+            liveNessModel.imageResult = getImageResult()
             activity?.runOnUiThread {
                 showLoading(false)
                 AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
@@ -852,7 +805,10 @@ internal class FaceMatchFragment : Fragment() {
         if (mStepScan <= listColor.size) {
             if (mStepScan == 2) {
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-                    takePicture(mCount!!*1000L)
+                    Handler(Looper.getMainLooper()).post {
+                        test.visibility = View.INVISIBLE
+                    }
+                    takePicture(mCount!! * 1000L)
                 } else {
                     cameraViewVideo.close()
                     slider.visibility = View.GONE
@@ -861,7 +817,10 @@ internal class FaceMatchFragment : Fragment() {
                     uploadFace()
                 }
             } else {
-                takePicture(1200)
+                Handler(Looper.getMainLooper()).post {
+                    test.visibility = View.INVISIBLE
+                }
+                takePicture(1500)
             }
         } else {
             cameraViewVideo.close()
@@ -871,46 +830,10 @@ internal class FaceMatchFragment : Fragment() {
             uploadFile()
             saveImage()
         }
-//        if (mStepScan == 1) {
-//            takePicture(1300)
-//        } else if (mStepScan == 2) {
-//            if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-//                takePicture(1300)
-//            } else {
-//                cameraViewVideo.close()
-//                slider.visibility = View.GONE
-//                tvStatus.visibility = View.VISIBLE
-//                tvStatus.text = getString(R.string.fm_register_process)
-//                uploadFace()
-//            }
-//        } else if (mStepScan == 3) {
-//            takePicture(1300)
-//        } else if (mStepScan == 4) {
-//            takePicture(1300)
-//        } else {
-//            cameraViewVideo.close()
-//            slider.visibility = View.GONE
-//            tvStatus.visibility = View.VISIBLE
-//            tvStatus.text = getString(R.string.fm_verifying)
-//            uploadFile()
-//            saveImage()
-//        }
     }
 
     private fun saveImage() {
         if (swSaveImage.isChecked) {
-//            for (item in lstImageInit) {
-//                saveItem(item)
-//            }
-//            for (item in lstImageRed) {
-//                saveItem(item)
-//            }
-//            for (item in lstImageGreen) {
-//                saveItem(item)
-//            }
-//            for (item in lstImageBlue) {
-//                saveItem(item)
-//            }
             for (item in mImageList) {
                 saveItem(item)
             }

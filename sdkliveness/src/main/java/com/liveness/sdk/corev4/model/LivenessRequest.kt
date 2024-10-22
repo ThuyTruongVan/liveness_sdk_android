@@ -39,5 +39,7 @@ data class LivenessRequest(
     @field:SerializedName("offline_mode")
     var offlineMode: Boolean = false,
     @field:SerializedName("color_config")
-    var colorConfig: List<Long>? = null
+    var colorConfig: List<Long>? = null,
+    @field:SerializedName("data_config")
+    var dataConfig: DataConfig? = null
     )

@@ -14,11 +14,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.liveness.sdk.corev4.LiveNessSDK
+import com.liveness.sdk.corev4.model.DataConfig
+import com.liveness.sdk.corev4.model.ImageResult
 import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.model.LivenessRequest
 import com.liveness.sdk.corev4.utils.CallbackLivenessListener
 import java.io.ByteArrayInputStream
 import java.io.InputStream
+import kotlin.random.Random
 
 /**
  * Created by Thuytv on 15/04/2024.
@@ -53,9 +56,7 @@ class CustomActivity : AppCompatActivity() {
                         if (data?.status == 200) {
 
                             data.livenessImage?.apply {
-                                val map = hashMapOf(
-                                    0x00000000L to this
-                                )
+                                val map = listOf(ImageResult(0x00000000L, this))
                                 createAdapter(map)
                             }
                             data.livenessImage = null
@@ -72,7 +73,7 @@ class CustomActivity : AppCompatActivity() {
 
     }
 
-    private fun createAdapter(data: HashMap<Long, String>) {
+    private fun createAdapter(data: List<ImageResult>) {
         val adapter = ResultAdapter(data)
         rvResult.adapter = adapter
         adapter.notifyDataSetChanged()
@@ -102,7 +103,7 @@ class CustomActivity : AppCompatActivity() {
 //        val transactionId="TEST"
         val transactionId = "51219b1d-fc4e-4005-a988-4183e76fcd97"
         //ABCDEFGHIJKLMNOP
-        return LivenessRequest(
+        val request = LivenessRequest(
             duration = 600,
             privateKey = privateKey,
             appId = appId,
@@ -115,8 +116,12 @@ class CustomActivity : AppCompatActivity() {
             optionRequest = optionRequest,
             isDebug = true,
             offlineMode = swOffline.isChecked,
-            colorConfig = listOf(0xFFFFFF00, 0xFF800080, 0xFFFFA500)
+//            colorConfig = listOf(0xFFFFFF00, 0xFF800080, 0xFFFFA500)
         )
+        if (swOffline.isChecked) {
+            request.dataConfig = DataConfig((0..3).random(), (1..4).random())
+        }
+        return request
 
     }
 

@@ -371,14 +371,20 @@ internal class HttpClientUtils {
         return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_verify_face), request, optionalHeader)
     }
 
-    fun checkLiveNessFlashV2(mContext: Context, a: String, b: String, c: String, d: String, e: String, f: String): String? {
+    fun checkLiveNessFlashV2(mContext: Context, a: String, b: String, c: String, d: String?, e: String?, f: String?): String? {
         val request = JSONObject()
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_totp), a)
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_transaction_id), b)
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live), c)
-        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live1), d)
-        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live2), e)
-        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live3), f)
+        d?.apply {
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live1), this)
+        }
+        e?.apply {
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live2), this)
+        }
+        f?.apply {
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live3), this)
+        }
         val optionalHeader = HashMap<String, String>()
         optionalHeader.put(
             AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_device_id),
@@ -451,7 +457,7 @@ internal class HttpClientUtils {
         }.start()
     }
 
-    fun checkLiveNessFlashV2(mContext: Context, a: String, b: String, c: String, d: String, e: String, callbackAPIListener: CallbackAPIListener?) {
+    fun checkLiveNessFlashV2(mContext: Context, a: String, b: String, c: String?, d: String?, e: String?, callbackAPIListener: CallbackAPIListener?) {
         Thread {
             val f = TotpUtils(mContext).getTotp()
             if (d.isNullOrEmpty() || d == "-1") {

@@ -385,6 +385,9 @@ internal class HttpClientUtils {
         f?.apply {
             request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_image_live3), this)
         }
+        if (d == null && e == null && f == null) {
+            request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_color), 1)
+        }
         val optionalHeader = HashMap<String, String>()
         optionalHeader.put(
             AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_device_id),

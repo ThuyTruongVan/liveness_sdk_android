@@ -179,11 +179,11 @@ internal class FaceMatchFragment : Fragment() {
         listColor.add(0x00000000L)
         listColor.add(getColor(color))
         if (AppConfig.mLivenessRequest?.colorConfig != null) {
-            if (checkColor()) {
+            if (checkColor() && AppConfig.mLivenessRequest?.colorConfig!!.size < 3) {
                 AppConfig.mLivenessRequest?.colorConfig?.apply {
                     for (i in indices) {
                         listColor.add(this[i])
-                        if (listColor.size >= 4) break
+                        if (listColor.size >= 5) break
                     }
                 }
             } else {
@@ -469,8 +469,8 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun uploadFile() {
-        if (mImageList.size > 2) {
-            callApiUploadSession(mImageList[1], mImageList[0], mImageList[2], mImageList[3])
+        if (mImageList.size > 5) {
+            callApiUploadSession(mImageList[1], mImageList[2], mImageList[3], mImageList[4])
         } else {
             callApiUploadSession(mImageList[1], null, null, null)
         }

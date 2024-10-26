@@ -178,6 +178,7 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun initListColor(color: Int) {
+        listColor.clear()
         listColor.add(0x00000000L)
         listColor.add(getColor(color))
         if (AppConfig.mLivenessRequest?.colorConfig != null) {
@@ -427,6 +428,7 @@ internal class FaceMatchFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mFaceDetector?.setFaceProcessing(false)
         cameraViewVideo.destroy()
     }
 
@@ -505,7 +507,9 @@ internal class FaceMatchFragment : Fragment() {
         prbLoading.visibility = View.VISIBLE
         if (AppConfig.mLivenessRequest?.offlineMode == true) {
             AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(imageResult = getImageResult()))
-            onBackFragment()
+            if(activity is FaceMatchActivity){
+                onBackFragment()
+            }
         } else {
             getTOTP(imageB64, image2B64, image3B64, image4B64)
         }
@@ -812,9 +816,6 @@ internal class FaceMatchFragment : Fragment() {
         if (mStepScan <= listColor.size) {
             if (mStepScan == 2) {
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-//                    Handler(Looper.getMainLooper()).post {
-//                        test.visibility = View.INVISIBLE
-//                    }
                     takePicture(mCount!! * 1000L)
                 } else {
                     cameraViewVideo.close()
@@ -824,9 +825,6 @@ internal class FaceMatchFragment : Fragment() {
                     uploadFace()
                 }
             } else {
-//                Handler(Looper.getMainLooper()).post {
-//                    test.visibility = View.INVISIBLE
-//                }
                 takePicture(1500)
             }
         } else {

@@ -93,6 +93,7 @@ internal class FaceMatchFragment : Fragment() {
         arrayListOf(0xFFFF0000L, 0xFF00FF00L, 0xFF0000FFL)
     private var isInit = false
     private var mCount: Int? = 1
+    private var mScreenBrightness: Float? = 0.5F
 
 
     override fun onCreateView(
@@ -460,6 +461,7 @@ internal class FaceMatchFragment : Fragment() {
 
     private fun setScreenBrightness(brightnessValue: Float) {
         val layoutParams = activity?.window?.attributes
+        mScreenBrightness= layoutParams?.screenBrightness
         layoutParams?.screenBrightness = brightnessValue
         activity?.window?.attributes = layoutParams
     }
@@ -512,6 +514,9 @@ internal class FaceMatchFragment : Fragment() {
             }
         } else {
             getTOTP(imageB64, image2B64, image3B64, image4B64)
+        }
+        mScreenBrightness?.apply {
+            setScreenBrightness(this)
         }
     }
 

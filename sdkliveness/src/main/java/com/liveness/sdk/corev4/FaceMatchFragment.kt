@@ -145,6 +145,12 @@ internal class FaceMatchFragment : Fragment() {
                 onBackFragment()
             }
             if (AppConfig.mLivenessRequest?.dataConfig?.randomFrame != null) {
+                if (AppConfig.mLivenessRequest?.dataConfig?.randomFrame!! < 60) {
+                    AppConfig.mLivenessRequest?.dataConfig?.randomFrame = 60
+                }
+                if (AppConfig.mLivenessRequest?.dataConfig?.randomFrame!! > 240) {
+                    AppConfig.mLivenessRequest?.dataConfig?.randomFrame = 240
+                }
                 mCount = AppConfig.mLivenessRequest?.dataConfig?.randomFrame!!.div(60f)
             } else {
                 showToast("Data config fail")

@@ -92,7 +92,7 @@ internal class FaceMatchFragment : Fragment() {
     private val listColorDefault: ArrayList<Long> =
         arrayListOf(0xFFFF0000L, 0xFF00FF00L, 0xFF0000FFL)
     private var isInit = false
-    private var mCount: Int? = 1
+    private var mCount: Float? = 1.0f
     private var mScreenBrightness: Float? = 0.5F
 
 
@@ -145,7 +145,13 @@ internal class FaceMatchFragment : Fragment() {
                 onBackFragment()
             }
             if (AppConfig.mLivenessRequest?.dataConfig?.randomFrame != null) {
-                mCount = AppConfig.mLivenessRequest?.dataConfig?.randomFrame
+                if (AppConfig.mLivenessRequest?.dataConfig?.randomFrame!! < 60) {
+                    AppConfig.mLivenessRequest?.dataConfig?.randomFrame = 60
+                }
+                if (AppConfig.mLivenessRequest?.dataConfig?.randomFrame!! > 240) {
+                    AppConfig.mLivenessRequest?.dataConfig?.randomFrame = 240
+                }
+                mCount = AppConfig.mLivenessRequest?.dataConfig?.randomFrame!!.div(60f)
             } else {
                 showToast("Data config fail")
                 onBackFragment()
@@ -328,9 +334,14 @@ internal class FaceMatchFragment : Fragment() {
 //                    Handler(Looper.getMainLooper()).post {
 //                        test.visibility = View.VISIBLE
 //                    }
-                    val mImage = Base64.encodeToString(
-                        it.scaleImage(), Base64.NO_PADDING
-                    )
+                    val mImage: String = if (AppConfig.mLivenessRequest?.offlineMode == true) {
+                        Base64.encodeToString(it, Base64.NO_PADDING)
+                    } else {
+                        Base64.encodeToString(
+                            it.scaleImage(), Base64.NO_PADDING
+                        )
+                    }
+
                     Log.d("Thuytv", "------onPictureTaken--mStepScan: $mStepScan")
                     val index = mStepScan - 1
                     if (index < 0) return
@@ -461,7 +472,7 @@ internal class FaceMatchFragment : Fragment() {
 
     private fun setScreenBrightness(brightnessValue: Float) {
         val layoutParams = activity?.window?.attributes
-        mScreenBrightness= layoutParams?.screenBrightness
+        mScreenBrightness = layoutParams?.screenBrightness
         layoutParams?.screenBrightness = brightnessValue
         activity?.window?.attributes = layoutParams
     }
@@ -509,7 +520,7 @@ internal class FaceMatchFragment : Fragment() {
         prbLoading.visibility = View.VISIBLE
         if (AppConfig.mLivenessRequest?.offlineMode == true) {
             AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(imageResult = getImageResult()))
-            if(activity is FaceMatchActivity){
+            if (activity is FaceMatchActivity) {
                 onBackFragment()
             }
         } else {
@@ -670,7 +681,12 @@ internal class FaceMatchFragment : Fragment() {
                         data = result.getJSONObject("data")
                     }
                     val color = data?.getInt("randomColor")
-                    mCount = data?.getInt("randomFrame")
+                    val fCount = data?.getInt("randomFrame")
+                    if (fCount == null) {
+                        this.mCount = 1.2f
+                    } else {
+                        mCount = fCount.div(60f)
+                    }
                     color?.apply {
                         initListColor(this)
                         isInit = true
@@ -821,7 +837,7 @@ internal class FaceMatchFragment : Fragment() {
         if (mStepScan <= listColor.size) {
             if (mStepScan == 2) {
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-                    takePicture(mCount!! * 1000L)
+                    takePicture((mCount!! * 1000L).toLong() + 500L)
                 } else {
                     cameraViewVideo.close()
                     slider.visibility = View.GONE
@@ -874,8 +890,8 @@ internal class FaceMatchFragment : Fragment() {
     fun ByteArray.scaleImage(): ByteArray {
         val stream = ByteArrayOutputStream()
         val bitmap = BitmapFactory.decodeByteArray(this, 0, this.size)
-        val height = (bitmap.height / 1.5).toInt()
-        val width = (bitmap.width / 1.5).toInt()
+        val height = (bitmap.height / 3).toInt()
+        val width = (bitmap.width / 3).toInt()
         val scaleBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true)
         scaleBitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
         return stream.toByteArray()

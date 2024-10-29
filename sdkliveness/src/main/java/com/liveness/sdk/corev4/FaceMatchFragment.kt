@@ -843,7 +843,7 @@ internal class FaceMatchFragment : Fragment() {
             tvStatus.visibility = View.VISIBLE
             tvStatus.text = getString(R.string.fm_verifying)
             uploadFile()
-            saveImage()
+//            saveImage()
         }
     }
 

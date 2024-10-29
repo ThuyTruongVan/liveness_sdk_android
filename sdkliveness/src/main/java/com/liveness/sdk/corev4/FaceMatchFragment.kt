@@ -879,8 +879,8 @@ internal class FaceMatchFragment : Fragment() {
     fun ByteArray.scaleImage(): ByteArray {
         val stream = ByteArrayOutputStream()
         val bitmap = BitmapFactory.decodeByteArray(this, 0, this.size)
-        val height = bitmap.height / 3
-        val width = bitmap.width / 3
+        val height = (bitmap.height / 1.5).toInt()
+        val width = (bitmap.width / 1.5).toInt()
         val scaleBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true)
         scaleBitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
         return stream.toByteArray()

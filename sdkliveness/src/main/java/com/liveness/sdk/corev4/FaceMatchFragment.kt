@@ -308,7 +308,7 @@ internal class FaceMatchFragment : Fragment() {
 //                        Handler(Looper.getMainLooper()).post {
 //                            test.visibility = View.INVISIBLE
 //                        }
-                        takePicture(500)
+                        takePicture(100)
                         mSessionId = UUID.randomUUID().toString()
                     }
                 } else {
@@ -679,7 +679,7 @@ internal class FaceMatchFragment : Fragment() {
                     if (fCount == null) {
                         this.mCount = 1.2f
                     } else {
-                        mCount= fCount.div(60f)
+                        mCount = fCount.div(60f)
                     }
                     color?.apply {
                         initListColor(this)
@@ -831,7 +831,7 @@ internal class FaceMatchFragment : Fragment() {
         if (mStepScan <= listColor.size) {
             if (mStepScan == 2) {
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-                    takePicture((mCount!! * 1000L).toLong())
+                    takePicture((mCount!! * 1000L).toLong() - 100L)
                 } else {
                     cameraViewVideo.close()
                     slider.visibility = View.GONE

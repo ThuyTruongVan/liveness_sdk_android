@@ -461,7 +461,7 @@ internal class FaceMatchFragment : Fragment() {
 
     private fun setScreenBrightness(brightnessValue: Float) {
         val layoutParams = activity?.window?.attributes
-        mScreenBrightness= layoutParams?.screenBrightness
+        mScreenBrightness = layoutParams?.screenBrightness
         layoutParams?.screenBrightness = brightnessValue
         activity?.window?.attributes = layoutParams
     }
@@ -509,7 +509,7 @@ internal class FaceMatchFragment : Fragment() {
         prbLoading.visibility = View.VISIBLE
         if (AppConfig.mLivenessRequest?.offlineMode == true) {
             AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(imageResult = getImageResult()))
-            if(activity is FaceMatchActivity){
+            if (activity is FaceMatchActivity) {
                 onBackFragment()
             }
         } else {
@@ -671,6 +671,11 @@ internal class FaceMatchFragment : Fragment() {
                     }
                     val color = data?.getInt("randomColor")
                     mCount = data?.getInt("randomFrame")
+                    if (mCount == null) {
+                        mCount = 5
+                    } else {
+                        if (mCount!! > 5) mCount = 5
+                    }
                     color?.apply {
                         initListColor(this)
                         isInit = true

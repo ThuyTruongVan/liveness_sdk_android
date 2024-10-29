@@ -233,7 +233,7 @@ class MainActivity : AppCompatActivity() {
 //            colorConfig = listOf(0xFFFFFF00, 0xFF800080, 0xFFFFA500)
         )
         if (swOffline.isChecked) {
-            request.dataConfig = DataConfig((0..3).random(), (1..4).random())
+            request.dataConfig = DataConfig((0..3).random(), (60..240).random())
         }
         return request
 

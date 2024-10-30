@@ -345,7 +345,9 @@ internal class FaceMatchFragment : Fragment() {
                     Log.d("Thuytv", "------onPictureTaken--mStepScan: $mStepScan")
                     val index = mStepScan - 1
                     if (index < 0) return
+                    Log.d("Thuytv", "------onPictureTaken--mStepScan: $index")
                     mImageList.add(index, mImage)
+                    Log.d("Thuytv", "------onPictureTaken--mStepScan: ${mImageList.size}")
                     if (mStepScan <= listColor.size) {
                         mStepScan++
                         updateUIWhenCapture(true)
@@ -835,10 +837,15 @@ internal class FaceMatchFragment : Fragment() {
     private fun updateUIWhenCapture(isSlide: Boolean = true) {
         if (isSlide) slider.currentPagePosition = mStepScan - 1
         if (mStepScan <= listColor.size) {
+            Log.d("Thuytv", "------updateUIWhenCapture if1--: $mStepScan")
             if (mStepScan == 2) {
+                Log.d("Thuytv", "------updateUIWhenCapture if2--: $mStepScan")
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
                     takePicture((mCount!! * 1000L).toLong() + 500L)
+                    Log.d("Thuytv", "------updateUIWhenCapture if3--: ${(mCount!! * 1000L).toLong() + 500L}")
+
                 } else {
+                    Log.d("Thuytv", "------updateUIWhenCapture else3--: ${(mCount!! * 1000L).toLong() + 500L}")
                     cameraViewVideo.close()
                     slider.visibility = View.GONE
                     tvStatus.visibility = View.VISIBLE
@@ -846,9 +853,11 @@ internal class FaceMatchFragment : Fragment() {
                     uploadFace()
                 }
             } else {
+                Log.d("Thuytv", "------updateUIWhenCapture else2--: $mStepScan")
                 takePicture(1500)
             }
         } else {
+            Log.d("Thuytv", "------updateUIWhenCapture else1--: $mStepScan")
             cameraViewVideo.close()
             slider.visibility = View.GONE
             tvStatus.visibility = View.VISIBLE

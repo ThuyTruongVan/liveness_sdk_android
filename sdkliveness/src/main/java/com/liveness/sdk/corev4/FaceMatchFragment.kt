@@ -335,10 +335,10 @@ internal class FaceMatchFragment : Fragment() {
 //                        test.visibility = View.VISIBLE
 //                    }
                     val mImage: String = if (AppConfig.mLivenessRequest?.offlineMode == true) {
-                        Base64.encodeToString(it, Base64.NO_PADDING)
+                        Base64.encodeToString(it.scaleImage(1.5f), Base64.NO_PADDING)
                     } else {
                         Base64.encodeToString(
-                            it.scaleImage(), Base64.NO_PADDING
+                            it.scaleImage(3f), Base64.NO_PADDING
                         )
                     }
 
@@ -896,11 +896,11 @@ internal class FaceMatchFragment : Fragment() {
 
     }
 
-    fun ByteArray.scaleImage(): ByteArray {
+    fun ByteArray.scaleImage(scale: Float): ByteArray {
         val stream = ByteArrayOutputStream()
         val bitmap = BitmapFactory.decodeByteArray(this, 0, this.size)
-        val height = (bitmap.height / 3).toInt()
-        val width = (bitmap.width / 3).toInt()
+        val height = (bitmap.height / scale).toInt()
+        val width = (bitmap.width / scale).toInt()
         val scaleBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true)
         scaleBitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
         return stream.toByteArray()

@@ -70,7 +70,6 @@ internal class FaceMatchFragment : Fragment() {
     private var mFrameMark: FrameLayout? = null
     private lateinit var mFrameImageMax: ImageView
 
-    private lateinit var swSaveImage: Switch
     private lateinit var toolbar: LinearLayout
     private lateinit var btBack: ImageView
     private lateinit var slider: SliderView
@@ -106,7 +105,6 @@ internal class FaceMatchFragment : Fragment() {
         mFrameImageMax = view.findViewById(R.id.imv_frame_face)
         tvStatus = view.findViewById(R.id.tvStatus)
         slider = view.findViewById(R.id.imageSlider)
-        swSaveImage = view.findViewById(R.id.swSaveImage)
         toolbar = view.findViewById(R.id.llToolbar)
         btBack = view.findViewById(R.id.ivBack)
         test = view.findViewById(R.id.tvTest)
@@ -868,7 +866,7 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun saveImage() {
-        if (swSaveImage.isChecked) {
+        if (AppConfig.mLivenessRequest?.isDebug==true) {
             for (item in mImageList) {
                 saveItem(item)
             }

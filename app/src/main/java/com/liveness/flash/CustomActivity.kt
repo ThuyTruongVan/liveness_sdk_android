@@ -56,7 +56,7 @@ class CustomActivity : AppCompatActivity() {
                         if (data?.status == 200) {
 
                             data.livenessImage?.apply {
-                                val map = listOf(ImageResult(0x00000000L, this))
+                                val map = listOf(ImageResult(0x00000000L, this, "00000000"))
                                 createAdapter(map)
                             }
                             data.livenessImage = null
@@ -147,7 +147,7 @@ class CustomActivity : AppCompatActivity() {
             optionRequest = optionRequest,
             isDebug = true,
             offlineMode = swOffline.isChecked,
-//            colorConfig = listOf(0xFFFFFF00, 0xFF800080, 0xFFFFA500)
+//            colorConfig = listOf("#FFFFFF00", "#FF800080", "#FFFFA500")
         )
         if (swOffline.isChecked) {
             request.dataConfig = DataConfig((0..3).random(), (1..4).random())

@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 //                        Log.d("AKKKKK", "-----data: $data")
                     if (data?.status == 200) {
                         data.faceImage?.apply {
-                            val map = listOf(ImageResult(0x00000000L, this))
+                            val map = listOf(ImageResult(0x00000000L, this,"00000000"))
                             createAdapter(map)
                         }
                         data.faceImage = null
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
 //                        Log.d("AKKKKK", "-----data: $data")
                         if (data?.status == 200) {
                             data.livenessImage?.apply {
-                                val map = listOf(ImageResult(0x00000000L, this))
+                                val map = listOf(ImageResult(0x00000000L, this, "00000000"))
                                 createAdapter(map)
                             }
                             data.livenessImage = null
@@ -230,7 +230,8 @@ class MainActivity : AppCompatActivity() {
             optionRequest = optionRequest,
             isDebug = true,
             offlineMode = swOffline.isChecked,
-//            colorConfig = listOf(0xFFFFFF00, 0xFF800080, 0xFFFFA500)
+            colorConfig = listOf("#FFFFFF00", "#FF800080", "#FFFFA500"),
+            isSaveImage = true
         )
         if (swOffline.isChecked) {
             request.dataConfig = DataConfig((0..3).random(), (60..240).random())

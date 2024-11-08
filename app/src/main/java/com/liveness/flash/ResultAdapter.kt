@@ -22,8 +22,8 @@ class ResultAdapter(private val data: List<ImageResult>): RecyclerView.Adapter<R
         val tvTitle: TextView= itemView.findViewById(R.id.tvTitle)
         val ivResult: ImageView= itemView.findViewById(R.id.ivResult)
 
-         fun bindView(title: Long, image: String){
-            tvTitle.text = title.toString()
+         fun bindView(title: String?, image: String){
+            tvTitle.text = title
             val img = base64ToBitmap(image)
             if (img != null) {
                 ivResult.setImageBitmap(img)
@@ -52,6 +52,6 @@ class ResultAdapter(private val data: List<ImageResult>): RecyclerView.Adapter<R
 
     override fun onBindViewHolder(holder: ResultHolder, position: Int) {
         val image= data[position]
-        holder.bindView(image.color, image.image)
+        holder.bindView(image.colorString, image.image)
     }
 }

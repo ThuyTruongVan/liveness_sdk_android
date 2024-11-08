@@ -88,6 +88,7 @@ internal class FaceMatchFragment : Fragment() {
     private var typeScreen: String? = null
     private var mFragmentManager: FragmentManager? = null
     private var mImageList: MutableList<String> = ArrayList()
+    private var mImagePathList: MutableList<String> = ArrayList()
     private val listColorDefault: ArrayList<Long> =
         arrayListOf(0xFFFF0000L, 0xFF00FF00L, 0xFF0000FFL)
     private var isInit = false
@@ -187,11 +188,11 @@ internal class FaceMatchFragment : Fragment() {
         listColor.add(0x00000000L)
         listColor.add(getColor(color))
         if (AppConfig.mLivenessRequest?.colorConfig != null) {
-            if (checkColor() && AppConfig.mLivenessRequest?.colorConfig!!.size >= 3) {
+            if (checkColor() && AppConfig.mLivenessRequest?.colorConfig!!.size >= 2) {
                 AppConfig.mLivenessRequest?.colorConfig?.apply {
                     for (i in indices) {
-                        listColor.add(this[i])
-                        if (listColor.size >= 5) break
+                        listColor.add(this[i].removePrefix("#").toLong(16))
+                        if (listColor.size >= 4) break
                     }
                 }
             } else {
@@ -210,7 +211,7 @@ internal class FaceMatchFragment : Fragment() {
 
     private fun checkColor(): Boolean {
         AppConfig.mLivenessRequest?.colorConfig?.forEach {
-            if (!isValidColor(it)) return false
+            if (!isValidColor(it.removePrefix("#").toLong(16))) return false
         }
         return true
     }
@@ -413,6 +414,7 @@ internal class FaceMatchFragment : Fragment() {
                 MediaScannerConnection.scanFile(
                     context, arrayOf(file.toString()), null, null
                 )
+                mImagePathList.add(file.absolutePath)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -534,17 +536,22 @@ internal class FaceMatchFragment : Fragment() {
     private fun getImageResult(): List<ImageResult> {
         val result: MutableList<ImageResult> = mutableListOf()
         for (i in 0 until mImageList.size) {
-            result.add(ImageResult(listColor[i], mImageList[i]))
+            val imageResult = ImageResult(listColor[i], mImageList[i], getColorString(listColor[i]))
+            if (AppConfig.mLivenessRequest?.isSaveImage == true && mImagePathList.size > i) {
+                imageResult.imagePath = mImagePathList[i]
+            }
+            result.add(imageResult)
         }
         return result
     }
 
+    private fun getColorString(color: Long): String {
+        return String.format("#%08X", color or 0xFF000000L)
+    }
+
 
     private fun getTOTP(
-        imageB64: String,
-        image2B64: String?,
-        image3B64: String?,
-        image4B64: String?
+        imageB64: String, image2B64: String?, image3B64: String?, image4B64: String?
     ) {
         showLoading(true)
         Thread {
@@ -840,10 +847,16 @@ internal class FaceMatchFragment : Fragment() {
                 Log.d("Thuytv", "------updateUIWhenCapture if2--: $mStepScan")
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
                     takePicture((mCount!! * 1000L).toLong() + 500L)
-                    Log.d("Thuytv", "------updateUIWhenCapture if3--: ${(mCount!! * 1000L).toLong() + 500L}")
+                    Log.d(
+                        "Thuytv",
+                        "------updateUIWhenCapture if3--: ${(mCount!! * 1000L).toLong() + 500L}"
+                    )
 
                 } else {
-                    Log.d("Thuytv", "------updateUIWhenCapture else3--: ${(mCount!! * 1000L).toLong() + 500L}")
+                    Log.d(
+                        "Thuytv",
+                        "------updateUIWhenCapture else3--: ${(mCount!! * 1000L).toLong() + 500L}"
+                    )
                     cameraViewVideo.close()
                     slider.visibility = View.GONE
                     tvStatus.visibility = View.VISIBLE
@@ -860,13 +873,13 @@ internal class FaceMatchFragment : Fragment() {
             slider.visibility = View.GONE
             tvStatus.visibility = View.VISIBLE
             tvStatus.text = getString(R.string.fm_verifying)
-            uploadFile()
             saveImage()
+            uploadFile()
         }
     }
 
     private fun saveImage() {
-        if (AppConfig.mLivenessRequest?.isDebug==true) {
+        if (AppConfig.mLivenessRequest?.isSaveImage == true) {
             for (item in mImageList) {
                 saveItem(item)
             }
@@ -874,8 +887,7 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun saveItem(imageString: String) {
-        val decodedString: ByteArray =
-            android.util.Base64.decode(imageString, android.util.Base64.NO_PADDING)
+        val decodedString: ByteArray = Base64.decode(imageString, Base64.NO_PADDING)
         val bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
         saveBitmapToDisk(bitmap)
     }

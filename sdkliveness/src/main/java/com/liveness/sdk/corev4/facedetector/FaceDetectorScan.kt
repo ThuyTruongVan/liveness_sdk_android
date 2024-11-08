@@ -236,8 +236,8 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
         return !faceTooSmall && !faceTooBig && !faceOutFrame
     }
 
-    private val minFacePercent: Int = 50
-    private val maxFacePercent: Int = 95
+    private val minFacePercent: Int = 45
+    private val maxFacePercent: Int = 96
     private var percent = 0
 
     private fun faceSmallOrBig(
@@ -263,7 +263,7 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
         val offsetHorizontal = mCameraView?.top?.toFloat() ?: 0f
         bound.top += offsetHorizontal
         bound.bottom += offsetHorizontal
-        val offset = 30F
+        val offset = 25F
         val borderline = RectF(
             mFrameViewMax!!.left.toFloat(),
             mFrameViewMax!!.top - offset,
@@ -274,7 +274,7 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
         return (bound.left < borderline.left || bound.top < borderline.top || bound.right > borderline.right || bound.bottom > borderline.bottom)
     }
 
-    private val eulerDescartes = 6f
+    private val eulerDescartes = 8f
 
     private fun checkFaceCenter(face: Face): Boolean {
         if (face.headEulerAngleX < eulerDescartes && face.headEulerAngleY < eulerDescartes

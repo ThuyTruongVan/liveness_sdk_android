@@ -230,7 +230,7 @@ class MainActivity : AppCompatActivity() {
             optionRequest = optionRequest,
             isDebug = true,
             offlineMode = swOffline.isChecked,
-            colorConfig = listOf("#FFFFFF00", "#FF800080", "#FFFFA500"),
+//            colorConfig = listOf("#FFFFFF00", "#FF800080", "#FFFFA500"),
             isSaveImage = true
         )
         if (swOffline.isChecked) {

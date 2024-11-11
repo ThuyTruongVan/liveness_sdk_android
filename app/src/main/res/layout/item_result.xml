@@ -12,6 +12,14 @@
       android:gravity="center"
       tools:text="Trans" />
 
+  <TextView
+      android:id="@+id/tvPath"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center"
+      android:textColor="@color/black"
+      tools:text="Trans" />
+
   <ImageView
       android:id="@+id/ivResult"
       android:layout_width="match_parent"

@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Switch
@@ -147,10 +148,11 @@ class CustomActivity : AppCompatActivity() {
             optionRequest = optionRequest,
             isDebug = true,
             offlineMode = swOffline.isChecked,
-//            colorConfig = listOf("#FFFFFF00", "#FF800080", "#FFFFA500")
+//            colorConfig = listOf("#FFFFFF00", "#FF800080", "#FFFFA500"),
+            isSaveImage = true
         )
         if (swOffline.isChecked) {
-            request.dataConfig = DataConfig((0..3).random(), (1..4).random())
+            request.dataConfig = DataConfig((0..3).random(), (60..240).random())
         }
         return request
 

@@ -46,8 +46,10 @@ import com.nimbusds.jose.shaded.gson.Gson
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.PictureResult
+import com.otaliastudios.cameraview.controls.Engine
 import com.otaliastudios.cameraview.controls.Facing
 import com.otaliastudios.cameraview.controls.Mode
+import com.otaliastudios.cameraview.engine.CameraEngine
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -323,7 +325,9 @@ internal class FaceMatchFragment : Fragment() {
 
         })
         cameraViewVideo.facing = lensFacing
-        cameraViewVideo.mode = Mode.VIDEO
+        cameraViewVideo.mode = Mode.PICTURE
+//        cameraViewVideo.setEngine(Engine.CAMERA2)
+//        cameraViewVideo.setLifecycleOwner(this)
 
         cameraViewVideo.addCameraListener(object : CameraListener() {
 
@@ -411,6 +415,7 @@ internal class FaceMatchFragment : Fragment() {
                 bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, fos)
                 fos.flush()
                 fos.close()
+                bitmap?.recycle()
                 MediaScannerConnection.scanFile(
                     context, arrayOf(file.toString()), null, null
                 )
@@ -418,9 +423,66 @@ internal class FaceMatchFragment : Fragment() {
             } catch (e: IOException) {
                 e.printStackTrace()
             }
+            Log.d("Thuytv", "------save---: ${file.absolutePath}")
             handler.post {
+            }
+        }
+    }
+
+    fun saveBase64Images() {
+        val executor = Executors.newFixedThreadPool(4)
+        val handler = Handler(Looper.getMainLooper())
+        var exceptionOccurred: Exception? = null
+
+        for (base64Image in mImageList) {
+            executor.execute {
+                try {
+                    val decodedBytes = Base64.decode(base64Image, Base64.DEFAULT)
+                    val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                    val path = saveImageToInternalStorage(bitmap)
+                    synchronized(mImagePathList) { mImagePathList.add(path) }
+
+                } catch (e: Exception) {
+                    exceptionOccurred = e
+                }
+            }
+        }
+        executor.shutdown()
+        Thread {
+            while (!executor.isTerminated) {
+            }
+            Log.d("Thuytv", "------saved image--- $mImagePathList")
+            handler.post {
+                uploadFile()
+            }
+        }.start()
+    }
+
+    private fun saveImageToInternalStorage(bitmap: Bitmap): String {
+        val root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+        val appDir = File(root.absolutePath + File.separator + "SaveImage")
+        if (!appDir.exists()) {
+            val res: Boolean = appDir.mkdir()
+            if (!res) {
+                Log.d("Thuytv", "------can't create folder---: ${appDir.absolutePath}")
 
             }
+        }
+        val fileName = "ImageScan" + System.currentTimeMillis() + ".jpg"
+        val file = File(appDir, fileName)
+        try {
+            val fos = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            fos.flush()
+            fos.close()
+            bitmap.recycle()
+            MediaScannerConnection.scanFile(
+                context, arrayOf(file.toString()), null, null
+            )
+            return file.absolutePath
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return ""
         }
     }
 
@@ -489,7 +551,7 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun uploadFile() {
-        if (mImageList.size > 5) {
+        if (mImageList.size > 4) {
             callApiUploadSession(mImageList[1], mImageList[2], mImageList[3], mImageList[4])
         } else {
             callApiUploadSession(mImageList[1], mImageList[0], null, null)
@@ -873,8 +935,12 @@ internal class FaceMatchFragment : Fragment() {
             slider.visibility = View.GONE
             tvStatus.visibility = View.VISIBLE
             tvStatus.text = getString(R.string.fm_verifying)
-            saveImage()
-            uploadFile()
+
+            if (AppConfig.mLivenessRequest?.isSaveImage == true) {
+                saveBase64Images()
+            }else{
+                uploadFile()
+            }
         }
     }
 

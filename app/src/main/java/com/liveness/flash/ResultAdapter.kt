@@ -3,6 +3,7 @@ package com.liveness.flash
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,9 +22,12 @@ class ResultAdapter(private val data: List<ImageResult>): RecyclerView.Adapter<R
     inner class ResultHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView= itemView.findViewById(R.id.tvTitle)
         val ivResult: ImageView= itemView.findViewById(R.id.ivResult)
+        val tvPath: TextView= itemView.findViewById(R.id.tvPath)
 
-         fun bindView(title: String?, image: String){
+         fun bindView(title: String?, image: String, path: String?){
             tvTitle.text = title
+             path?.apply { tvPath.text = this }
+
             val img = base64ToBitmap(image)
             if (img != null) {
                 ivResult.setImageBitmap(img)
@@ -52,6 +56,7 @@ class ResultAdapter(private val data: List<ImageResult>): RecyclerView.Adapter<R
 
     override fun onBindViewHolder(holder: ResultHolder, position: Int) {
         val image= data[position]
-        holder.bindView(image.colorString, image.image)
+        Log.d("hid", "${image.imagePath}")
+        holder.bindView(image.colorString, image.image, image.imagePath)
     }
 }

@@ -110,7 +110,7 @@
       android:id="@+id/rvResult"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       android:layout_width="match_parent"
-      android:layout_height="100dp"
+      android:layout_height="300dp"
       android:orientation="horizontal"
       android:layout_gravity="bottom">
   </androidx.recyclerview.widget.RecyclerView>

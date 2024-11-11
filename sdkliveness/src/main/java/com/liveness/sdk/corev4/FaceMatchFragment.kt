@@ -552,7 +552,7 @@ internal class FaceMatchFragment : Fragment() {
 
     private fun uploadFile() {
         if (mImageList.size > 4) {
-            callApiUploadSession(mImageList[1], mImageList[2], mImageList[3], mImageList[4])
+            callApiUploadSession(mImageList[1], mImageList[0], mImageList[2], mImageList[3])
         } else {
             callApiUploadSession(mImageList[1], mImageList[0], null, null)
         }

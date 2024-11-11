@@ -52,7 +52,7 @@ class CustomActivity : AppCompatActivity() {
                 R.id.custom_container,
                 object : CallbackLivenessListener {
                     override fun onCallbackLiveness(data: LivenessModel?) {
-//                        Log.d("AKKKKK", "-----data: $data")
+                        Log.d("AKKKKK", "-----data: $data")
                         btStart.isEnabled = true
                         if (data?.status == 200) {
 

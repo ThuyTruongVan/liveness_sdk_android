@@ -88,8 +88,8 @@ internal class AppPreferenceUtils(context: Context?) {
 //        val secret = KeyStoreUtils.getInstance(context)?.encryptData(strKey)
 //        val enCryptData = EnCryptData()
 //        enCryptData.encryptText(context, KEY_TOTP_SECRET, strKey)
-        KeyStoreUtils.getInstance(context)?.encryptData(strKey)
-//        setValueString(KEY_TOTP_SECRET, KeyStoreUtils.getInstance(context)?.encryptData(strKey))
+//        KeyStoreUtils.getInstance(context)?.encryptData(strKey)
+        setValueString(KEY_TOTP_SECRET, KeyStoreUtils.getInstance(context)?.encryptData(strKey))
     }
 
     fun getTOTPSecret(context: Context): String {

@@ -37,6 +37,8 @@ import com.liveness.sdk.corev4.facedetector.LensFacing
 import com.liveness.sdk.corev4.model.DataResult
 import com.liveness.sdk.corev4.model.ImageResult
 import com.liveness.sdk.corev4.model.LivenessModel
+import com.liveness.sdk.corev4.model.LivenessRequest
+import com.liveness.sdk.corev4.model.VerifyLevel
 import com.liveness.sdk.corev4.slider.SliderAdapter
 import com.liveness.sdk.corev4.slider.SliderView
 import com.liveness.sdk.corev4.utils.AppConfig
@@ -257,7 +259,10 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun setupCamera(lensFacing: Facing, view: View) = apply {
-        mFaceDetector = FaceDetectorScan(view.findViewById(R.id.faceBoundsOverlay))
+        mFaceDetector = FaceDetectorScan(
+            view.findViewById(R.id.faceBoundsOverlay),
+            AppConfig.mLivenessRequest?.verifyLevel ?: VerifyLevel.MEDIUM
+        )
         mFaceDetector?.setFrameImage(cameraViewVideo, mFrameImageMax)
         mFaceDetector?.setonFaceDetectionFailureListener(object :
             FaceDetectorScan.OnFaceDetectionResultListener {
@@ -424,13 +429,12 @@ internal class FaceMatchFragment : Fragment() {
                 e.printStackTrace()
             }
             Log.d("Thuytv", "------save---: ${file.absolutePath}")
-            handler.post {
-            }
+            handler.post {}
         }
     }
 
-    fun saveBase64Images() {
-        val executor = Executors.newFixedThreadPool(4)
+    private fun saveBase64Images() {
+        val executor = Executors.newFixedThreadPool(if (mImageList.size > 2) 4 else 2)
         val handler = Handler(Looper.getMainLooper())
         var exceptionOccurred: Exception? = null
 
@@ -612,7 +616,21 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun getColorString(color: Long): String {
-        return String.format("#%08X", color or 0xFF000000L)
+        return when (color) {
+            0xFFFF0000L -> {
+                "r"
+            }
+            0xFF00FF00L -> {
+                "g"
+            }
+            0xFF0000FFL -> {
+                "b"
+            }
+            else -> {
+                ""
+            }
+        }
+//        return String.format("#%08X", color or 0xFF000000L)
     }
 
 
@@ -639,12 +657,7 @@ internal class FaceMatchFragment : Fragment() {
                     )
                 } else {
                     checkLiveNessFlash(
-                        tOTP,
-                        mTransactionId!!,
-                        imageB64,
-                        image2B64,
-                        image3B64,
-                        image4B64
+                        tOTP, mTransactionId!!, imageB64, image2B64, image3B64, image4B64
                     )
                 }
 
@@ -731,7 +744,9 @@ internal class FaceMatchFragment : Fragment() {
     private fun initAttemp() {
         showLoading(true)
         Thread {
-            val response = HttpClientUtils.instance?.initTransaction(requireContext(), AppConfig.mLivenessRequest?.clientTransactionId)
+            val response = HttpClientUtils.instance?.initTransaction(
+                requireContext(), AppConfig.mLivenessRequest?.clientTransactionId
+            )
             var result: JSONObject? = null
             if (response?.isNotEmpty() == true) {
                 result = JSONObject(response)
@@ -748,7 +763,8 @@ internal class FaceMatchFragment : Fragment() {
                 mTransactionId = result.getString("data")
             }
             if (status == 200) {
-                val response = HttpClientUtils.instance?.initAttemp(requireContext(), mTransactionId!!)
+                val response =
+                    HttpClientUtils.instance?.initAttemp(requireContext(), mTransactionId!!)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)

@@ -20,6 +20,7 @@ import com.liveness.sdk.corev4.model.DataConfig
 import com.liveness.sdk.corev4.model.ImageResult
 import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.model.LivenessRequest
+import com.liveness.sdk.corev4.model.VerifyLevel
 import com.liveness.sdk.corev4.utils.CallbackAPIListener
 import com.liveness.sdk.corev4.utils.CallbackLivenessListener
 import java.io.ByteArrayInputStream
@@ -231,7 +232,8 @@ class MainActivity : AppCompatActivity() {
             isDebug = true,
             offlineMode = swOffline.isChecked,
 //            colorConfig = listOf("#FFFFFF00", "#FF800080", "#FFFFA500"),
-            isSaveImage = true
+            isSaveImage = true,
+            verifyLevel = VerifyLevel.HIGH
         )
         if (swOffline.isChecked) {
             request.dataConfig = DataConfig((0..3).random(), (60..240).random())

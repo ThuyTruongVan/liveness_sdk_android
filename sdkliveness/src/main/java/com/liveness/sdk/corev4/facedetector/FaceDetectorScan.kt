@@ -12,18 +12,28 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.liveness.sdk.corev4.model.VerifyLevel
 import com.otaliastudios.cameraview.CameraView
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay) {
+internal class FaceDetectorScan(
+    faceBoundsOverlay: FaceBoundsOverlay,
+    level: VerifyLevel = VerifyLevel.MEDIUM
+) {
 
     //    companion object {
     private val TAG = "FaceDetector"
     private val MIN_FACE_SIZE = 0.15F
     private var mCameraView: CameraView? = null
     private var mFrameViewMax: View? = null
+    private var minFacePercent: Int = 50
+    private var maxFacePercent: Int = 94
+    private var percent = 0
+    private var offset = 30F
+    private var eulerDescartes = 6f
+
 
     //    }
     private val mlKitFaceDetector = FaceDetection.getClient(
@@ -42,9 +52,31 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
 
     @GuardedBy("lock")
     private var isProcessing = false
-    private var isSmiled = false
 
     init {
+        when (level) {
+            VerifyLevel.HIGH -> {
+                minFacePercent = 55
+                maxFacePercent = 90
+                eulerDescartes = 6f
+                offset = 0F
+            }
+
+            VerifyLevel.MEDIUM -> {
+                minFacePercent = 50
+                maxFacePercent = 94
+                eulerDescartes = 8f
+                offset = 30F
+            }
+
+            VerifyLevel.LOW -> {
+                minFacePercent = 45
+                maxFacePercent = 98
+                eulerDescartes = 10f
+                offset = 60F
+
+            }
+        }
         faceBoundsOverlay.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(view: View) {
                 faceDetectionExecutor = Executors.newSingleThreadExecutor()
@@ -62,7 +94,7 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
         onFaceDetectionResultListener = listener
     }
 
-    fun shutDown(){
+    fun shutDown() {
         if (::faceDetectionExecutor.isInitialized) {
             faceDetectionExecutor.shutdown()
         }
@@ -115,11 +147,6 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
                         if (mFrameViewMax == null) {
                             return@map
                         }
-                        val faceOutFrame = isFaceOut(rectF)
-                        if (faceOutFrame) {
-                            onFaceDetectionResultListener?.onFaceStatus(2, null)
-                            return@map
-                        }
                         val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
                         if (faceTooSmall) {
                             onFaceDetectionResultListener?.onFaceStatus(0, percent)
@@ -128,6 +155,11 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
                         val faceTooBig = faceSmallOrBig(rectF, false, mFrameViewMax!!)
                         if (faceTooBig) {
                             onFaceDetectionResultListener?.onFaceStatus(1, null)
+                            return@map
+                        }
+                        val faceOutFrame = isFaceOut(rectF)
+                        if (faceOutFrame) {
+                            onFaceDetectionResultListener?.onFaceStatus(2, null)
                             return@map
                         }
                         val resultCenter = checkFaceCenter(face)
@@ -242,9 +274,6 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
         return !faceTooSmall && !faceTooBig && !faceOutFrame
     }
 
-    private val minFacePercent: Int = 45
-    private val maxFacePercent: Int = 96
-    private var percent = 0
 
     private fun faceSmallOrBig(
         faceSquare: RectF, checkSmall: Boolean, standardFrame: View
@@ -269,18 +298,17 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
         val offsetHorizontal = mCameraView?.top?.toFloat() ?: 0f
         bound.top += offsetHorizontal
         bound.bottom += offsetHorizontal
-        val offset = 25F
         val borderline = RectF(
-            mFrameViewMax!!.left.toFloat(),
-            mFrameViewMax!!.top - offset,
-            mFrameViewMax!!.right.toFloat(),
+            mFrameViewMax!!.left.toFloat() - offset,
+            mFrameViewMax!!.top + offset,
+            mFrameViewMax!!.right.toFloat() + offset,
             mFrameViewMax!!.bottom - offset
         )
-
+        Log.d("border", "border$borderline")
+        Log.d("border", "bound $bound")
         return (bound.left < borderline.left || bound.top < borderline.top || bound.right > borderline.right || bound.bottom > borderline.bottom)
     }
 
-    private val eulerDescartes = 8f
 
     private fun checkFaceCenter(face: Face): Boolean {
         if (face.headEulerAngleX < eulerDescartes && face.headEulerAngleY < eulerDescartes

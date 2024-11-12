@@ -44,4 +44,6 @@ data class LivenessRequest(
     var dataConfig: DataConfig? = null,
     @field:SerializedName("is_save_image")
     var isSaveImage: Boolean = false,
+    @field:SerializedName("verify_level")
+    var verifyLevel: VerifyLevel = VerifyLevel.MEDIUM
 )

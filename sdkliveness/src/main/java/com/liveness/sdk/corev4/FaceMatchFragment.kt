@@ -96,6 +96,7 @@ internal class FaceMatchFragment : Fragment() {
     private var isInit = false
     private var mCount: Float? = 1.0f
     private var mScreenBrightness: Float? = 0.5F
+    private var mTransactionId: String? = null
 
 
     override fun onCreateView(
@@ -622,14 +623,26 @@ internal class FaceMatchFragment : Fragment() {
 //                AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = -1, message = ""))
                 showToast("TOTP null")
             } else {
-                initTransaction(
-                    tOTP,
-                    AppConfig.mLivenessRequest?.clientTransactionId,
-                    imageB64,
-                    image2B64,
-                    image3B64,
-                    image4B64
-                )
+                if (mTransactionId == null) {
+                    initTransaction(
+                        tOTP,
+                        AppConfig.mLivenessRequest?.clientTransactionId,
+                        imageB64,
+                        image2B64,
+                        image3B64,
+                        image4B64
+                    )
+                } else {
+                    checkLiveNessFlash(
+                        tOTP,
+                        mTransactionId!!,
+                        imageB64,
+                        image2B64,
+                        image3B64,
+                        image4B64
+                    )
+                }
+
             }
         }.start()
     }
@@ -726,12 +739,11 @@ internal class FaceMatchFragment : Fragment() {
             if (result?.has("message") == true) {
                 strMessage = result.getString("message")
             }
-            var data: String? = null
             if (result?.has("data") == true) {
-                data = result.getString("data")
+                mTransactionId = result.getString("data")
             }
             if (status == 200) {
-                val response = HttpClientUtils.instance?.initAttemp(requireContext(), data!!)
+                val response = HttpClientUtils.instance?.initAttemp(requireContext(), mTransactionId!!)
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)
@@ -938,7 +950,7 @@ internal class FaceMatchFragment : Fragment() {
 
             if (AppConfig.mLivenessRequest?.isSaveImage == true) {
                 saveBase64Images()
-            }else{
+            } else {
                 uploadFile()
             }
         }

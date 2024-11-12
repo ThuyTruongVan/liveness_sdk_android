@@ -62,6 +62,12 @@ internal class FaceDetectorScan(private val faceBoundsOverlay: FaceBoundsOverlay
         onFaceDetectionResultListener = listener
     }
 
+    fun shutDown(){
+        if (::faceDetectionExecutor.isInitialized) {
+            faceDetectionExecutor.shutdown()
+        }
+    }
+
     fun process(frame: Frame) {
         synchronized(lock) {
             if (!isProcessing) {

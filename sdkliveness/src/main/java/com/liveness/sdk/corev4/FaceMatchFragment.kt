@@ -34,6 +34,7 @@ import com.liveness.sdk.corev4.api.HttpClientUtils
 import com.liveness.sdk.corev4.facedetector.FaceDetectorScan
 import com.liveness.sdk.corev4.facedetector.Frame
 import com.liveness.sdk.corev4.facedetector.LensFacing
+import com.liveness.sdk.corev4.model.DataResult
 import com.liveness.sdk.corev4.model.ImageResult
 import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.slider.SliderAdapter
@@ -265,7 +266,7 @@ internal class FaceMatchFragment : Fragment() {
             }
 
             override fun onFaceStatus(status: Int, percent: Int?) {
-                if (!isInit) return
+                if (!isInit || !isAdded) return
                 restartSection()
                 when (status) {
                     0 -> { // small
@@ -326,9 +327,7 @@ internal class FaceMatchFragment : Fragment() {
 
         })
         cameraViewVideo.facing = lensFacing
-        cameraViewVideo.mode = Mode.PICTURE
-//        cameraViewVideo.setEngine(Engine.CAMERA2)
-//        cameraViewVideo.setLifecycleOwner(this)
+        cameraViewVideo.setLifecycleOwner(this)
 
         cameraViewVideo.addCameraListener(object : CameraListener() {
 
@@ -505,7 +504,11 @@ internal class FaceMatchFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mScreenBrightness?.apply {
+            setScreenBrightness(this)
+        }
         mFaceDetector?.setFaceProcessing(false)
+        mFaceDetector?.shutDown()
         cameraViewVideo.destroy()
     }
 
@@ -618,7 +621,9 @@ internal class FaceMatchFragment : Fragment() {
     ) {
         showLoading(true)
         Thread {
+
             val tOTP = TotpUtils(requireContext()).getTotp()
+
             if (tOTP.isEmpty() || tOTP == "-1") {
 //                AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = -1, message = ""))
                 showToast("TOTP null")
@@ -726,7 +731,7 @@ internal class FaceMatchFragment : Fragment() {
     private fun initAttemp() {
         showLoading(true)
         Thread {
-            val response = HttpClientUtils.instance?.initTransaction(requireContext())
+            val response = HttpClientUtils.instance?.initTransaction(requireContext(), AppConfig.mLivenessRequest?.clientTransactionId)
             var result: JSONObject? = null
             if (response?.isNotEmpty() == true) {
                 result = JSONObject(response)

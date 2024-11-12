@@ -50,7 +50,9 @@
         android:keepScreenOn="true"
         android:visibility="visible"
         app:cameraAudio="off"
-        app:cameraMode="video" />
+        app:cameraEngine="camera2"
+        app:cameraPreview="glSurface"
+        app:cameraMode="picture" />
 
     <com.liveness.sdk.corev4.facedetector.FaceBoundsOverlay
         android:id="@+id/faceBoundsOverlay"

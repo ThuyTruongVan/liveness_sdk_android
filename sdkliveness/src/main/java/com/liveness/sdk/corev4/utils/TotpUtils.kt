@@ -17,7 +17,6 @@ internal class TotpUtils(private val mContext: Context) {
 
     private fun setSecret(secretString: String) {
         secret = secretString
-        Log.d("Thuytv", "------setSecret: $secretString")
         AppPreferenceUtils(mContext).setTOTPSecret(mContext, secretString)
     }
 
@@ -68,7 +67,7 @@ internal class TotpUtils(private val mContext: Context) {
     fun getTotp(): String {
         if (totpSecret?.isNotEmpty() == true) {
             val generator = TOTPGenerator()
-            Log.d("Thuytv", "-----totpSecret: $totpSecret")
+            Log.d("Thuytv", "-----totpSecret getTotp: $totpSecret")
             return generator.generateTOTP(totpSecret!!)
         }
         return ""

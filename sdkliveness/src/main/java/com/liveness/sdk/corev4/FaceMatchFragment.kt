@@ -10,6 +10,7 @@ import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.FileUtils
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
@@ -22,7 +23,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -34,7 +34,6 @@ import com.liveness.sdk.corev4.api.HttpClientUtils
 import com.liveness.sdk.corev4.facedetector.FaceDetectorScan
 import com.liveness.sdk.corev4.facedetector.Frame
 import com.liveness.sdk.corev4.facedetector.LensFacing
-import com.liveness.sdk.corev4.model.DataResult
 import com.liveness.sdk.corev4.model.ImageResult
 import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.model.LivenessRequest
@@ -49,10 +48,7 @@ import com.nimbusds.jose.shaded.gson.Gson
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.PictureResult
-import com.otaliastudios.cameraview.controls.Engine
 import com.otaliastudios.cameraview.controls.Facing
-import com.otaliastudios.cameraview.controls.Mode
-import com.otaliastudios.cameraview.engine.CameraEngine
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -98,7 +94,6 @@ internal class FaceMatchFragment : Fragment() {
         arrayListOf(0xFFFF0000L, 0xFF00FF00L, 0xFF0000FFL)
     private var isInit = false
     private var mCount: Float? = 1.0f
-    private var mScreenBrightness: Float? = 0.5F
     private var mTransactionId: String? = null
 
 
@@ -134,7 +129,6 @@ internal class FaceMatchFragment : Fragment() {
         } else {
             requestPermissions()
         }
-//        initListColor()
         setScreenBrightness(1f)
         return view
     }
@@ -463,26 +457,21 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun saveImageToInternalStorage(bitmap: Bitmap): String {
-        val root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-        val appDir = File(root.absolutePath + File.separator + "SaveImage")
-        if (!appDir.exists()) {
-            val res: Boolean = appDir.mkdir()
-            if (!res) {
-                Log.d("Thuytv", "------can't create folder---: ${appDir.absolutePath}")
-
+        val cachePath = File(requireContext().cacheDir, "images")
+        if (!cachePath.exists()) {
+            val created = cachePath.mkdirs()
+            if (!created) {
+                Log.d("Thuytv", "------can't create folder---: ${cachePath.absolutePath}")
             }
         }
         val fileName = "ImageScan" + System.currentTimeMillis() + ".jpg"
-        val file = File(appDir, fileName)
+        val file = File(cachePath, fileName)
         try {
             val fos = FileOutputStream(file)
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
             fos.flush()
             fos.close()
             bitmap.recycle()
-            MediaScannerConnection.scanFile(
-                context, arrayOf(file.toString()), null, null
-            )
             return file.absolutePath
         } catch (e: IOException) {
             e.printStackTrace()
@@ -508,12 +497,17 @@ internal class FaceMatchFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mScreenBrightness?.apply {
-            setScreenBrightness(this)
-        }
+        resetScreenBrightness()
         mFaceDetector?.setFaceProcessing(false)
         mFaceDetector?.shutDown()
         cameraViewVideo.destroy()
+    }
+
+    private fun resetScreenBrightness() {
+        val window = requireActivity().window
+        val layoutParams = window.attributes
+        layoutParams.screenBrightness = -1f
+        window.attributes = layoutParams
     }
 
     private fun onBackFragment() {
@@ -542,10 +536,9 @@ internal class FaceMatchFragment : Fragment() {
 
     }
 
-    private fun setScreenBrightness(brightnessValue: Float) {
+    private fun setScreenBrightness(screenBrightness: Float) {
         val layoutParams = activity?.window?.attributes
-        mScreenBrightness = layoutParams?.screenBrightness
-        layoutParams?.screenBrightness = brightnessValue
+        layoutParams?.screenBrightness = screenBrightness
         activity?.window?.attributes = layoutParams
     }
 
@@ -561,7 +554,7 @@ internal class FaceMatchFragment : Fragment() {
     private fun uploadFile() {
         if (mImageList.size > 4) {
             callApiUploadSession(mImageList[1], mImageList[0], mImageList[2], mImageList[3])
-        } else {
+        } else if (mImageList.size >= 2) {
             callApiUploadSession(mImageList[1], mImageList[0], null, null)
         }
 
@@ -590,16 +583,14 @@ internal class FaceMatchFragment : Fragment() {
         imageB64: String, image2B64: String?, image3B64: String?, image4B64: String?
     ) {
         prbLoading.visibility = View.VISIBLE
+        resetScreenBrightness()
         if (AppConfig.mLivenessRequest?.offlineMode == true) {
             AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(imageResult = getImageResult()))
-            if (activity is FaceMatchActivity) {
-                onBackFragment()
-            }
+//            if (activity is FaceMatchActivity) {
+            onBackFragment()
+//            }
         } else {
             getTOTP(imageB64, image2B64, image3B64, image4B64)
-        }
-        mScreenBrightness?.apply {
-            setScreenBrightness(this)
         }
     }
 
@@ -620,12 +611,15 @@ internal class FaceMatchFragment : Fragment() {
             0xFFFF0000L -> {
                 "r"
             }
+
             0xFF00FF00L -> {
                 "g"
             }
+
             0xFF0000FFL -> {
                 "b"
             }
+
             else -> {
                 ""
             }

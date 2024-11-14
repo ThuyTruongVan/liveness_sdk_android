@@ -233,7 +233,7 @@ class MainActivity : AppCompatActivity() {
             offlineMode = swOffline.isChecked,
 //            colorConfig = listOf("#FFFFFF00", "#FF800080", "#FFFFA500"),
             isSaveImage = true,
-            verifyLevel = VerifyLevel.HIGH
+            verifyLevel = VerifyLevel.MEDIUM
         )
         if (swOffline.isChecked) {
             request.dataConfig = DataConfig((0..3).random(), (60..240).random())

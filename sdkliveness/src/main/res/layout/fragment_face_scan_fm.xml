@@ -94,13 +94,13 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/frMark"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="60dp"
         android:background="@drawable/bg_text_guide"
         android:gravity="center"
         android:padding="10dp"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
-        android:visibility="gone"
+        android:visibility="visible"
         tools:text="Tiến lại gần hơn" />
 
   </RelativeLayout>

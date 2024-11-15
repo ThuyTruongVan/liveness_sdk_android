@@ -552,7 +552,7 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun uploadFile() {
-        if (mImageList.size > 4) {
+        if (mImageList.size >= 4) {
             callApiUploadSession(mImageList[1], mImageList[0], mImageList[2], mImageList[3])
         } else if (mImageList.size >= 2) {
             callApiUploadSession(mImageList[1], mImageList[0], null, null)
@@ -582,7 +582,7 @@ internal class FaceMatchFragment : Fragment() {
     private fun callApiUploadSession(
         imageB64: String, image2B64: String?, image3B64: String?, image4B64: String?
     ) {
-        prbLoading.visibility = View.VISIBLE
+//        prbLoading.visibility = View.VISIBLE
         resetScreenBrightness()
         if (AppConfig.mLivenessRequest?.offlineMode == true) {
             AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(imageResult = getImageResult()))

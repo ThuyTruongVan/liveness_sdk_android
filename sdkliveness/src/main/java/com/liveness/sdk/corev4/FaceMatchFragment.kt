@@ -297,6 +297,7 @@ internal class FaceMatchFragment : Fragment() {
 
                     4 -> { // no face
                         tvStatus.visibility = View.GONE
+                        tvStatus.text = ""
                         prbLoading.visibility = View.GONE
                     }
 

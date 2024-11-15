@@ -271,10 +271,10 @@ internal class FaceMatchFragment : Fragment() {
                     0 -> { // small
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_come_closer)
-                        prbLoading.visibility = View.VISIBLE
-                        percent?.apply {
-                            prbLoading.setProgress(percent, true)
-                        }
+                        prbLoading.visibility = View.GONE
+//                        percent?.apply {
+//                            prbLoading.setProgress(percent, true)
+//                        }
                     }
 
                     1 -> { // big

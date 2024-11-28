@@ -183,6 +183,7 @@ class CustomActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
+//        Log.d("back activity", "+++")
         btStart.isEnabled = true
     }
 

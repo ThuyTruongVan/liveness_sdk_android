@@ -10,7 +10,6 @@ import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.FileUtils
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
@@ -25,6 +24,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -36,7 +36,6 @@ import com.liveness.sdk.corev4.facedetector.Frame
 import com.liveness.sdk.corev4.facedetector.LensFacing
 import com.liveness.sdk.corev4.model.ImageResult
 import com.liveness.sdk.corev4.model.LivenessModel
-import com.liveness.sdk.corev4.model.LivenessRequest
 import com.liveness.sdk.corev4.model.VerifyLevel
 import com.liveness.sdk.corev4.slider.SliderAdapter
 import com.liveness.sdk.corev4.slider.SliderView
@@ -122,6 +121,15 @@ internal class FaceMatchFragment : Fragment() {
         btBack.setOnClickListener {
             onBackFragment()
         }
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                onBackFragment()
+                Log.d("back press", "++++++")
+//                isEnabled = false
+//                activity?.onBackPressedDispatcher?.onBackPressed()
+//                isEnabled = true
+            }
+        })
         initRunnable()
         initCamera(view)
         if (checkPermissions()) {
@@ -395,39 +403,6 @@ internal class FaceMatchFragment : Fragment() {
         }
     }
 
-    private fun saveBitmapToDisk(bitmap: Bitmap?) {
-        val executor = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
-        executor.execute {
-            val root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-            val appDir = File(root.absolutePath + File.separator + "SaveImage")
-            if (!appDir.exists()) {
-                val res: Boolean = appDir.mkdir()
-                if (!res) {
-                    Log.d("Thuytv", "------can't create folder---: ${appDir.absolutePath}")
-
-                }
-            }
-            val fileName = "ImageScan" + System.currentTimeMillis() + ".jpg"
-            val file = File(appDir, fileName)
-            try {
-                val fos = FileOutputStream(file)
-                bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, fos)
-                fos.flush()
-                fos.close()
-                bitmap?.recycle()
-                MediaScannerConnection.scanFile(
-                    context, arrayOf(file.toString()), null, null
-                )
-                mImagePathList.add(file.absolutePath)
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            Log.d("Thuytv", "------save---: ${file.absolutePath}")
-            handler.post {}
-        }
-    }
-
     private fun saveBase64Images() {
         val executor = Executors.newFixedThreadPool(if (mImageList.size > 2) 4 else 2)
         val handler = Handler(Looper.getMainLooper())
@@ -450,7 +425,7 @@ internal class FaceMatchFragment : Fragment() {
         Thread {
             while (!executor.isTerminated) {
             }
-            Log.d("Thuytv", "------saved image--- $mImagePathList")
+            Log.d("++++", "------saved image--- $mImagePathList")
             handler.post {
                 uploadFile()
             }
@@ -462,7 +437,9 @@ internal class FaceMatchFragment : Fragment() {
         if (!cachePath.exists()) {
             val created = cachePath.mkdirs()
             if (!created) {
-                Log.d("Thuytv", "------can't create folder---: ${cachePath.absolutePath}")
+                Log.d("++++", "------can't create folder---: ${cachePath.absolutePath}")
+                showToast("Error")
+                onBackFragment()
             }
         }
         val fileName = "ImageScan" + System.currentTimeMillis() + ".jpg"
@@ -545,7 +522,7 @@ internal class FaceMatchFragment : Fragment() {
 
     private fun uploadFace() {
         var imageB64 = ""
-        Log.d("lstImageInit", mImageList.size.toString())
+        Log.d("++++lstImageInit", mImageList.size.toString())
         for (item in mImageList) {
             imageB64 = item
         }
@@ -932,21 +909,10 @@ internal class FaceMatchFragment : Fragment() {
     private fun updateUIWhenCapture(isSlide: Boolean = true) {
         if (isSlide) slider.currentPagePosition = mStepScan - 1
         if (mStepScan <= listColor.size) {
-            Log.d("Thuytv", "------updateUIWhenCapture if1--: $mStepScan")
             if (mStepScan == 2) {
-                Log.d("Thuytv", "------updateUIWhenCapture if2--: $mStepScan")
                 if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
                     takePicture((mCount!! * 1000L).toLong() + 500L)
-                    Log.d(
-                        "Thuytv",
-                        "------updateUIWhenCapture if3--: ${(mCount!! * 1000L).toLong() + 500L}"
-                    )
-
                 } else {
-                    Log.d(
-                        "Thuytv",
-                        "------updateUIWhenCapture else3--: ${(mCount!! * 1000L).toLong() + 500L}"
-                    )
                     cameraViewVideo.close()
                     slider.visibility = View.GONE
                     tvStatus.visibility = View.VISIBLE
@@ -954,11 +920,9 @@ internal class FaceMatchFragment : Fragment() {
                     uploadFace()
                 }
             } else {
-                Log.d("Thuytv", "------updateUIWhenCapture else2--: $mStepScan")
                 takePicture(1500)
             }
         } else {
-            Log.d("Thuytv", "------updateUIWhenCapture else1--: $mStepScan")
             cameraViewVideo.close()
             slider.visibility = View.GONE
             tvStatus.visibility = View.VISIBLE
@@ -970,20 +934,6 @@ internal class FaceMatchFragment : Fragment() {
                 uploadFile()
             }
         }
-    }
-
-    private fun saveImage() {
-        if (AppConfig.mLivenessRequest?.isSaveImage == true) {
-            for (item in mImageList) {
-                saveItem(item)
-            }
-        }
-    }
-
-    private fun saveItem(imageString: String) {
-        val decodedString: ByteArray = Base64.decode(imageString, Base64.NO_PADDING)
-        val bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-        saveBitmapToDisk(bitmap)
     }
 
     private fun showDefaultDialog(strContent: String?) {

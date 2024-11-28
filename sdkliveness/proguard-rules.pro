@@ -23,3 +23,11 @@
 -keep class kotlin.Metadata { *; }
 -dontwarn kotlin.**
 -keep class org.apache.commons.** { *; }
+
+-keep class com.otaliastudios.cameraview.** { *; }
+-keep class com.otaliastudios.cameraview.annotation.** { *; }
+-keep class com.otaliastudios.cameraview.internal.** { *; }
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}

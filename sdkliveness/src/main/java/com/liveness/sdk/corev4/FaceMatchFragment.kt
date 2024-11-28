@@ -44,9 +44,11 @@ import com.liveness.sdk.corev4.utils.AppPreferenceUtils
 import com.liveness.sdk.corev4.utils.AppUtils
 import com.liveness.sdk.corev4.utils.TotpUtils
 import com.nimbusds.jose.shaded.gson.Gson
+import com.otaliastudios.cameraview.CameraException
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.PictureResult
+import com.otaliastudios.cameraview.controls.Engine
 import com.otaliastudios.cameraview.controls.Facing
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -123,6 +125,9 @@ internal class FaceMatchFragment : Fragment() {
         }
         activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                AppConfig.livenessListener?.onCallbackLiveness(
+                    LivenessModel(status = 6666)
+                )
                 onBackFragment()
                 Log.d("back press", "++++++")
 //                isEnabled = false
@@ -261,6 +266,10 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun setupCamera(lensFacing: Facing, view: View) = apply {
+        cameraViewVideo.facing = lensFacing
+        cameraViewVideo.engine = Engine.CAMERA2
+        cameraViewVideo.setLifecycleOwner(this)
+
         mFaceDetector = FaceDetectorScan(
             view.findViewById(R.id.faceBoundsOverlay),
             AppConfig.mLivenessRequest?.verifyLevel ?: VerifyLevel.MEDIUM
@@ -334,8 +343,7 @@ internal class FaceMatchFragment : Fragment() {
             }
 
         })
-        cameraViewVideo.facing = lensFacing
-        cameraViewVideo.setLifecycleOwner(this)
+
 
         cameraViewVideo.addCameraListener(object : CameraListener() {
 
@@ -360,6 +368,11 @@ internal class FaceMatchFragment : Fragment() {
                     }
                 }
 
+            }
+
+            override fun onCameraError(exception: CameraException) {
+                super.onCameraError(exception)
+                Log.d("++++onCameraError", exception.message ?: "")
             }
 
         })
@@ -467,11 +480,11 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         resetScreenBrightness()
         mFaceDetector?.setFaceProcessing(false)
         mFaceDetector?.shutDown()
         cameraViewVideo.destroy()
+        super.onDestroy()
     }
 
     private fun resetScreenBrightness() {

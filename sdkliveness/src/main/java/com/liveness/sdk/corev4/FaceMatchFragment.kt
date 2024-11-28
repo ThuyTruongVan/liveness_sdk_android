@@ -346,12 +346,12 @@ internal class FaceMatchFragment : Fragment() {
 //                        test.visibility = View.VISIBLE
 //                    }
                     val mImage: String = Base64.encodeToString(it.scaleImage(), Base64.NO_PADDING)
-                    Log.d("Thuytv", "------onPictureTaken--mStepScan: $mStepScan")
+                    Log.d("++++", "------onPictureTaken--mStepScan: $mStepScan")
                     val index = mStepScan - 1
                     if (index < 0) return
-                    Log.d("Thuytv", "------onPictureTaken--mStepScan: $index")
+                    Log.d("++++", "------onPictureTaken--mStepScan: $index")
                     mImageList.add(index, mImage)
-                    Log.d("Thuytv", "------onPictureTaken--mStepScan: ${mImageList.size}")
+                    Log.d("++++", "------onPictureTaken--mStepScan: ${mImageList.size}")
                     if (mStepScan <= listColor.size) {
                         mStepScan++
                         updateUIWhenCapture(true)

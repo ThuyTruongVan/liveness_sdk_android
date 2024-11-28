@@ -123,18 +123,18 @@ internal class FaceMatchFragment : Fragment() {
         btBack.setOnClickListener {
             onBackFragment()
         }
-        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                AppConfig.livenessListener?.onCallbackLiveness(
-                    LivenessModel(status = 6666)
-                )
-                onBackFragment()
-                Log.d("back press", "++++++")
-//                isEnabled = false
-//                activity?.onBackPressedDispatcher?.onBackPressed()
-//                isEnabled = true
-            }
-        })
+//        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+//            override fun handleOnBackPressed() {
+//                AppConfig.livenessListener?.onCallbackLiveness(
+//                    LivenessModel(status = 6666)
+//                )
+//                onBackFragment()
+//                Log.d("back press", "++++++")
+////                isEnabled = false
+////                activity?.onBackPressedDispatcher?.onBackPressed()
+////                isEnabled = true
+//            }
+//        })
         initRunnable()
         initCamera(view)
         if (checkPermissions()) {

@@ -7,5 +7,9 @@ data class DataConfig(
     @field:SerializedName("randomColor")
     var randomColor: Int?,
     @field:SerializedName("randomColor")
-    var randomFrame: Int?
+    var randomFrame: Int?,
+    @field:SerializedName("maxWidth")
+    var maxWidth: Int?=null,
+    @field:SerializedName("quality")
+    var quality: Int?=null
 )

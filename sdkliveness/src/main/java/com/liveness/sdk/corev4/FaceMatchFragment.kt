@@ -345,14 +345,7 @@ internal class FaceMatchFragment : Fragment() {
 //                    Handler(Looper.getMainLooper()).post {
 //                        test.visibility = View.VISIBLE
 //                    }
-                    val mImage: String = if (AppConfig.mLivenessRequest?.offlineMode == true) {
-                        Base64.encodeToString(it.scaleImage(1.5f), Base64.NO_PADDING)
-                    } else {
-                        Base64.encodeToString(
-                            it.scaleImage(3f), Base64.NO_PADDING
-                        )
-                    }
-
+                    val mImage: String = Base64.encodeToString(it.scaleImage(), Base64.NO_PADDING)
                     Log.d("Thuytv", "------onPictureTaken--mStepScan: $mStepScan")
                     val index = mStepScan - 1
                     if (index < 0) return
@@ -950,13 +943,39 @@ internal class FaceMatchFragment : Fragment() {
 
     }
 
-    fun ByteArray.scaleImage(scale: Float): ByteArray {
+    fun ByteArray.scaleImage(): ByteArray {
         val stream = ByteArrayOutputStream()
         val bitmap = BitmapFactory.decodeByteArray(this, 0, this.size)
-        val height = (bitmap.height / scale).toInt()
-        val width = (bitmap.width / scale).toInt()
-        val scaleBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true)
-        scaleBitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
+        val primitiveWidth = bitmap.width
+        val primitiveHeight = bitmap.height
+        var quality = AppConfig.mLivenessRequest?.dataConfig?.quality ?: 90
+        if (quality > 100) {
+            quality = 100
+        }
+        if (quality < 0) {
+            quality = 50
+        }
+        var newWidth = if (AppConfig.mLivenessRequest?.offlineMode == true) {
+            (primitiveWidth / 1.5f).toInt()
+        } else {
+            (primitiveWidth / 3f).toInt()
+        }
+        var newHeight = if (AppConfig.mLivenessRequest?.offlineMode == true) {
+            (primitiveHeight / 1.5f).toInt()
+        } else {
+            (primitiveHeight / 3f).toInt()
+        }
+        AppConfig.mLivenessRequest?.dataConfig?.maxWidth?.let {
+            if (it >= primitiveWidth) {
+                newWidth = primitiveWidth
+                newHeight = primitiveHeight
+            } else {
+                newWidth = it
+                newHeight = (newWidth * primitiveHeight) / primitiveWidth
+            }
+        }
+        val scaleBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        scaleBitmap.compress(Bitmap.CompressFormat.PNG, quality, stream)
         return stream.toByteArray()
     }
 

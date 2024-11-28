@@ -236,7 +236,7 @@ class MainActivity : AppCompatActivity() {
             verifyLevel = VerifyLevel.MEDIUM
         )
         if (swOffline.isChecked) {
-            request.dataConfig = DataConfig((0..3).random(), (60..240).random())
+            request.dataConfig = DataConfig((0..3).random(), (60..240).random(), 560, 90)
         }
         return request
 

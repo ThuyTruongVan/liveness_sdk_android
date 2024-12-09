@@ -2,6 +2,7 @@ package com.liveness.sdk.corev4.facedetector
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.PointF
 import android.graphics.RectF
 import android.os.Looper
 import android.util.Log
@@ -10,13 +11,16 @@ import androidx.annotation.GuardedBy
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
+import com.google.mlkit.vision.face.FaceContour
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.google.mlkit.vision.face.FaceLandmark
 import com.liveness.sdk.corev4.model.VerifyLevel
 import com.otaliastudios.cameraview.CameraView
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
 
 internal class FaceDetectorScan(
     faceBoundsOverlay: FaceBoundsOverlay,
@@ -142,10 +146,36 @@ internal class FaceDetectorScan(
 //                        val result = checkFaceAvailable(face.toFaceBounds(this))
 //                        val resultCenter = checkFaceCenter(face)
 //                        onFaceDetectionResultListener?.onProcessing(result && resultCenter)
-                        val rectF = face.toFaceBounds(this)
+                        val leftEyeOpen =
+                            if (face.leftEyeOpenProbability != null) face.leftEyeOpenProbability!! else 1.0f
+                        val rightEyeOpen =
+                            if (face.rightEyeOpenProbability != null) face.rightEyeOpenProbability!! else 1.0f
+                        if (face.getLandmark(FaceLandmark.LEFT_EYE) == null ||
+                            face.getLandmark(FaceLandmark.RIGHT_EYE) == null ||
+                            leftEyeOpen < 0.5 || rightEyeOpen < 0.5
+                        ) {
+                            Log.d("--hieudt", "has Glass")
+                            onFaceDetectionResultListener?.onFaceStatus(3, null)
+                            return@map
+                        }
 
+                        val rectF = face.toFaceBounds(this)
+                        Log.d("--hieudt", rectF.toString())
                         if (mFrameViewMax == null) {
                             return@map
+                        }
+
+                        val noseBase = face.getLandmark(FaceLandmark.NOSE_BASE)
+                        val mouthBottom = face.getLandmark(FaceLandmark.MOUTH_BOTTOM)
+                        val threshold = mFrameViewMax!!.height * 0.05
+                        if (noseBase != null && mouthBottom != null) {
+                            val distance = Math.abs(noseBase.position.y - mouthBottom.position.y)
+                            Log.d("MaskDetection $threshold", distance.toString())
+                            if (distance < threshold) { // threshold: khoảng cách tối thiểu để miệng không bị che
+                                Log.d("MaskDetection", "Miệng bị che hoặc khoảng cách không bình thường")
+                            } else {
+                                Log.d("MaskDetection", "Miệng không bị che")
+                            }
                         }
                         val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
                         if (faceTooSmall) {
@@ -334,6 +364,29 @@ internal class FaceDetectorScan(
         val scaledRight = scaleX * flippedRight
         val scaledBottom = scaleY * boundingBox.bottom
         return RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
+    }
+
+    private fun FaceLandmark.toMappedPointF(frame: Frame): PointF {
+        val reverseDimens = frame.rotation == 90 || frame.rotation == 270
+        val width = if (reverseDimens) frame.size.height else frame.size.width
+        val height = if (reverseDimens) frame.size.width else frame.size.height
+
+        val scaleX = (mCameraView?.width?.toFloat() ?: 0f) / width
+        val scaleY = (mCameraView?.height?.toFloat() ?: 0f) / height
+        val isFrontLens = frame.lensFacing == LensFacing.FRONT
+
+        // Lấy vị trí gốc của landmark
+        val originalX = position.x
+        val originalY = position.y
+
+        // Lật vị trí nếu là camera trước
+        val flippedX = if (isFrontLens) width - originalX else originalX
+
+        // Chuyển đổi sang tọa độ được scale
+        val scaledX = scaleX * flippedX
+        val scaledY = scaleY * originalY
+
+        return PointF(scaledX, scaledY)
     }
 
 //    private fun Face.toFaceBounds(frame: Frame): RectF {

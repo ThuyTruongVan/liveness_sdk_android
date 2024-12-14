@@ -9,4 +9,9 @@
     <string name="fm_face_out_frame">Vui lòng đưa khuôn mặt nằm trọn trong khung</string>
     <string name="fm_come_closer">Tiến lại gần hơn</string>
     <string name="fm_move_face_farther">Đưa khuôn mặt xa hơn</string>
+    <string name="face_math_fail_title">So khớp không chính xác</string>
+    <string name="face_math_fail_message">Có vẻ như bạn và chủ sở hữu CCCD không cùng một người, bạn có muốn xác nhận lại không</string>
+    <string name="retry">Thử lại</string>
+    <string name="skip">Bỏ qua</string>
+
 </resources>

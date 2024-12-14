@@ -6,10 +6,8 @@ import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
@@ -42,6 +40,8 @@ import com.liveness.sdk.corev4.slider.SliderView
 import com.liveness.sdk.corev4.utils.AppConfig
 import com.liveness.sdk.corev4.utils.AppPreferenceUtils
 import com.liveness.sdk.corev4.utils.AppUtils
+import com.liveness.sdk.corev4.utils.DialogUtils
+import com.liveness.sdk.corev4.utils.InformationDialogListener
 import com.liveness.sdk.corev4.utils.TotpUtils
 import com.nimbusds.jose.shaded.gson.Gson
 import com.otaliastudios.cameraview.CameraException
@@ -96,6 +96,7 @@ internal class FaceMatchFragment : Fragment() {
     private var isInit = false
     private var mCount: Float? = 1.0f
     private var mTransactionId: String? = null
+    private var isProcess: Boolean = false
 
 
     override fun onCreateView(
@@ -123,15 +124,17 @@ internal class FaceMatchFragment : Fragment() {
         btBack.setOnClickListener {
             onBackFragment()
         }
-        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                AppConfig.livenessListener?.onCallbackLiveness(
-                    LivenessModel(status = 6666)
-                )
-                onBackFragment()
-                Log.d("back press", "++++++")
-            }
-        })
+        activity?.onBackPressedDispatcher?.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    AppConfig.livenessListener?.onCallbackLiveness(
+                        LivenessModel(status = 6666)
+                    )
+                    onBackFragment()
+                    Log.d("back press", "++++++")
+                }
+            })
         initRunnable()
         initCamera(view)
         if (checkPermissions()) {
@@ -279,7 +282,7 @@ internal class FaceMatchFragment : Fragment() {
             }
 
             override fun onFaceStatus(status: Int, percent: Int?) {
-                if (!isInit || !isAdded) return
+                if (!isInit || !isAdded || isProcess) return
                 restartSection()
                 when (status) {
                     0 -> { // small
@@ -323,7 +326,7 @@ internal class FaceMatchFragment : Fragment() {
 
             override fun onProcessing(isFace: Boolean) {
                 super.onProcessing(isFace)
-                if (!isInit) return
+                if (!isInit || isProcess) return
                 if (isFace) {
                     if (mStepScan == 0) {
                         mStepScan = 1
@@ -698,11 +701,27 @@ internal class FaceMatchFragment : Fragment() {
             liveNessModel.transactionID = transactionID
             liveNessModel.imageResult = getImageResult()
             activity?.runOnUiThread {
-                showLoading(false)
-                AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
-                onBackFragment()
+                if (liveNessModel.data?.faceMatchingResult != 1) {
+                    DialogUtils.showConfirmDialog(
+                        requireActivity(),
+                        getString(R.string.face_math_fail_title),
+                        getString(R.string.face_math_fail_message),
+                        getString(R.string.retry),
+                        getString(R.string.skip),
+                        object : InformationDialogListener {
+                            override fun onPositiveClick() {
+                                isProcess = false
+                            }
+                            override fun onNegativeClick() {
+                                activity?.finish()
+                            }
+                        })
+                } else {
+                    showLoading(false)
+                    AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
+                    onBackFragment()
+                }
             }
-
         } else {
             activity?.runOnUiThread {
                 showLoading(false)
@@ -934,6 +953,7 @@ internal class FaceMatchFragment : Fragment() {
             if (AppConfig.mLivenessRequest?.isSaveImage == true) {
                 saveBase64Images()
             } else {
+                isProcess = true
                 uploadFile()
             }
         }

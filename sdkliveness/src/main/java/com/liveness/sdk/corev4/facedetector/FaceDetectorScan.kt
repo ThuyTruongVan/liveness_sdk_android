@@ -11,7 +11,6 @@ import androidx.annotation.GuardedBy
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
-import com.google.mlkit.vision.face.FaceContour
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.google.mlkit.vision.face.FaceLandmark
@@ -56,6 +55,12 @@ internal class FaceDetectorScan(
 
     @GuardedBy("lock")
     private var isProcessing = false
+
+    fun enableProcessing() {
+        synchronized(lock) {
+            isProcessing = false
+        }
+    }
 
     init {
         when (level) {
@@ -146,18 +151,6 @@ internal class FaceDetectorScan(
 //                        val result = checkFaceAvailable(face.toFaceBounds(this))
 //                        val resultCenter = checkFaceCenter(face)
 //                        onFaceDetectionResultListener?.onProcessing(result && resultCenter)
-                        val leftEyeOpen =
-                            if (face.leftEyeOpenProbability != null) face.leftEyeOpenProbability!! else 1.0f
-                        val rightEyeOpen =
-                            if (face.rightEyeOpenProbability != null) face.rightEyeOpenProbability!! else 1.0f
-                        if (face.getLandmark(FaceLandmark.LEFT_EYE) == null ||
-                            face.getLandmark(FaceLandmark.RIGHT_EYE) == null ||
-                            leftEyeOpen < 0.5 || rightEyeOpen < 0.5
-                        ) {
-                            Log.d("--hieudt", "has Glass")
-                            onFaceDetectionResultListener?.onFaceStatus(3, null)
-                            return@map
-                        }
 
                         val rectF = face.toFaceBounds(this)
                         Log.d("--hieudt", rectF.toString())
@@ -199,34 +192,8 @@ internal class FaceDetectorScan(
                         }
                         onFaceDetectionResultListener?.onProcessing(true)
                     }
-
-//                        }
-
-//                        if (isSmiled) {
-//                            if (face.leftEyeOpenProbability != null && face.rightEyeOpenProbability != null) {
-//                                if (checkEyeBlink(face)) {
-//                                    onFaceDetectionResultListener?.onSuccess(face, faces.size)
-//                                    isSmiled = false
-//                                    onFaceDetectionResultListener?.onProcessing(false)
-//                                    isProcessing = true
-//                                } else {
-////                                val faceBounds = faces.map { face -> face.toFaceBounds(this) }
-////                                mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
-//                                }
-//                            }
-//                        } else {
-//                            if (face.smilingProbability != null && checkFaceFrame(face)) {
-//                                val smile = face.smilingProbability ?: 0.0f
-//                                if (smile > 0.95) {
-//                                    isSmiled = true
-//                                    onFaceDetectionResultListener?.onProcessing(true)
-//                                }
-//                            }
-//                        }
                 }
             } else {
-//                    val faceBounds = faces.map { face -> face.toFaceBounds(this) }
-//                    mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
                 onFaceDetectionResultListener?.onFaceStatus(4, null)
             }
         }.addOnFailureListener { exception ->
@@ -388,30 +355,6 @@ internal class FaceDetectorScan(
 
         return PointF(scaledX, scaledY)
     }
-
-//    private fun Face.toFaceBounds(frame: Frame): RectF {
-//        val reverseDimens = frame.rotation == 90 || frame.rotation == 270
-//        val width = if (reverseDimens) frame.size.height else frame.size.width
-//        val height = if (reverseDimens) frame.size.width else frame.size.height
-//        val scaleX = faceBoundsOverlay.width.toFloat() / width
-//        val scaleY = faceBoundsOverlay.height.toFloat() / height
-//
-//        val isFrontLens = frame.lensFacing == LensFacing.FRONT
-//        val flippedLeft = if (isFrontLens) width - boundingBox.right else boundingBox.left
-//        val flippedRight = if (isFrontLens) width - boundingBox.left else boundingBox.right
-//
-//        val scaledLeft = scaleX * flippedLeft
-//        val scaledTop = scaleY * boundingBox.top
-//        val scaledRight = scaleX * flippedRight
-//        val scaledBottom = scaleY * boundingBox.bottom
-//        val scaledBoundingBox = RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
-//
-////        return FaceBounds(
-////            trackingId,
-////            scaledBoundingBox
-////        )
-//        return RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
-//    }
 
     private fun onError(exception: Exception) {
         onFaceDetectionResultListener?.onFailure(exception)

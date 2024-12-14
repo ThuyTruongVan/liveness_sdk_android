@@ -683,6 +683,9 @@ internal class FaceMatchFragment : Fragment() {
         val response = HttpClientUtils.instance?.checkLiveNessFlashV2(
             requireContext(), tOTP, transactionID, imageB64, image2B64, image3B64, image4B64
         )
+        activity?.runOnUiThread {
+            prbLoading.progress = 100
+        }
         var result: JSONObject? = null
         if (response?.isNotEmpty() == true) {
             result = JSONObject(response)
@@ -710,7 +713,8 @@ internal class FaceMatchFragment : Fragment() {
                         getString(R.string.skip),
                         object : InformationDialogListener {
                             override fun onPositiveClick() {
-                                isProcess = false
+//                                isProcess = false
+                                cameraViewVideo.open()
                             }
                             override fun onNegativeClick() {
                                 activity?.finish()
@@ -953,7 +957,7 @@ internal class FaceMatchFragment : Fragment() {
             if (AppConfig.mLivenessRequest?.isSaveImage == true) {
                 saveBase64Images()
             } else {
-                isProcess = true
+//                isProcess = true
                 uploadFile()
             }
         }

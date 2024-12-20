@@ -97,6 +97,7 @@ internal class FaceMatchFragment : Fragment() {
     private var mCount: Float? = 1.0f
     private var mTransactionId: String? = null
     private var isProcess: Boolean = false
+    private var isRunning=true
 
 
     override fun onCreateView(
@@ -124,17 +125,15 @@ internal class FaceMatchFragment : Fragment() {
         btBack.setOnClickListener {
             onBackFragment()
         }
-        activity?.onBackPressedDispatcher?.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
                     AppConfig.livenessListener?.onCallbackLiveness(
                         LivenessModel(status = 6666)
                     )
                     onBackFragment()
-                    Log.d("back press", "++++++")
-                }
-            })
+                Log.d("back press", "++++++")
+            }
+        })
         initRunnable()
         initCamera(view)
         if (checkPermissions()) {
@@ -484,6 +483,7 @@ internal class FaceMatchFragment : Fragment() {
         mFaceDetector?.setFaceProcessing(false)
         mFaceDetector?.shutDown()
         cameraViewVideo.destroy()
+        isRunning=false
         super.onDestroy()
     }
 
@@ -726,6 +726,7 @@ internal class FaceMatchFragment : Fragment() {
                     onBackFragment()
                 }
             }
+
         } else {
             activity?.runOnUiThread {
                 showLoading(false)
@@ -742,27 +743,10 @@ internal class FaceMatchFragment : Fragment() {
     private fun initAttemp() {
         showLoading(true)
         Thread {
-            val response = HttpClientUtils.instance?.initTransaction(
-                requireContext(), AppConfig.mLivenessRequest?.clientTransactionId
-            )
-            var result: JSONObject? = null
-            if (response?.isNotEmpty() == true) {
-                result = JSONObject(response)
-            }
-            var status = -1
-            if (result?.has("status") == true) {
-                status = result.getInt("status")
-            }
-            var strMessage = "Error"
-            if (result?.has("message") == true) {
-                strMessage = result.getString("message")
-            }
-            if (result?.has("data") == true) {
-                mTransactionId = result.getString("data")
-            }
-            if (status == 200) {
-                val response =
-                    HttpClientUtils.instance?.initAttemp(requireContext(), mTransactionId!!)
+            try {
+                val response = HttpClientUtils.instance?.initTransaction(
+                    requireContext(), AppConfig.mLivenessRequest?.clientTransactionId
+                )
                 var result: JSONObject? = null
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)
@@ -775,23 +759,54 @@ internal class FaceMatchFragment : Fragment() {
                 if (result?.has("message") == true) {
                     strMessage = result.getString("message")
                 }
+                if (result?.has("data") == true) {
+                    mTransactionId = result.getString("data")
+                }
+                if(!isRunning) return@Thread
                 if (status == 200) {
-                    var data: JSONObject? = null
-                    if (result?.has("data") == true) {
-                        data = result.getJSONObject("data")
+                    val response =
+                        HttpClientUtils.instance?.initAttemp(requireContext(), mTransactionId!!)
+                    var result: JSONObject? = null
+                    if (response?.isNotEmpty() == true) {
+                        result = JSONObject(response)
                     }
-                    val color = data?.getInt("randomColor")
-                    val fCount = data?.getInt("randomFrame")
-                    if (fCount == null) {
-                        this.mCount = 1.2f
+                    var status = -1
+                    if (result?.has("status") == true) {
+                        status = result.getInt("status")
+                    }
+                    var strMessage = "Error"
+                    if (result?.has("message") == true) {
+                        strMessage = result.getString("message")
+                    }
+                    if(!isRunning) return@Thread
+                    if (status == 200) {
+                        var data: JSONObject? = null
+                        if (result?.has("data") == true) {
+                            data = result.getJSONObject("data")
+                        }
+                        val color = data?.getInt("randomColor")
+                        val fCount = data?.getInt("randomFrame")
+                        if (fCount == null) {
+                            this.mCount = 1.2f
+                        } else {
+                            mCount = fCount.div(60f)
+                        }
+                        color?.apply {
+                            initListColor(this)
+                            isInit = true
+                        }
+                        showLoading(false)
                     } else {
-                        mCount = fCount.div(60f)
+                        showLoading(false)
+                        activity?.runOnUiThread {
+                            AppConfig.livenessListener?.onCallbackLiveness(
+                                LivenessModel(
+                                    status = status, message = strMessage
+                                )
+                            )
+                            onBackFragment()
+                        }
                     }
-                    color?.apply {
-                        initListColor(this)
-                        isInit = true
-                    }
-                    showLoading(false)
                 } else {
                     showLoading(false)
                     activity?.runOnUiThread {
@@ -803,16 +818,8 @@ internal class FaceMatchFragment : Fragment() {
                         onBackFragment()
                     }
                 }
-            } else {
-                showLoading(false)
-                activity?.runOnUiThread {
-                    AppConfig.livenessListener?.onCallbackLiveness(
-                        LivenessModel(
-                            status = status, message = strMessage
-                        )
-                    )
-                    onBackFragment()
-                }
+            }catch (e: Exception) {
+                e.printStackTrace()
             }
         }.start()
 
@@ -957,7 +964,6 @@ internal class FaceMatchFragment : Fragment() {
             if (AppConfig.mLivenessRequest?.isSaveImage == true) {
                 saveBase64Images()
             } else {
-//                isProcess = true
                 uploadFile()
             }
         }

@@ -652,6 +652,7 @@ internal class FaceMatchFragment : Fragment() {
         image4B64: String?
     ) {
         val response = HttpClientUtils.instance?.initTransaction(requireContext(), readCardId)
+        if(!isRunning) return
         var result: JSONObject? = null
         if (!response.isNullOrEmpty()) {
             result = JSONObject(response)
@@ -683,6 +684,7 @@ internal class FaceMatchFragment : Fragment() {
         val response = HttpClientUtils.instance?.checkLiveNessFlashV2(
             requireContext(), tOTP, transactionID, imageB64, image2B64, image3B64, image4B64
         )
+        if(!isRunning) return
         activity?.runOnUiThread {
             prbLoading.progress = 100
         }
@@ -861,6 +863,7 @@ internal class FaceMatchFragment : Fragment() {
                     requireContext(), AppConfig.encrypted_register_device
                 ), request
             )
+            if(!isRunning) return@Thread
             var result: JSONObject? = null
             if (responseDevice != null && responseDevice.length > 0) {
                 result = JSONObject(responseDevice)
@@ -878,6 +881,7 @@ internal class FaceMatchFragment : Fragment() {
                 AppPreferenceUtils(requireContext()).setTOTPSecret(requireContext(), mSecret)
                 val response = HttpClientUtils.instance?.registerFace(requireContext(), faceImage)
                 var result: JSONObject? = null
+                if (!isRunning) return@Thread
                 if (response?.isNotEmpty() == true) {
                     result = JSONObject(response)
                 }

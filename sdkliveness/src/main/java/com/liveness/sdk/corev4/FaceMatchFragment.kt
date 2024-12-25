@@ -6,10 +6,8 @@ import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
@@ -18,7 +16,6 @@ import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -31,6 +28,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.corev4.api.HttpClientUtils
+import com.liveness.sdk.corev4.facedetector.EllipseView
 import com.liveness.sdk.corev4.facedetector.FaceDetectorScan
 import com.liveness.sdk.corev4.facedetector.Frame
 import com.liveness.sdk.corev4.facedetector.LensFacing
@@ -69,7 +67,7 @@ internal class FaceMatchFragment : Fragment() {
     private lateinit var cameraViewVideo: CameraView
     private lateinit var prbLoading: ProgressBar
     private lateinit var tvStatus: TextView
-    private var mFrameMark: FrameLayout? = null
+    private var mViewMark: EllipseView? = null
     private lateinit var mFrameImageMax: ImageView
 
     private lateinit var toolbar: LinearLayout
@@ -105,7 +103,7 @@ internal class FaceMatchFragment : Fragment() {
         val view: View = inflater.inflate(R.layout.fragment_face_scan_fm, container, false)
         cameraViewVideo = view.findViewById(R.id.camera_view_video)
         prbLoading = view.findViewById(R.id.pbLoading)
-        mFrameMark = view.findViewById(R.id.frMark)
+        mViewMark = view.findViewById(R.id.frMark)
         mFrameImageMax = view.findViewById(R.id.imv_frame_face)
         tvStatus = view.findViewById(R.id.tvStatus)
         slider = view.findViewById(R.id.imageSlider)
@@ -284,6 +282,7 @@ internal class FaceMatchFragment : Fragment() {
                 restartSection()
                 when (status) {
                     0 -> { // small
+                        mViewMark?.defaultView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_come_closer)
                         prbLoading.visibility = View.GONE
@@ -293,24 +292,28 @@ internal class FaceMatchFragment : Fragment() {
                     }
 
                     1 -> { // big
+                        mViewMark?.defaultView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_move_face_farther)
                         prbLoading.visibility = View.GONE
                     }
 
                     2 -> { // face out
+                        mViewMark?.defaultView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_face_center_frame)
                         prbLoading.visibility = View.GONE
                     }
 
                     3 -> { // face euler fail
+                        mViewMark?.defaultView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_look_straight)
                         prbLoading.visibility = View.GONE
                     }
 
                     4 -> { // no face
+                        mViewMark?.defaultView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_face_out_frame)
                         prbLoading.visibility = View.GONE
@@ -399,6 +402,7 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun showKeepDevice() {
+        mViewMark?.activeView()
         tvStatus.visibility = View.VISIBLE
         tvStatus.text = getString(R.string.fm_keep_face)
         prbLoading.visibility = View.GONE
@@ -468,7 +472,7 @@ internal class FaceMatchFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         cameraViewVideo.open()
-        mFrameMark?.visibility = View.VISIBLE
+        mViewMark?.visibility = View.VISIBLE
         slider.currentPagePosition = 0
     }
 
@@ -911,7 +915,7 @@ internal class FaceMatchFragment : Fragment() {
     private fun showToastError(strError: String) {
         activity?.runOnUiThread {
             prbLoading.visibility = View.GONE
-            mFrameMark?.visibility = View.GONE
+            mViewMark?.visibility = View.GONE
             tvStatus.text = getString(R.string.fm_success)
             showDefaultDialog(strError)
         }

@@ -282,7 +282,7 @@ internal class FaceMatchFragment : Fragment() {
                 restartSection()
                 when (status) {
                     0 -> { // small
-                        mViewMark?.warningView()
+//                        mViewMark?.warningView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_come_closer)
                         prbLoading.visibility = View.GONE
@@ -292,35 +292,35 @@ internal class FaceMatchFragment : Fragment() {
                     }
 
                     1 -> { // big
-                        mViewMark?.warningView()
+//                        mViewMark?.warningView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_move_face_farther)
                         prbLoading.visibility = View.GONE
                     }
 
                     2 -> { // face out
-                        mViewMark?.warningView()
+//                        mViewMark?.warningView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_face_center_frame)
                         prbLoading.visibility = View.GONE
                     }
 
                     3 -> { // face euler fail
-                        mViewMark?.warningView()
+//                        mViewMark?.warningView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_look_straight)
                         prbLoading.visibility = View.GONE
                     }
 
                     4 -> { // no face
-                        mViewMark?.defaultView()
+//                        mViewMark?.defaultView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_face_out_frame)
                         prbLoading.visibility = View.GONE
                     }
 
                     5 -> { // many face
-                        mViewMark?.warningView()
+//                        mViewMark?.warningView()
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_face_many)
                         prbLoading.visibility = View.GONE
@@ -409,7 +409,7 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun showKeepDevice() {
-        mViewMark?.activeView()
+//        mViewMark?.activeView()
         tvStatus.visibility = View.VISIBLE
         tvStatus.text = getString(R.string.fm_keep_face)
         prbLoading.visibility = View.GONE

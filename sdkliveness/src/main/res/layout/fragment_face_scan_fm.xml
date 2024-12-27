@@ -74,7 +74,7 @@
         android:layout_height="match_parent"
         android:layout_marginVertical="?android:actionBarSize"
         app:colorActive="@color/fm_color_green"
-        app:colorNormal="@color/fm_color_red"
+        app:colorNormal="@color/fm_black_75"
         app:colorWarning="@color/fm_color_yellow"
         app:paddingHorizontal="40dp"
         app:paddingVertical="100dp"

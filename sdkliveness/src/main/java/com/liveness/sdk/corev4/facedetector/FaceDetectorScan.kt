@@ -20,6 +20,7 @@ import com.otaliastudios.cameraview.CameraView
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.abs
 
 
 internal class FaceDetectorScan(
@@ -37,6 +38,8 @@ internal class FaceDetectorScan(
     private var percent = 0
     private var offset = 30F
     private var eulerDescartes = 6f
+    private var acreageThreshold = 110000
+    private var mIndex: Int? = null
 
 
     //    }
@@ -139,43 +142,12 @@ internal class FaceDetectorScan(
                 isProcessing = false
             }
             if (faces.size > 0) {
-                for (face in faces) {
-//                        if(checkFaceFrame(face)) {
-                    val faceBounds = faces.map { face ->
-//                            val result = checkFaceFrame(face.toFaceBounds(this))
-//                        val result = checkFaceAvailable(face.toFaceBounds(this))
-//                        val resultCenter = checkFaceCenter(face)
-//                        onFaceDetectionResultListener?.onProcessing(result && resultCenter)
-                        val leftEyeOpen =
-                            if (face.leftEyeOpenProbability != null) face.leftEyeOpenProbability!! else 1.0f
-                        val rightEyeOpen =
-                            if (face.rightEyeOpenProbability != null) face.rightEyeOpenProbability!! else 1.0f
-                        if (face.getLandmark(FaceLandmark.LEFT_EYE) == null ||
-                            face.getLandmark(FaceLandmark.RIGHT_EYE) == null ||
-                            leftEyeOpen < 0.5 || rightEyeOpen < 0.5
-                        ) {
-                            Log.d("--hieudt", "has Glass")
-                            onFaceDetectionResultListener?.onFaceStatus(3, null)
-                            return@map
-                        }
-
+                if (faces.size == 1) {
+                    faces.map { face ->
                         val rectF = face.toFaceBounds(this)
                         Log.d("--hieudt", rectF.toString())
                         if (mFrameViewMax == null) {
                             return@map
-                        }
-
-                        val noseBase = face.getLandmark(FaceLandmark.NOSE_BASE)
-                        val mouthBottom = face.getLandmark(FaceLandmark.MOUTH_BOTTOM)
-                        val threshold = mFrameViewMax!!.height * 0.05
-                        if (noseBase != null && mouthBottom != null) {
-                            val distance = Math.abs(noseBase.position.y - mouthBottom.position.y)
-                            Log.d("MaskDetection $threshold", distance.toString())
-                            if (distance < threshold) { // threshold: khoảng cách tối thiểu để miệng không bị che
-                                Log.d("MaskDetection", "Miệng bị che hoặc khoảng cách không bình thường")
-                            } else {
-                                Log.d("MaskDetection", "Miệng không bị che")
-                            }
                         }
                         val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
                         if (faceTooSmall) {
@@ -199,34 +171,45 @@ internal class FaceDetectorScan(
                         }
                         onFaceDetectionResultListener?.onProcessing(true)
                     }
+                } else {
+                    val faceBounds = faces.map { face -> face.toFaceBounds(this) }
+                    val faceAcreage = faceBounds.map { faceBound -> faceBound.toFaceAcreage() }
+                    Log.d("--hieudt faceAcreage", faceAcreage.toString())
 
-//                        }
-
-//                        if (isSmiled) {
-//                            if (face.leftEyeOpenProbability != null && face.rightEyeOpenProbability != null) {
-//                                if (checkEyeBlink(face)) {
-//                                    onFaceDetectionResultListener?.onSuccess(face, faces.size)
-//                                    isSmiled = false
-//                                    onFaceDetectionResultListener?.onProcessing(false)
-//                                    isProcessing = true
-//                                } else {
-////                                val faceBounds = faces.map { face -> face.toFaceBounds(this) }
-////                                mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
-//                                }
-//                            }
-//                        } else {
-//                            if (face.smilingProbability != null && checkFaceFrame(face)) {
-//                                val smile = face.smilingProbability ?: 0.0f
-//                                if (smile > 0.95) {
-//                                    isSmiled = true
-//                                    onFaceDetectionResultListener?.onProcessing(true)
-//                                }
-//                            }
-//                        }
+                    if (checkManyFace(faceAcreage.toMutableList())) {
+                        mIndex?.let {
+                            val rectF = faceBounds[it]
+                            Log.d("--hieudt many rectF", rectF.toString())
+                            if (mFrameViewMax == null) {
+                                return@let
+                            }
+                            val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
+                            if (faceTooSmall) {
+                                onFaceDetectionResultListener?.onFaceStatus(0, percent)
+                                return@let
+                            }
+                            val faceTooBig = faceSmallOrBig(rectF, false, mFrameViewMax!!)
+                            if (faceTooBig) {
+                                onFaceDetectionResultListener?.onFaceStatus(1, null)
+                                return@let
+                            }
+                            val faceOutFrame = isFaceOut(rectF)
+                            if (faceOutFrame) {
+                                onFaceDetectionResultListener?.onFaceStatus(2, null)
+                                return@let
+                            }
+                            val resultCenter = checkFaceCenter(faces[it])
+                            if (!resultCenter) {
+                                onFaceDetectionResultListener?.onFaceStatus(3, null)
+                                return@let
+                            }
+                            onFaceDetectionResultListener?.onProcessing(true)
+                        }
+                    } else {
+                        onFaceDetectionResultListener?.onFaceStatus(5, null)
+                    }
                 }
             } else {
-//                    val faceBounds = faces.map { face -> face.toFaceBounds(this) }
-//                    mainExecutor.execute { faceBoundsOverlay.updateFaces(faceBounds) }
                 onFaceDetectionResultListener?.onFaceStatus(4, null)
             }
         }.addOnFailureListener { exception ->
@@ -235,6 +218,30 @@ internal class FaceDetectorScan(
             }
             onError(exception)
         }
+    }
+
+    private fun checkFaceRect(){
+
+    }
+
+    private fun checkManyFace(faceAcreage: MutableList<Int>): Boolean {
+        val max = faceAcreage.maxOrNull()
+
+        if (faceAcreage.filter { it == max }.size > 1) {
+            return false
+        }
+        mIndex = faceAcreage.indexOf(max)
+        faceAcreage.removeIf { it == max }
+        faceAcreage.forEach { acreage ->
+            if (abs(max!!.minus(acreage)) < acreageThreshold) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun RectF.toFaceAcreage(): Int {
+        return (width() * height()).toInt()
     }
 
     fun setFaceProcessing(isProcess: Boolean) {
@@ -426,11 +433,5 @@ internal class FaceDetectorScan(
         fun onFailure(exception: Exception) {}
     }
 
-    private fun checkEyeBlink(face: Face): Boolean {
-        val leftEyeOpenProbability: Float = face.leftEyeOpenProbability ?: 0f
-        val rightEyeOpenProbability: Float = face.rightEyeOpenProbability ?: 0f
-        Log.d("Thuytv", "-----left: $leftEyeOpenProbability ---right: $rightEyeOpenProbability")
-        return leftEyeOpenProbability < 0.4 || rightEyeOpenProbability < 0.4
-    }
 
 }

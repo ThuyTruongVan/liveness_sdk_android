@@ -29,6 +29,7 @@ internal class EllipseView : View {
     private var paddingHorizontal = 0f
     private var strokeWidth = 0f
     private var colorNormal = Color.WHITE
+    private var colorWarning = Color.YELLOW
     private var colorActive = Color.GREEN
     private var colorStroke: Int = Color.WHITE
     private lateinit var strokePaint: Paint
@@ -78,6 +79,7 @@ internal class EllipseView : View {
                     R.dimen.default_stroke_width
                 ).toFloat()
                 colorNormal = ta.getColor(R.styleable.EllipseView_colorNormal, Color.WHITE)
+                colorWarning = ta.getColor(R.styleable.EllipseView_colorWarning, Color.YELLOW)
                 colorActive = ta.getColor(R.styleable.EllipseView_colorActive, Color.GREEN)
                 colorStroke = colorNormal
 
@@ -157,6 +159,11 @@ internal class EllipseView : View {
 
     fun defaultView() {
         colorStroke = colorNormal
+        invalidateEllipseBounds()
+    }
+
+    fun warningView() {
+        colorStroke = colorWarning
         invalidateEllipseBounds()
     }
 

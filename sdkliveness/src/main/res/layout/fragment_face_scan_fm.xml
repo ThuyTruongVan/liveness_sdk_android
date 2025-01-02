@@ -46,7 +46,7 @@
         android:id="@+id/camera_view_video"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginVertical="?android:actionBarSize"
+        android:layout_below="@id/llToolbar"
         android:keepScreenOn="true"
         android:visibility="visible"
         app:cameraAudio="off"
@@ -65,6 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignTop="@id/camera_view_video"
+        android:layout_marginVertical="100dp"
         android:layout_alignBottom="@id/camera_view_video"
         android:visibility="invisible" />
 
@@ -72,12 +73,12 @@
         android:id="@+id/frMark"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginVertical="?android:actionBarSize"
+        android:layout_alignTop="@id/camera_view_video"
         app:colorActive="@color/fm_color_green"
         app:colorNormal="@color/fm_black_75"
         app:colorWarning="@color/fm_color_yellow"
         app:paddingHorizontal="40dp"
-        app:paddingVertical="100dp"
+        app:paddingVertical="120dp"
         app:strokeWidth="2dp"
         />
 

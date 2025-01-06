@@ -1004,7 +1004,7 @@ internal class FaceMatchFragment : Fragment() {
             }
         }
         val scaleBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
-        scaleBitmap.compress(Bitmap.CompressFormat.PNG, quality, stream)
+        scaleBitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)
         return stream.toByteArray()
     }
 

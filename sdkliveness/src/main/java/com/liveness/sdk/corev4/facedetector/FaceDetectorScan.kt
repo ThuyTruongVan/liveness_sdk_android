@@ -172,42 +172,42 @@ internal class FaceDetectorScan(
                         onFaceDetectionResultListener?.onProcessing(true)
                     }
                 } else {
-                    val faceBounds = faces.map { face -> face.toFaceBounds(this) }
-                    val faceAcreage = faceBounds.map { faceBound -> faceBound.toFaceAcreage() }
-                    Log.d("--hieudt faceAcreage", faceAcreage.toString())
-
-                    if (checkManyFace(faceAcreage.toMutableList())) {
-                        mIndex?.let {
-                            val rectF = faceBounds[it]
-                            Log.d("--hieudt many rectF", rectF.toString())
-                            if (mFrameViewMax == null) {
-                                return@let
-                            }
-                            val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
-                            if (faceTooSmall) {
-                                onFaceDetectionResultListener?.onFaceStatus(0, percent)
-                                return@let
-                            }
-                            val faceTooBig = faceSmallOrBig(rectF, false, mFrameViewMax!!)
-                            if (faceTooBig) {
-                                onFaceDetectionResultListener?.onFaceStatus(1, null)
-                                return@let
-                            }
-                            val faceOutFrame = isFaceOut(rectF)
-                            if (faceOutFrame) {
-                                onFaceDetectionResultListener?.onFaceStatus(2, null)
-                                return@let
-                            }
-                            val resultCenter = checkFaceCenter(faces[it])
-                            if (!resultCenter) {
-                                onFaceDetectionResultListener?.onFaceStatus(3, null)
-                                return@let
-                            }
-                            onFaceDetectionResultListener?.onProcessing(true)
-                        }
-                    } else {
+//                    val faceBounds = faces.map { face -> face.toFaceBounds(this) }
+//                    val faceAcreage = faceBounds.map { faceBound -> faceBound.toFaceAcreage() }
+//                    Log.d("--hieudt faceAcreage", faceAcreage.toString())
+//
+//                    if (checkManyFace(faceAcreage.toMutableList())) {
+//                        mIndex?.let {
+//                            val rectF = faceBounds[it]
+//                            Log.d("--hieudt many rectF", rectF.toString())
+//                            if (mFrameViewMax == null) {
+//                                return@let
+//                            }
+//                            val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
+//                            if (faceTooSmall) {
+//                                onFaceDetectionResultListener?.onFaceStatus(0, percent)
+//                                return@let
+//                            }
+//                            val faceTooBig = faceSmallOrBig(rectF, false, mFrameViewMax!!)
+//                            if (faceTooBig) {
+//                                onFaceDetectionResultListener?.onFaceStatus(1, null)
+//                                return@let
+//                            }
+//                            val faceOutFrame = isFaceOut(rectF)
+//                            if (faceOutFrame) {
+//                                onFaceDetectionResultListener?.onFaceStatus(2, null)
+//                                return@let
+//                            }
+//                            val resultCenter = checkFaceCenter(faces[it])
+//                            if (!resultCenter) {
+//                                onFaceDetectionResultListener?.onFaceStatus(3, null)
+//                                return@let
+//                            }
+//                            onFaceDetectionResultListener?.onProcessing(true)
+//                        }
+//                    } else {
                         onFaceDetectionResultListener?.onFaceStatus(5, null)
-                    }
+//                    }
                 }
             } else {
                 onFaceDetectionResultListener?.onFaceStatus(4, null)

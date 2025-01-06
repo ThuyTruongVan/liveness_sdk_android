@@ -149,16 +149,17 @@ internal class FaceDetectorScan(
                         if (mFrameViewMax == null) {
                             return@map
                         }
-                        val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
-                        if (faceTooSmall) {
-                            onFaceDetectionResultListener?.onFaceStatus(0, percent)
-                            return@map
-                        }
                         val faceTooBig = faceSmallOrBig(rectF, false, mFrameViewMax!!)
                         if (faceTooBig) {
                             onFaceDetectionResultListener?.onFaceStatus(1, null)
                             return@map
                         }
+                        val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
+                        if (faceTooSmall) {
+                            onFaceDetectionResultListener?.onFaceStatus(0, percent)
+                            return@map
+                        }
+
                         val faceOutFrame = isFaceOut(rectF)
                         if (faceOutFrame) {
                             onFaceDetectionResultListener?.onFaceStatus(2, null)

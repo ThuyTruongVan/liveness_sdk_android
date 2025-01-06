@@ -40,7 +40,11 @@ import com.liveness.sdk.corev4.slider.SliderView
 import com.liveness.sdk.corev4.utils.AppConfig
 import com.liveness.sdk.corev4.utils.AppPreferenceUtils
 import com.liveness.sdk.corev4.utils.AppUtils
+import com.liveness.sdk.corev4.utils.ORTTrainer
 import com.liveness.sdk.corev4.utils.TotpUtils
+import com.liveness.sdk.corev4.utils.copyAssetFileOrDir
+import com.liveness.sdk.corev4.utils.processBitmap
+import com.liveness.sdk.corev4.utils.processImage
 import com.nimbusds.jose.shaded.gson.Gson
 import com.otaliastudios.cameraview.CameraException
 import com.otaliastudios.cameraview.CameraListener
@@ -48,11 +52,13 @@ import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.PictureResult
 import com.otaliastudios.cameraview.controls.Engine
 import com.otaliastudios.cameraview.controls.Facing
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.nio.FloatBuffer
 import java.util.UUID
 import java.util.concurrent.Executors
 
@@ -94,7 +100,8 @@ internal class FaceMatchFragment : Fragment() {
     private var isInit = false
     private var mCount: Float? = 1.0f
     private var mTransactionId: String? = null
-    private var isRunning=true
+    private var isRunning = true
+    private var ortTrainer: ORTTrainer? = null
 
 
     override fun onCreateView(
@@ -122,15 +129,17 @@ internal class FaceMatchFragment : Fragment() {
         btBack.setOnClickListener {
             onBackFragment()
         }
-        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
+        activity?.onBackPressedDispatcher?.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
                     AppConfig.livenessListener?.onCallbackLiveness(
                         LivenessModel(status = 6666)
                     )
                     onBackFragment()
-                Log.d("back press", "++++++")
-            }
-        })
+                    Log.d("back press", "++++++")
+                }
+            })
         initRunnable()
         initCamera(view)
         if (checkPermissions()) {
@@ -142,9 +151,17 @@ internal class FaceMatchFragment : Fragment() {
         return view
     }
 
+    private fun copyFileOrDir(path: String): String {
+        val dst = File("${requireContext().cacheDir}/$path")
+        copyAssetFileOrDir(requireActivity().assets, path, dst)
+        return dst.path
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        copyFileOrDir("backbone.onnx")
+        ortTrainer = ORTTrainer()
         if (AppConfig.mLivenessRequest?.offlineMode == true) {
             if (AppConfig.mLivenessRequest?.dataConfig?.randomColor != null) {
                 initListColor(AppConfig.mLivenessRequest?.dataConfig?.randomColor!!)
@@ -493,7 +510,7 @@ internal class FaceMatchFragment : Fragment() {
         mFaceDetector?.setFaceProcessing(false)
         mFaceDetector?.shutDown()
         cameraViewVideo.destroy()
-        isRunning=false
+        isRunning = false
         super.onDestroy()
     }
 
@@ -554,37 +571,53 @@ internal class FaceMatchFragment : Fragment() {
 
     }
 
-    private fun callApiUploadSession(
-    ) {
-        prbLoading.visibility = View.VISIBLE
-        if (AppConfig.mLivenessRequest?.offlineMode == true) {
-            AppConfig.livenessListener?.onCallbackLiveness(
-                LivenessModel(
-                    imageResult = getImageResult(),
-//                    imgTransparent = imageB64,
-//                    imgRed = image2B64,
-//                    imgGreen = image3B64,
-//                    imgBlue = image4B64
-                )
-            )
-            onBackFragment()
-        } else {
-//            getTOTP(imageB64, image2B64, image3B64, image4B64)
-        }
+    private fun createBody(feature: List<List<Float>>): JSONObject{
+        val payload= JSONObject()
+        payload.put("features", JSONArray(feature))
+        payload.put("threshold", 0.6)
+        return payload
     }
 
     private fun callApiUploadSession(
         imageB64: String, image2B64: String?, image3B64: String?, image4B64: String?
     ) {
-//        prbLoading.visibility = View.VISIBLE
         resetScreenBrightness()
-        if (AppConfig.mLivenessRequest?.offlineMode == true) {
-            AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(imageResult = getImageResult()))
-//            if (activity is FaceMatchActivity) {
-            onBackFragment()
-//            }
-        } else {
-            getTOTP(imageB64, image2B64, image3B64, image4B64)
+        //        if (AppConfig.mLivenessRequest?.offlineMode == true) {
+//            AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(imageResult = getImageResult()))
+//            onBackFragment()
+//        } else {
+//            getTOTP(imageB64, image2B64, image3B64, image4B64)
+//        }
+        val decodedBytes = Base64.decode(imageB64, Base64.DEFAULT)
+        val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+        if (bitmap != null) {
+            val batchSize = 1
+            val channels = 3
+            val width = 224
+            val height = 224
+            val imgData = FloatBuffer.allocate(batchSize * channels * width * height)
+            imgData.rewind()
+            processImage(bitmap, imgData, 0)
+            imgData.rewind()
+
+            ortTrainer?.let {
+                val result = it.performInference(
+                    imgData!!,
+                    requireContext().cacheDir,
+                    "backbone.onnx"
+                )
+
+                Log.d("hieudt++Inference: ", result.toString())
+                Thread {
+                    try {
+                        val response = HttpClientUtils.instance?.doPost("https://ai-training-01.lehuy.net/apiv2/classify", createBody(result))
+                        Log.d("hieudt++API CALL: ", response.toString())
+                        showDialog(response.toString())
+                    }catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }.start()
+            }
         }
     }
 
@@ -751,7 +784,7 @@ internal class FaceMatchFragment : Fragment() {
                 if (result?.has("data") == true) {
                     mTransactionId = result.getString("data")
                 }
-                if(!isRunning) return@Thread
+                if (!isRunning) return@Thread
                 if (status == 200) {
                     val response =
                         HttpClientUtils.instance?.initAttemp(requireContext(), mTransactionId!!)
@@ -767,7 +800,7 @@ internal class FaceMatchFragment : Fragment() {
                     if (result?.has("message") == true) {
                         strMessage = result.getString("message")
                     }
-                    if(!isRunning) return@Thread
+                    if (!isRunning) return@Thread
                     if (status == 200) {
                         var data: JSONObject? = null
                         if (result?.has("data") == true) {
@@ -807,7 +840,7 @@ internal class FaceMatchFragment : Fragment() {
                         onBackFragment()
                     }
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }.start()
@@ -919,11 +952,8 @@ internal class FaceMatchFragment : Fragment() {
 
     }
 
-    private fun showToastError(strError: String) {
+    private fun showDialog(strError: String) {
         activity?.runOnUiThread {
-            prbLoading.visibility = View.GONE
-            mViewMark?.visibility = View.GONE
-            tvStatus.text = getString(R.string.fm_success)
             showDefaultDialog(strError)
         }
     }
@@ -975,36 +1005,8 @@ internal class FaceMatchFragment : Fragment() {
     fun ByteArray.scaleImage(): ByteArray {
         val stream = ByteArrayOutputStream()
         val bitmap = BitmapFactory.decodeByteArray(this, 0, this.size)
-        val primitiveWidth = bitmap.width
-        val primitiveHeight = bitmap.height
-        var quality = AppConfig.mLivenessRequest?.dataConfig?.quality ?: 90
-        if (quality > 100) {
-            quality = 100
-        }
-        if (quality < 0) {
-            quality = 50
-        }
-        var newWidth = if (AppConfig.mLivenessRequest?.offlineMode == true) {
-            (primitiveWidth / 1.5f).toInt()
-        } else {
-            (primitiveWidth / 3f).toInt()
-        }
-        var newHeight = if (AppConfig.mLivenessRequest?.offlineMode == true) {
-            (primitiveHeight / 1.5f).toInt()
-        } else {
-            (primitiveHeight / 3f).toInt()
-        }
-        AppConfig.mLivenessRequest?.dataConfig?.maxWidth?.let {
-            if (it >= primitiveWidth) {
-                newWidth = primitiveWidth
-                newHeight = primitiveHeight
-            } else {
-                newWidth = it
-                newHeight = (newWidth * primitiveHeight) / primitiveWidth
-            }
-        }
-        val scaleBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
-        scaleBitmap.compress(Bitmap.CompressFormat.PNG, quality, stream)
+        val scaleBitmap = processBitmap(bitmap)
+        scaleBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
         return stream.toByteArray()
     }
 

@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
+import android.util.Log
 import com.liveness.sdk.corev4.jws.JwsUtils
 import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.model.LivenessRequest
@@ -146,6 +147,47 @@ internal class HttpClientUtils {
             }
         } catch (e: MalformedURLException) {
             e.printStackTrace()
+        }
+        return null
+    }
+
+    fun doPost(urlString: String, requestBody: JSONObject): String? {
+        var urlConnection: HttpURLConnection? = null
+        try {
+            val url = URL(urlString)
+            Log.d("HTTP Request", "Request : [$requestBody]")
+
+            urlConnection = url.openConnection() as HttpURLConnection
+            urlConnection.requestMethod = "POST"
+            urlConnection.readTimeout = 100000  // Timeout cho đọc dữ liệu
+            urlConnection.connectTimeout = 100000  // Timeout cho kết nối
+            urlConnection.useCaches = false
+            urlConnection.doInput = true
+            urlConnection.doOutput = true
+            urlConnection.setRequestProperty("Content-Type", "application/json")
+            urlConnection.setRequestProperty("Connection", "keep-alive")
+            val os = urlConnection.outputStream
+            os.write(requestBody.toString().toByteArray(StandardCharsets.UTF_8))
+            os.flush()
+            os.close()
+
+            val responseCode = urlConnection.responseCode
+            Log.d("HTTP Response", "Response Code: $responseCode")
+
+            if (responseCode < 500) {
+                val inputStream: InputStream = if (responseCode == HttpURLConnection.HTTP_OK) {
+                    urlConnection.inputStream
+                } else {
+                    urlConnection.errorStream
+                }
+                val response = readStream(inputStream)
+                Log.d("HTTP Response", "Response : [$response]")
+                return response
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            urlConnection?.disconnect()
         }
         return null
     }

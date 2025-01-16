@@ -124,9 +124,16 @@ internal class CircleView : View {
         val centerX = circleRadius + paddingHorizontal
         val centerY = circleRadius + paddingVertical
         bm!!.eraseColor(Color.TRANSPARENT)
+//        cv?.drawPaint(Paint().apply {
+//            shader = LinearGradient(
+//                0f, gradientOffset, 0f, gradientOffset + height * 0.1f,
+//                startColor, endColor, Shader.TileMode.CLAMP
+//            )
+//        })
+        //top to bottom
         cv?.drawPaint(Paint().apply {
             shader = LinearGradient(
-                0f, gradientOffset, 0f, height.toFloat(),
+                0f, gradientOffset, 0f, gradientOffset - height * 0.1f,
                 startColor, endColor, Shader.TileMode.CLAMP
             )
         })
@@ -197,7 +204,18 @@ internal class CircleView : View {
         endColor = toColor
 
         gradientAnimator?.cancel()
-        gradientAnimator = ValueAnimator.ofFloat(height.toFloat(), 0f).apply {
+        //bottom to top
+//        gradientAnimator = ValueAnimator.ofFloat(height.toFloat(), 0f).apply {
+//            this.duration = duration
+//            interpolator = LinearInterpolator()
+//            addUpdateListener { animator ->
+//                gradientOffset = animator.animatedValue as Float
+//                invalidate()
+//            }
+//            start()
+//        }
+        //top to bottom
+        gradientAnimator = ValueAnimator.ofFloat(0f, height.toFloat()).apply {
             this.duration = duration
             interpolator = LinearInterpolator()
             addUpdateListener { animator ->

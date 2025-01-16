@@ -70,17 +70,17 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@id/frMark"
+            app:layout_constraintBottom_toBottomOf="@id/vDummy"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/frMark" />
+            app:layout_constraintTop_toTopOf="@id/vDummy" />
 
         <com.liveness.sdk.corev4.facedetector.CircleView
             android:id="@+id/frMark"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:colorLine="@color/fm_line_color"
-            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/llToolbar"
@@ -94,12 +94,10 @@
             android:id="@+id/vDummy"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/fm_white"
-            app:colorLine="@color/fm_line_color"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/frMark" />
+            app:layout_constraintTop_toBottomOf="@id/llToolbar" />
 
         <ImageView
             android:id="@+id/ivLive"
@@ -128,12 +126,12 @@
             android:id="@+id/tvStatus"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="30dp"
             android:layout_marginTop="20dp"
             android:gravity="center"
             android:textColor="#1B1D29"
             android:textSize="14sp"
             android:visibility="gone"
-            android:layout_marginHorizontal="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvDescription"
@@ -151,7 +149,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/frMark" />
+            app:layout_constraintTop_toBottomOf="@id/vDummy" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

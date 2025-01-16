@@ -78,7 +78,6 @@ internal class FaceMatchFragment : Fragment() {
     private lateinit var toolbar: LinearLayout
     private lateinit var btBack: ImageView
     private lateinit var slider: SliderView
-    private lateinit var vDummy: View
 //    private lateinit var test: TextView
 
     private var mFaceDetector: FaceDetectorScan? = null
@@ -116,7 +115,6 @@ internal class FaceMatchFragment : Fragment() {
         slider = view.findViewById(R.id.imageSlider)
         toolbar = view.findViewById(R.id.llToolbar)
         btBack = view.findViewById(R.id.ivBack)
-        vDummy = view.findViewById(R.id.vDummy)
 //        test = view.findViewById(R.id.tvTest)
         if (arguments?.containsKey(AppConfig.KEY_BUNDLE_BOOLEAN) == true) {
             isShowToolbar = arguments?.getBoolean(AppConfig.KEY_BUNDLE_BOOLEAN, true) == true
@@ -403,7 +401,6 @@ internal class FaceMatchFragment : Fragment() {
         slider.visibility = View.GONE
         slider.currentPagePosition = 0
         mFrameMark?.resetView()
-        vDummy.setBackgroundColor(Color.WHITE)
         mHandler.removeCallbacks(mCaptureRunnable)
     }
 
@@ -415,8 +412,6 @@ internal class FaceMatchFragment : Fragment() {
 //            slider.visibility = View.VISIBLE
 //            mFrameMark?.flashView(listColor[1].toInt())
             mFrameMark?.animateBackgroundSlide(listColor[1].toInt())
-            vDummy.setBackgroundColor(listColor[1].toInt())
-
         }
     }
 

@@ -4,14 +4,15 @@
     <string name="fm_success">Hoàn thành</string>
     <string name="fm_verifying">Đang xác minh…</string>
     <string name="fm_register_process">Đang đăng ký…</string>
-    <string name="fm_look_straight">Nhìn thẳng</string>
-    <string name="fm_face_center_frame">Đưa khuôn mặt vào giữa khung hình</string>
+    <string name="fm_look_straight">Vui lòng nhìn thẳng</string>
+    <string name="fm_face_center_frame">Vui lòng đưa khuôn mặt vào chính giữa khung hình</string>
     <string name="fm_face_out_frame">Vui lòng đưa khuôn mặt nằm trọn trong khung</string>
-    <string name="fm_come_closer">Tiến lại gần hơn</string>
-    <string name="fm_move_face_farther">Đưa khuôn mặt xa hơn</string>
+    <string name="fm_come_closer">Vui lòng tiến lại gần hơn</string>
+    <string name="fm_move_face_farther">Vui lòng đưa khuôn mặt xa hơn</string>
     <string name="face_math_fail_title">So khớp không chính xác</string>
     <string name="face_math_fail_message">Có vẻ như bạn và chủ sở hữu CCCD không cùng một người, bạn có muốn xác nhận lại không</string>
     <string name="retry">Thử lại</string>
     <string name="skip">Bỏ qua</string>
+    <string name="fm_face_matching">Đang xác thực khuôn mặt</string>
 
 </resources>

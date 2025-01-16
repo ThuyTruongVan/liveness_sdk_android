@@ -6,4 +6,5 @@
     <color name="fm_color_red">#FF0000</color>
     <color name="fm_color_green">#00FF00</color>
     <color name="fm_color_blue">#0000FF</color>
+    <color name="fm_line_color">#CCCCCC</color>
 </resources>

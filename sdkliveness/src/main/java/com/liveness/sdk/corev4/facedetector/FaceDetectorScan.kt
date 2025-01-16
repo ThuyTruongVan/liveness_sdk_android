@@ -65,24 +65,24 @@ internal class FaceDetectorScan(
     init {
         when (level) {
             VerifyLevel.HIGH -> {
-                minFacePercent = 55
-                maxFacePercent = 90
+                minFacePercent = 40
+                maxFacePercent = 60
                 eulerDescartes = 6f
                 offset = 0F
             }
 
             VerifyLevel.MEDIUM -> {
-                minFacePercent = 50
-                maxFacePercent = 94
+                minFacePercent = 35
+                maxFacePercent = 66
                 eulerDescartes = 8f
-                offset = 30F
+                offset = 20F
             }
 
             VerifyLevel.LOW -> {
-                minFacePercent = 45
-                maxFacePercent = 98
+                minFacePercent = 25
+                maxFacePercent = 72
                 eulerDescartes = 10f
-                offset = 60F
+                offset = 40F
 
             }
         }

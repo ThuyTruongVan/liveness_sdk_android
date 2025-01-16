@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -29,6 +30,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.corev4.api.HttpClientUtils
+import com.liveness.sdk.corev4.facedetector.CircleView
 import com.liveness.sdk.corev4.facedetector.FaceDetectorScan
 import com.liveness.sdk.corev4.facedetector.Frame
 import com.liveness.sdk.corev4.facedetector.LensFacing
@@ -50,6 +52,7 @@ import com.otaliastudios.cameraview.CameraView
 import com.otaliastudios.cameraview.PictureResult
 import com.otaliastudios.cameraview.controls.Engine
 import com.otaliastudios.cameraview.controls.Facing
+import com.otaliastudios.cameraview.size.SizeSelectors
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -69,13 +72,14 @@ internal class FaceMatchFragment : Fragment() {
     private lateinit var cameraViewVideo: CameraView
     private lateinit var prbLoading: ProgressBar
     private lateinit var tvStatus: TextView
-    private var mFrameMark: FrameLayout? = null
+    private var mFrameMark: CircleView? = null
     private lateinit var mFrameImageMax: ImageView
 
     private lateinit var toolbar: LinearLayout
     private lateinit var btBack: ImageView
     private lateinit var slider: SliderView
-    private lateinit var test: TextView
+    private lateinit var vDummy: View
+//    private lateinit var test: TextView
 
     private var mFaceDetector: FaceDetectorScan? = null
     private var mStepScan = 0
@@ -112,7 +116,8 @@ internal class FaceMatchFragment : Fragment() {
         slider = view.findViewById(R.id.imageSlider)
         toolbar = view.findViewById(R.id.llToolbar)
         btBack = view.findViewById(R.id.ivBack)
-        test = view.findViewById(R.id.tvTest)
+        vDummy = view.findViewById(R.id.vDummy)
+//        test = view.findViewById(R.id.tvTest)
         if (arguments?.containsKey(AppConfig.KEY_BUNDLE_BOOLEAN) == true) {
             isShowToolbar = arguments?.getBoolean(AppConfig.KEY_BUNDLE_BOOLEAN, true) == true
         }
@@ -268,6 +273,7 @@ internal class FaceMatchFragment : Fragment() {
         cameraViewVideo.facing = lensFacing
         cameraViewVideo.engine = Engine.CAMERA2
         cameraViewVideo.setLifecycleOwner(this)
+        cameraViewVideo.setPreviewStreamSize(SizeSelectors.minWidth(1560))
 
         mFaceDetector = FaceDetectorScan(
             view.findViewById(R.id.faceBoundsOverlay),
@@ -396,6 +402,8 @@ internal class FaceMatchFragment : Fragment() {
         prbLoading.visibility = View.GONE
         slider.visibility = View.GONE
         slider.currentPagePosition = 0
+        mFrameMark?.resetView()
+        vDummy.setBackgroundColor(Color.WHITE)
         mHandler.removeCallbacks(mCaptureRunnable)
     }
 
@@ -404,7 +412,11 @@ internal class FaceMatchFragment : Fragment() {
         tvStatus.text = getString(R.string.fm_keep_face)
         prbLoading.visibility = View.GONE
         if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-            slider.visibility = View.VISIBLE
+//            slider.visibility = View.VISIBLE
+//            mFrameMark?.flashView(listColor[1].toInt())
+            mFrameMark?.animateBackgroundSlide(listColor[1].toInt())
+            vDummy.setBackgroundColor(listColor[1].toInt())
+
         }
     }
 

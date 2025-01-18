@@ -72,6 +72,7 @@
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@id/vDummy"
             app:layout_constraintEnd_toEndOf="parent"
+            android:layout_margin="15dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/vDummy" />
 

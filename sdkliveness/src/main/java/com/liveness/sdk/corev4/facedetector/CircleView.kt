@@ -133,7 +133,7 @@ internal class CircleView : View {
         //top to bottom
         cv?.drawPaint(Paint().apply {
             shader = LinearGradient(
-                0f, gradientOffset, 0f, gradientOffset - height * 0.1f,
+                0f, gradientOffset, 0f, gradientOffset - height * 0.01f,
                 startColor, endColor, Shader.TileMode.CLAMP
             )
         })
@@ -199,9 +199,10 @@ internal class CircleView : View {
     private var endColor: Int = Color.WHITE
     private var gradientAnimator: ValueAnimator? = null
 
-    fun animateBackgroundSlide(toColor: Int, duration: Long = 400L) {
+    fun animateBackgroundSlide(toColor: Int, duration: Long = 600L) {
         startColor = colorBackground
         endColor = toColor
+        colorLineNormal = Color.WHITE
 
         gradientAnimator?.cancel()
         //bottom to top

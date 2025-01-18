@@ -31,11 +31,11 @@ internal class FaceDetectorScan(
     private val MIN_FACE_SIZE = 0.15F
     private var mCameraView: CameraView? = null
     private var mFrameViewMax: View? = null
-    private var minFacePercent: Int = 50
-    private var maxFacePercent: Int = 94
+    private var minFacePercent: Int = 25
+    private var maxFacePercent: Int = 60
     private var percent = 0
-    private var offset = 30F
-    private var eulerDescartes = 6f
+    private var offset = 15F
+    private var eulerDescartes = 5f
 
 
     //    }
@@ -65,24 +65,24 @@ internal class FaceDetectorScan(
     init {
         when (level) {
             VerifyLevel.HIGH -> {
-                minFacePercent = 40
-                maxFacePercent = 60
-                eulerDescartes = 6f
+                minFacePercent = 30
+                maxFacePercent = 36
+                eulerDescartes = 5f
                 offset = 0F
             }
 
             VerifyLevel.MEDIUM -> {
-                minFacePercent = 35
-                maxFacePercent = 66
-                eulerDescartes = 8f
-                offset = 20F
+                minFacePercent = 25
+                maxFacePercent = 40
+                eulerDescartes = 7f
+                offset = 15F
             }
 
             VerifyLevel.LOW -> {
-                minFacePercent = 25
-                maxFacePercent = 72
-                eulerDescartes = 10f
-                offset = 40F
+                minFacePercent = 20
+                maxFacePercent = 45
+                eulerDescartes = 9f
+                offset = 25F
 
             }
         }

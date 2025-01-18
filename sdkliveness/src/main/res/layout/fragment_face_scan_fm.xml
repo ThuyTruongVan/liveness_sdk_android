@@ -24,6 +24,7 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:visibility="visible"
+            tools:visibility="gone"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
@@ -48,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginHorizontal="30dp"
-            android:layout_marginVertical="?android:actionBarSize"
+            android:layout_marginBottom="?android:actionBarSize"
             android:keepScreenOn="true"
             android:visibility="visible"
             app:cameraAudio="off"

@@ -767,7 +767,7 @@ internal class FaceMatchFragment : Fragment() {
                         slider.visibility = View.GONE
                         ivSuccess.visibility = View.VISIBLE
                         tvSuccess.visibility = View.VISIBLE
-                        mHandler.postDelayed(mBackRunnable, 1000)
+                        mHandler.postDelayed(mBackRunnable, 700)
                     }
                     mHandler.postDelayed(mSuccessRunnable, 350)
 

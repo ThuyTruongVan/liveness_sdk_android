@@ -14,6 +14,7 @@ import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.google.mlkit.vision.face.FaceLandmark
+import com.liveness.sdk.corev4.BuildConfig
 import com.liveness.sdk.corev4.model.VerifyLevel
 import com.otaliastudios.cameraview.CameraView
 import java.io.ByteArrayOutputStream
@@ -150,7 +151,9 @@ internal class FaceDetectorScan(
                     if (mFrameViewMax == null) {
                         return@addOnSuccessListener
                     }
-                    faceBoundsOverlay.updateFaces(listOf(FaceBounds(0, rectF)))
+                    if (BuildConfig.DEBUG) {
+                        faceBoundsOverlay.updateFaces(listOf(FaceBounds(0, rectF)))
+                    }
                     val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
                     if (faceTooSmall) {
                         onFaceDetectionResultListener?.onFaceStatus(0, percent)

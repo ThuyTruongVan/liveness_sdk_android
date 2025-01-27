@@ -22,7 +22,7 @@ import java.util.concurrent.Executors
 
 
 internal class FaceDetectorScan(
-    faceBoundsOverlay: FaceBoundsOverlay,
+    private val faceBoundsOverlay: FaceBoundsOverlay,
     level: VerifyLevel = VerifyLevel.MEDIUM
 ) {
 
@@ -31,10 +31,10 @@ internal class FaceDetectorScan(
     private val MIN_FACE_SIZE = 0.15F
     private var mCameraView: CameraView? = null
     private var mFrameViewMax: View? = null
-    private var minFacePercent: Int = 25
-    private var maxFacePercent: Int = 60
+    private var minFacePercent: Int = 50
+    private var maxFacePercent: Int = 94
     private var percent = 0
-    private var offset = 15F
+    private var offset = 10F
     private var eulerDescartes = 5f
 
 
@@ -65,24 +65,24 @@ internal class FaceDetectorScan(
     init {
         when (level) {
             VerifyLevel.HIGH -> {
-                minFacePercent = 30
-                maxFacePercent = 36
-                eulerDescartes = 5f
+                minFacePercent = 55
+                maxFacePercent = 90
+                eulerDescartes = 6f
                 offset = 0F
             }
 
             VerifyLevel.MEDIUM -> {
-                minFacePercent = 25
-                maxFacePercent = 40
-                eulerDescartes = 7f
-                offset = 15F
+                minFacePercent = 50
+                maxFacePercent = 94
+                eulerDescartes = 9f
+                offset = 10F
             }
 
             VerifyLevel.LOW -> {
-                minFacePercent = 20
-                maxFacePercent = 45
-                eulerDescartes = 9f
-                offset = 25F
+                minFacePercent = 45
+                maxFacePercent = 98
+                eulerDescartes = 12f
+                offset = 20F
 
             }
         }
@@ -144,55 +144,38 @@ internal class FaceDetectorScan(
                 isProcessing = false
             }
             if (faces.size > 0) {
-                for (face in faces) {
-//                        if(checkFaceFrame(face)) {
-                    val faceBounds = faces.map { face ->
-//                            val result = checkFaceFrame(face.toFaceBounds(this))
-//                        val result = checkFaceAvailable(face.toFaceBounds(this))
-//                        val resultCenter = checkFaceCenter(face)
-//                        onFaceDetectionResultListener?.onProcessing(result && resultCenter)
-
-                        val rectF = face.toFaceBounds(this)
-                        Log.d("--hieudt", rectF.toString())
-                        if (mFrameViewMax == null) {
-                            return@map
-                        }
-
-                        val noseBase = face.getLandmark(FaceLandmark.NOSE_BASE)
-                        val mouthBottom = face.getLandmark(FaceLandmark.MOUTH_BOTTOM)
-                        val threshold = mFrameViewMax!!.height * 0.05
-                        if (noseBase != null && mouthBottom != null) {
-                            val distance = Math.abs(noseBase.position.y - mouthBottom.position.y)
-                            Log.d("MaskDetection $threshold", distance.toString())
-                            if (distance < threshold) { // threshold: khoảng cách tối thiểu để miệng không bị che
-                                Log.d("MaskDetection", "Miệng bị che hoặc khoảng cách không bình thường")
-                            } else {
-                                Log.d("MaskDetection", "Miệng không bị che")
-                            }
-                        }
-                        val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
-                        if (faceTooSmall) {
-                            onFaceDetectionResultListener?.onFaceStatus(0, percent)
-                            return@map
-                        }
-                        val faceTooBig = faceSmallOrBig(rectF, false, mFrameViewMax!!)
-                        if (faceTooBig) {
-                            onFaceDetectionResultListener?.onFaceStatus(1, null)
-                            return@map
-                        }
-                        val faceOutFrame = isFaceOut(rectF)
-                        if (faceOutFrame) {
-                            onFaceDetectionResultListener?.onFaceStatus(2, null)
-                            return@map
-                        }
-                        val resultCenter = checkFaceCenter(face)
-                        if (!resultCenter) {
-                            onFaceDetectionResultListener?.onFaceStatus(3, null)
-                            return@map
-                        }
-                        onFaceDetectionResultListener?.onProcessing(true)
+                if (faces.size == 1) {
+                    val rectF = faces[0].toFaceBounds(this)
+                    Log.d("--hieudt", rectF.toString())
+                    if (mFrameViewMax == null) {
+                        return@addOnSuccessListener
                     }
+                    faceBoundsOverlay.updateFaces(listOf(FaceBounds(0, rectF)))
+                    val faceTooSmall = faceSmallOrBig(rectF, true, mFrameViewMax!!)
+                    if (faceTooSmall) {
+                        onFaceDetectionResultListener?.onFaceStatus(0, percent)
+                        return@addOnSuccessListener
+                    }
+                    val faceTooBig = faceSmallOrBig(rectF, false, mFrameViewMax!!)
+                    if (faceTooBig) {
+                        onFaceDetectionResultListener?.onFaceStatus(1, null)
+                        return@addOnSuccessListener
+                    }
+                    val faceOutFrame = isFaceOut(rectF)
+                    if (faceOutFrame) {
+                        onFaceDetectionResultListener?.onFaceStatus(2, null)
+                        return@addOnSuccessListener
+                    }
+                    val resultCenter = checkFaceCenter(faces[0])
+                    if (!resultCenter) {
+                        onFaceDetectionResultListener?.onFaceStatus(3, null)
+                        return@addOnSuccessListener
+                    }
+                    onFaceDetectionResultListener?.onProcessing(true)
+                } else {
+                    onFaceDetectionResultListener?.onFaceStatus(5, null)
                 }
+
             } else {
                 onFaceDetectionResultListener?.onFaceStatus(4, null)
             }
@@ -297,12 +280,12 @@ internal class FaceDetectorScan(
         bound.bottom += offsetHorizontal
         val borderline = RectF(
             mFrameViewMax!!.left.toFloat() - offset,
-            mFrameViewMax!!.top + offset,
+            mFrameViewMax!!.top - offset,
             mFrameViewMax!!.right.toFloat() + offset,
-            mFrameViewMax!!.bottom - offset
+            mFrameViewMax!!.bottom + offset
         )
         Log.d("border", "border$borderline")
-        Log.d("border", "bound $bound")
+        Log.d("border", "face $bound")
         return (bound.left < borderline.left || bound.top < borderline.top || bound.right > borderline.right || bound.bottom > borderline.bottom)
     }
 
@@ -332,29 +315,20 @@ internal class FaceDetectorScan(
         val scaledBottom = scaleY * boundingBox.bottom
         return RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
     }
+    fun scaleRectF(rect: RectF, scale: Float): RectF {
+        val centerX = rect.centerX()
+        val centerY = rect.centerY()
+        val halfWidth = rect.width() / 2 * scale
+        val halfHeight = rect.height() / 2 * scale
 
-    private fun FaceLandmark.toMappedPointF(frame: Frame): PointF {
-        val reverseDimens = frame.rotation == 90 || frame.rotation == 270
-        val width = if (reverseDimens) frame.size.height else frame.size.width
-        val height = if (reverseDimens) frame.size.width else frame.size.height
-
-        val scaleX = (mCameraView?.width?.toFloat() ?: 0f) / width
-        val scaleY = (mCameraView?.height?.toFloat() ?: 0f) / height
-        val isFrontLens = frame.lensFacing == LensFacing.FRONT
-
-        // Lấy vị trí gốc của landmark
-        val originalX = position.x
-        val originalY = position.y
-
-        // Lật vị trí nếu là camera trước
-        val flippedX = if (isFrontLens) width - originalX else originalX
-
-        // Chuyển đổi sang tọa độ được scale
-        val scaledX = scaleX * flippedX
-        val scaledY = scaleY * originalY
-
-        return PointF(scaledX, scaledY)
+        return RectF(
+            centerX - halfWidth,
+            centerY - halfHeight,
+            centerX + halfWidth,
+            centerY + halfHeight
+        )
     }
+
 
     private fun onError(exception: Exception) {
         onFaceDetectionResultListener?.onFailure(exception)

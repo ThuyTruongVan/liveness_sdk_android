@@ -6,7 +6,6 @@ import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -17,20 +16,20 @@ import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.corev4.api.HttpClientUtils
-import com.liveness.sdk.corev4.facedetector.CircleView
+import com.liveness.sdk.corev4.facedetector.EllipseView
 import com.liveness.sdk.corev4.facedetector.FaceDetectorScan
 import com.liveness.sdk.corev4.facedetector.Frame
 import com.liveness.sdk.corev4.facedetector.LensFacing
@@ -60,6 +59,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.Executors
+import kotlin.random.Random
 
 /**
  * Created by Hieudt43 on 26/09/2024.
@@ -72,12 +72,15 @@ internal class FaceMatchFragment : Fragment() {
     private lateinit var cameraViewVideo: CameraView
     private lateinit var prbLoading: ProgressBar
     private lateinit var tvStatus: TextView
-    private var mFrameMark: CircleView? = null
+    private var mFrameMark: EllipseView? = null
     private lateinit var mFrameImageMax: ImageView
 
     private lateinit var toolbar: LinearLayout
     private lateinit var btBack: ImageView
+    private lateinit var ivSuccess: ImageView
+    private lateinit var tvSuccess: TextView
     private lateinit var slider: SliderView
+    private lateinit var rlVideo: ConstraintLayout
 //    private lateinit var test: TextView
 
     private var mFaceDetector: FaceDetectorScan? = null
@@ -89,7 +92,8 @@ internal class FaceMatchFragment : Fragment() {
     private lateinit var sliderAdapter: SliderAdapter
     private val mHandler = Handler(Looper.getMainLooper())
     private lateinit var mCaptureRunnable: Runnable
-    private lateinit var mStatusRunnable: Runnable
+    private lateinit var mSuccessRunnable: Runnable
+    private lateinit var mBackRunnable: Runnable
     private var typeScreen: String? = null
     private var mFragmentManager: FragmentManager? = null
     private var mImageList: MutableList<String> = ArrayList()
@@ -100,7 +104,8 @@ internal class FaceMatchFragment : Fragment() {
     private var mCount: Float? = 1.0f
     private var mTransactionId: String? = null
     private var isProcess: Boolean = false
-    private var isRunning=true
+    private var isRunning = true
+    private var mAngle = 260f
 
 
     override fun onCreateView(
@@ -115,6 +120,9 @@ internal class FaceMatchFragment : Fragment() {
         slider = view.findViewById(R.id.imageSlider)
         toolbar = view.findViewById(R.id.llToolbar)
         btBack = view.findViewById(R.id.ivBack)
+        ivSuccess = view.findViewById(R.id.ivSuccess)
+        tvSuccess = view.findViewById(R.id.tvSuccess)
+        rlVideo = view.findViewById(R.id.rlVideo)
 //        test = view.findViewById(R.id.tvTest)
         if (arguments?.containsKey(AppConfig.KEY_BUNDLE_BOOLEAN) == true) {
             isShowToolbar = arguments?.getBoolean(AppConfig.KEY_BUNDLE_BOOLEAN, true) == true
@@ -128,15 +136,17 @@ internal class FaceMatchFragment : Fragment() {
         btBack.setOnClickListener {
             onBackFragment()
         }
-        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
+        activity?.onBackPressedDispatcher?.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
                     AppConfig.livenessListener?.onCallbackLiveness(
                         LivenessModel(status = 6666)
                     )
                     onBackFragment()
-                Log.d("back press", "++++++")
-            }
-        })
+                    Log.d("back press", "++++++")
+                }
+            })
         initRunnable()
         initCamera(view)
         if (checkPermissions()) {
@@ -185,6 +195,7 @@ internal class FaceMatchFragment : Fragment() {
         mCaptureRunnable = Runnable {
             cameraViewVideo.takePictureSnapshot()
         }
+
     }
 
     private fun getColor(color: Int): Long {
@@ -292,6 +303,7 @@ internal class FaceMatchFragment : Fragment() {
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_come_closer)
                         prbLoading.visibility = View.GONE
+                        mFrameMark?.errorView()
 //                        percent?.apply {
 //                            prbLoading.setProgress(percent, true)
 //                        }
@@ -301,24 +313,35 @@ internal class FaceMatchFragment : Fragment() {
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_move_face_farther)
                         prbLoading.visibility = View.GONE
+                        mFrameMark?.errorView()
                     }
 
                     2 -> { // face out
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_face_center_frame)
                         prbLoading.visibility = View.GONE
+                        mFrameMark?.errorView()
                     }
 
                     3 -> { // face euler fail
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_look_straight)
                         prbLoading.visibility = View.GONE
+                        mFrameMark?.errorView()
                     }
 
                     4 -> { // no face
                         tvStatus.visibility = View.VISIBLE
                         tvStatus.text = getString(R.string.fm_face_out_frame)
                         prbLoading.visibility = View.GONE
+                        mFrameMark?.errorView()
+                    }
+
+                    5 -> { // many face
+                        tvStatus.visibility = View.VISIBLE
+                        tvStatus.text = getString(R.string.fm_face_many)
+                        prbLoading.visibility = View.GONE
+                        mFrameMark?.errorView()
                     }
 
                     else -> {
@@ -400,8 +423,8 @@ internal class FaceMatchFragment : Fragment() {
         prbLoading.visibility = View.GONE
         slider.visibility = View.GONE
         slider.currentPagePosition = 0
-        mFrameMark?.resetView()
         mHandler.removeCallbacks(mCaptureRunnable)
+        mFrameMark?.defaultView()
     }
 
     private fun showKeepDevice() {
@@ -409,9 +432,8 @@ internal class FaceMatchFragment : Fragment() {
         tvStatus.text = getString(R.string.fm_keep_face)
         prbLoading.visibility = View.GONE
         if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
-//            slider.visibility = View.VISIBLE
-//            mFrameMark?.flashView(listColor[1].toInt())
-            mFrameMark?.animateBackgroundSlide(listColor[1].toInt())
+            slider.visibility = View.VISIBLE
+            mFrameMark?.loadingViewSemi((mCount!! * 1000).toLong())
         }
     }
 
@@ -490,7 +512,8 @@ internal class FaceMatchFragment : Fragment() {
         mFaceDetector?.setFaceProcessing(false)
         mFaceDetector?.shutDown()
         cameraViewVideo.destroy()
-        isRunning=false
+        isRunning = false
+        mHandler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
 
@@ -622,7 +645,10 @@ internal class FaceMatchFragment : Fragment() {
     private fun getTOTP(
         imageB64: String, image2B64: String?, image3B64: String?, image4B64: String?
     ) {
-        showLoading(true)
+//        showLoading(true)
+        mAngle= Random.nextInt(180, 300).toFloat()
+        mFrameMark?.loadingViewPrepare(Random.nextLong(3000, 5001), mAngle)
+
         Thread {
 
             val tOTP = TotpUtils(requireContext()).getTotp()
@@ -659,7 +685,7 @@ internal class FaceMatchFragment : Fragment() {
         image4B64: String?
     ) {
         val response = HttpClientUtils.instance?.initTransaction(requireContext(), readCardId)
-        if(!isRunning) return
+        if (!isRunning) return
         var result: JSONObject? = null
         if (!response.isNullOrEmpty()) {
             result = JSONObject(response)
@@ -691,7 +717,7 @@ internal class FaceMatchFragment : Fragment() {
         val response = HttpClientUtils.instance?.checkLiveNessFlashV2(
             requireContext(), tOTP, transactionID, imageB64, image2B64, image3B64, image4B64
         )
-        if(!isRunning) return
+        if (!isRunning) return
         activity?.runOnUiThread {
             prbLoading.progress = 100
         }
@@ -725,14 +751,26 @@ internal class FaceMatchFragment : Fragment() {
 //                                isProcess = false
                                 cameraViewVideo.open()
                             }
+
                             override fun onNegativeClick() {
                                 activity?.finish()
                             }
                         })
                 } else {
-                    showLoading(false)
-                    AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
-                    onBackFragment()
+                    mFrameMark?.loadingViewFull(mAngle)
+                    mBackRunnable = Runnable {
+                        AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
+                        onBackFragment()
+                    }
+                    mSuccessRunnable = Runnable {
+                        rlVideo.visibility = View.GONE
+                        slider.visibility = View.GONE
+                        ivSuccess.visibility = View.VISIBLE
+                        tvSuccess.visibility = View.VISIBLE
+                        mHandler.postDelayed(mBackRunnable, 1000)
+                    }
+                    mHandler.postDelayed(mSuccessRunnable, 350)
+
                 }
             }
 
@@ -747,6 +785,10 @@ internal class FaceMatchFragment : Fragment() {
                 onBackFragment()
             }
         }
+    }
+
+    private fun showSuccessView() {
+
     }
 
     private fun initAttemp() {
@@ -771,7 +813,7 @@ internal class FaceMatchFragment : Fragment() {
                 if (result?.has("data") == true) {
                     mTransactionId = result.getString("data")
                 }
-                if(!isRunning) return@Thread
+                if (!isRunning) return@Thread
                 if (status == 200) {
                     val response =
                         HttpClientUtils.instance?.initAttemp(requireContext(), mTransactionId!!)
@@ -787,7 +829,7 @@ internal class FaceMatchFragment : Fragment() {
                     if (result?.has("message") == true) {
                         strMessage = result.getString("message")
                     }
-                    if(!isRunning) return@Thread
+                    if (!isRunning) return@Thread
                     if (status == 200) {
                         var data: JSONObject? = null
                         if (result?.has("data") == true) {
@@ -827,7 +869,7 @@ internal class FaceMatchFragment : Fragment() {
                         onBackFragment()
                     }
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }.start()
@@ -870,7 +912,7 @@ internal class FaceMatchFragment : Fragment() {
                     requireContext(), AppConfig.encrypted_register_device
                 ), request
             )
-            if(!isRunning) return@Thread
+            if (!isRunning) return@Thread
             var result: JSONObject? = null
             if (responseDevice != null && responseDevice.length > 0) {
                 result = JSONObject(responseDevice)
@@ -971,7 +1013,6 @@ internal class FaceMatchFragment : Fragment() {
             slider.visibility = View.GONE
             tvStatus.visibility = View.VISIBLE
             tvStatus.text = getString(R.string.fm_verifying)
-
             if (AppConfig.mLivenessRequest?.isSaveImage == true) {
                 saveBase64Images()
             } else {

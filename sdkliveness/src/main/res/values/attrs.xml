@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CircleView">
+        <attr name="circle_paddingHorizontal" format="dimension" />
+        <attr name="circle_paddingVertical" format="dimension" />
+        <attr name="circle_paddingLine" format="dimension" />
+        <attr name="circle_lineWidth" format="dimension" />
+        <attr name="circle_lineHeight" format="dimension" />
+        <attr name="circle_colorLine" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="EllipseView">
         <attr name="paddingHorizontal" format="dimension" />
         <attr name="paddingVertical" format="dimension" />
-        <attr name="paddingLine" format="dimension" />
-        <attr name="lineWidth" format="dimension" />
-        <attr name="lineHeight" format="dimension" />
-        <attr name="colorLine" format="color" />
+        <attr name="colorNormal" format="color" />
+        <attr name="colorWarning" format="color" />
+        <attr name="colorActive" format="color" />
+        <attr name="strokeWidth" format="dimension" />
     </declare-styleable>
 </resources>

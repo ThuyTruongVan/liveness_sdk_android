@@ -1,18 +1,21 @@
 <resources>
     <string name="app_name">DemoSDK</string>
-    <string name="fm_keep_face">Giữ yên</string>
+    <string name="fm_keep_face">Giữ yên khuôn mặt trong khung hình</string>
     <string name="fm_success">Hoàn thành</string>
-    <string name="fm_verifying">Đang xác minh…</string>
+    <string name="fm_verifying">Đang so khớp khuôn mặt</string>
     <string name="fm_register_process">Đang đăng ký…</string>
-    <string name="fm_look_straight">Vui lòng nhìn thẳng</string>
+    <string name="fm_look_straight">Hãy nhìn thẳng vào camera</string>
     <string name="fm_face_center_frame">Vui lòng đưa khuôn mặt vào chính giữa khung hình</string>
-    <string name="fm_face_out_frame">Vui lòng đưa khuôn mặt nằm trọn trong khung</string>
-    <string name="fm_come_closer">Vui lòng tiến lại gần hơn</string>
-    <string name="fm_move_face_farther">Vui lòng đưa khuôn mặt xa hơn</string>
+    <string name="fm_face_out_frame">Vui lòng đưa mặt vào khung hình</string>
+    <string name="fm_come_closer">Vui lòng di chuyển khuôn mặt lại gần khung hình</string>
+    <string name="fm_move_face_farther">Vui lòng di chuyển khuôn mặt ra xa khung hình</string>
     <string name="face_math_fail_title">So khớp không chính xác</string>
     <string name="face_math_fail_message">Có vẻ như bạn và chủ sở hữu CCCD không cùng một người, bạn có muốn xác nhận lại không</string>
     <string name="retry">Thử lại</string>
     <string name="skip">Bỏ qua</string>
     <string name="fm_face_matching">Đang xác thực khuôn mặt</string>
+    <string name="fm_face_many">Có nhiều khuôn mặt trong khung hình</string>
+    <string name="fm_face_match_success">So khớp khuôn mặt\nthành công</string>
+
 
 </resources>

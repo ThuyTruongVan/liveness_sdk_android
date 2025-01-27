@@ -72,34 +72,34 @@ internal class CircleView : View {
             try {
                 paddingVertical = getDimension(
                     ta,
-                    R.styleable.CircleView_paddingVertical,
+                    R.styleable.CircleView_circle_paddingVertical,
                     R.dimen.default_padding_vertical
                 ).toFloat()
                 paddingHorizontal = getDimension(
                     ta,
-                    R.styleable.CircleView_paddingHorizontal,
+                    R.styleable.CircleView_circle_paddingHorizontal,
                     R.dimen.default_padding_horizontal
                 ).toFloat()
 
                 lineWidth = getDimension(
                     ta,
-                    R.styleable.CircleView_lineWidth,
+                    R.styleable.CircleView_circle_lineWidth,
                     R.dimen.default_line_width
                 ).toFloat()
 
                 lineHeight = getDimension(
                     ta,
-                    R.styleable.CircleView_lineHeight,
+                    R.styleable.CircleView_circle_lineHeight,
                     R.dimen.default_line_height
                 ).toFloat()
 
                 paddingLine = getDimension(
                     ta,
-                    R.styleable.CircleView_paddingLine,
+                    R.styleable.CircleView_circle_paddingLine,
                     R.dimen.default_padding_line
                 ).toFloat()
 
-                colorLine = ta.getColor(R.styleable.CircleView_colorLine, Color.GRAY)
+                colorLine = ta.getColor(R.styleable.CircleView_circle_colorLine, Color.GRAY)
                 colorLineNormal = colorLine
 
             } finally {

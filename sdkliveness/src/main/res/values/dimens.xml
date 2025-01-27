@@ -5,4 +5,6 @@
     <dimen name="default_padding_line">5dp</dimen>
     <dimen name="default_line_width">10dp</dimen>
     <dimen name="default_line_height">2dp</dimen>
+    <dimen name="default_stroke_width">2dp</dimen>
+
 </resources>

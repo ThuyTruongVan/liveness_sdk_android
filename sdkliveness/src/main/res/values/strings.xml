@@ -9,13 +9,24 @@
     <string name="fm_face_out_frame">Vui lòng đưa khuôn mặt vào chính giữa khung hình để mặt để bắt đầu xác thực</string>
     <string name="fm_come_closer">Vui lòng di chuyển khuôn mặt lại gần khung hình</string>
     <string name="fm_move_face_farther">Vui lòng di chuyển khuôn mặt ra xa khung hình</string>
-    <string name="face_math_fail_title">So khớp không chính xác</string>
-    <string name="face_math_fail_message">Có vẻ như bạn và chủ sở hữu CCCD không cùng một người, bạn có muốn xác nhận lại không</string>
+
     <string name="retry">Thử lại</string>
     <string name="skip">Bỏ qua</string>
     <string name="fm_face_matching">Đang xác thực khuôn mặt</string>
     <string name="fm_face_many">Có quá nhiều khuôn mặt trong khung hình</string>
     <string name="fm_face_match_success">So khớp khuôn mặt\nthành công</string>
+
+    <string name="face_math_fail_title">Kết quả so khớp không thành công</string>
+    <string name="face_math_fail_message">Có vẻ như bạn và chủ sở hữu CCCD không cùng một người, bạn có muốn xác nhận lại không</string>
+
+    <string name="face_live_fail_title">Kết quả xác thực sự sống không thành công</string>
+    <string name="face_live_fail_message">Vui lòng kiểm tra và thực hiện lại</string>
+
+    <string name="face_accessories_fail_title">Xuất hiện vật cản hoặc không đủ ánh sáng trong quá trình liveness</string>
+    <string name="face_accessories_fail_message">Vui lòng kiểm tra và thực hiện lại</string>
+
+    <string name="face_quality_fail_title">Ảnh so khớp không đảm bảo chất lượng tiêu chuẩn</string>
+    <string name="face_quality_fail_message">Vui lòng kiểm tra và thực hiện lạii</string>
 
 
 </resources>

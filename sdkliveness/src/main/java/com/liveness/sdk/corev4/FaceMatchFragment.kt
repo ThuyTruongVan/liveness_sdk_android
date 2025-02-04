@@ -106,6 +106,15 @@ internal class FaceMatchFragment : Fragment() {
     private var isProcess: Boolean = false
     private var isRunning = true
     private var mAngle = 260f
+    private val mErrorListener = object : InformationDialogListener {
+        override fun onPositiveClick() {
+            cameraViewVideo.open()
+        }
+
+        override fun onNegativeClick() {
+            activity?.finish()
+        }
+    }
 
 
     override fun onCreateView(
@@ -646,7 +655,7 @@ internal class FaceMatchFragment : Fragment() {
         imageB64: String, image2B64: String?, image3B64: String?, image4B64: String?
     ) {
 //        showLoading(true)
-        mAngle= Random.nextInt(180, 300).toFloat()
+        mAngle = Random.nextInt(180, 300).toFloat()
         mFrameMark?.loadingViewPrepare(Random.nextLong(3000, 5001), mAngle)
 
         Thread {
@@ -740,22 +749,42 @@ internal class FaceMatchFragment : Fragment() {
             liveNessModel.imageResult = getImageResult()
             activity?.runOnUiThread {
                 if (liveNessModel.data?.faceMatchingResult != 1) {
+                    var title: String
+                    var message: String
+                    when (liveNessModel.code) {
+                        AppConfig.code_face_error -> {
+                            title = getString(R.string.face_math_fail_title)
+                            message = getString(R.string.face_math_fail_message)
+                        }
+
+                        AppConfig.code_liveness_error -> {
+                            title = getString(R.string.face_math_fail_title)
+                            message = getString(R.string.face_math_fail_message)
+                        }
+
+                        AppConfig.code_accessories_error -> {
+                            title = getString(R.string.face_math_fail_title)
+                            message = getString(R.string.face_math_fail_message)
+                        }
+
+                        AppConfig.code_quality_error -> {
+                            title = getString(R.string.face_math_fail_title)
+                            message = getString(R.string.face_math_fail_message)
+                        }
+
+                        else -> {
+                            title = getString(R.string.face_math_fail_title)
+                            message = getString(R.string.face_math_fail_message)
+                        }
+                    }
                     DialogUtils.showConfirmDialog(
                         requireActivity(),
-                        getString(R.string.face_math_fail_title),
-                        getString(R.string.face_math_fail_message),
+                        title,
+                        message,
                         getString(R.string.retry),
                         getString(R.string.skip),
-                        object : InformationDialogListener {
-                            override fun onPositiveClick() {
-//                                isProcess = false
-                                cameraViewVideo.open()
-                            }
-
-                            override fun onNegativeClick() {
-                                activity?.finish()
-                            }
-                        })
+                        mErrorListener
+                    )
                 } else {
                     mFrameMark?.loadingViewFull(mAngle)
                     mBackRunnable = Runnable {

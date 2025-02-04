@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/app_name"
+        android:text="@string/face_math_fail_title"
         android:textColor="#0D182D"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="15dp"
-        android:text="@string/app_name"
+        android:visibility="invisible"
         android:textColor="#313442"
         android:textSize="13sp" />
 

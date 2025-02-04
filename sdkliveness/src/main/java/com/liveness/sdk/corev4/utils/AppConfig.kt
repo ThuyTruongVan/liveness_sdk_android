@@ -104,4 +104,8 @@ internal object AppConfig {
     val key_encrypted_image_live = "key_encrypted_s"
     val key_encrypted_color = "key_encrypted_x"
     val key_encrypted_clientTransactionId ="key_encrypted_z"
+    val code_face_error ="016"
+    val code_liveness_error ="017"
+    val code_accessories_error ="018"
+    val code_quality_error ="019"
 }

@@ -119,7 +119,7 @@ internal class EllipseView : View {
             height - paddingVertical
         )
         bm!!.eraseColor(Color.TRANSPARENT)
-        cv?.drawColor(context.getColor(R.color.fm_black_75))
+        cv?.drawColor(context.getColor(R.color.fm_black_60))
         cv?.drawOval(strokeRect, strokePaint)
         cv?.drawOval(rect, eraser!!)
         canvas.drawBitmap(bm!!, 0f, 0f, null)

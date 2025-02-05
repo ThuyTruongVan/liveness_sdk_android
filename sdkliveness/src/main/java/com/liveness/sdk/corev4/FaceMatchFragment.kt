@@ -758,18 +758,18 @@ internal class FaceMatchFragment : Fragment() {
                         }
 
                         AppConfig.code_liveness_error -> {
-                            title = getString(R.string.face_math_fail_title)
-                            message = getString(R.string.face_math_fail_message)
+                            title = getString(R.string.face_live_fail_title)
+                            message = getString(R.string.face_live_fail_message)
                         }
 
                         AppConfig.code_accessories_error -> {
-                            title = getString(R.string.face_math_fail_title)
-                            message = getString(R.string.face_math_fail_message)
+                            title = getString(R.string.face_accessories_fail_title)
+                            message = getString(R.string.face_accessories_fail_message)
                         }
 
                         AppConfig.code_quality_error -> {
-                            title = getString(R.string.face_math_fail_title)
-                            message = getString(R.string.face_math_fail_message)
+                            title = getString(R.string.face_quality_fail_title)
+                            message = getString(R.string.face_quality_fail_message)
                         }
 
                         else -> {

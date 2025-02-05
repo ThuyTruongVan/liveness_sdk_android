@@ -13,7 +13,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="12dp"
         android:gravity="center"
-        android:text="@string/face_math_fail_title"
+        android:text="@string/fm_face_math_fail_title"
         android:textColor="#0D182D"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -42,7 +42,7 @@
             android:layout_weight="1"
             android:background="@drawable/btn_white"
             android:paddingHorizontal="12dp"
-            android:text="@string/retry"
+            android:text="@string/fm_retry"
             android:textAllCaps="false"
             android:textColor="#1b1d29"
             android:textSize="14sp" />
@@ -55,7 +55,7 @@
             android:layout_weight="1"
             android:background="@drawable/btn_login_normal"
             android:paddingHorizontal="12dp"
-            android:text="@string/retry"
+            android:text="@string/fm_retry"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="14sp" />

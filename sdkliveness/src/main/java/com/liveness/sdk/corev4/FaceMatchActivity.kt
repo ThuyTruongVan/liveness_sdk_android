@@ -10,7 +10,7 @@ import androidx.fragment.app.FragmentActivity
 internal class FaceMatchActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.ui_activity_fm)
+        setContentView(R.layout.fm_ui_activity_fm)
 
         val transaction = supportFragmentManager.beginTransaction()
         val fragment = FaceMatchFragment()

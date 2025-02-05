@@ -17,7 +17,7 @@ class SliderAdapter :
 
     override fun onCreateViewHolder(parent: ViewGroup): SliderAdapterVH {
         val inflate: View =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_slider_fm, null)
+            LayoutInflater.from(parent.context).inflate(R.layout.fm_item_slider_fm, null)
         return SliderAdapterVH(inflate)
     }
 

@@ -120,7 +120,7 @@ internal class FaceMatchFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        val view: View = inflater.inflate(R.layout.fragment_face_scan_fm, container, false)
+        val view: View = inflater.inflate(R.layout.fm_fragment_face_scan_fm, container, false)
         cameraViewVideo = view.findViewById(R.id.camera_view_video)
         prbLoading = view.findViewById(R.id.pbLoading)
         mFrameMark = view.findViewById(R.id.frMark)
@@ -753,36 +753,36 @@ internal class FaceMatchFragment : Fragment() {
                     var message: String
                     when (liveNessModel.code) {
                         AppConfig.code_face_error -> {
-                            title = getString(R.string.face_math_fail_title)
-                            message = getString(R.string.face_math_fail_message)
+                            title = getString(R.string.fm_face_math_fail_title)
+                            message = getString(R.string.fm_face_math_fail_message)
                         }
 
                         AppConfig.code_liveness_error -> {
-                            title = getString(R.string.face_live_fail_title)
-                            message = getString(R.string.face_live_fail_message)
+                            title = getString(R.string.fm_face_live_fail_title)
+                            message = getString(R.string.fm_face_live_fail_message)
                         }
 
                         AppConfig.code_accessories_error -> {
-                            title = getString(R.string.face_accessories_fail_title)
-                            message = getString(R.string.face_accessories_fail_message)
+                            title = getString(R.string.fm_face_accessories_fail_title)
+                            message = getString(R.string.fm_face_accessories_fail_message)
                         }
 
                         AppConfig.code_quality_error -> {
-                            title = getString(R.string.face_quality_fail_title)
-                            message = getString(R.string.face_quality_fail_message)
+                            title = getString(R.string.fm_face_quality_fail_title)
+                            message = getString(R.string.fm_face_quality_fail_message)
                         }
 
                         else -> {
-                            title = getString(R.string.face_math_fail_title)
-                            message = getString(R.string.face_math_fail_message)
+                            title = getString(R.string.fm_face_math_fail_title)
+                            message = getString(R.string.fm_face_math_fail_message)
                         }
                     }
                     DialogUtils.showConfirmDialog(
                         requireActivity(),
                         title,
                         message,
-                        getString(R.string.retry),
-                        getString(R.string.skip),
+                        getString(R.string.fm_retry),
+                        getString(R.string.fm_skip),
                         mErrorListener
                     )
                 } else {

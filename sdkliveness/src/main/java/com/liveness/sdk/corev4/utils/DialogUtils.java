@@ -14,7 +14,7 @@ import com.liveness.sdk.corev4.R;
 public class DialogUtils {
   public static void showConfirmDialog(Activity activity, String title, String message, String positiveText, String negativeText, InformationDialogListener listener) {
     AlertDialog.Builder builder = new AlertDialog.Builder(activity, androidx.appcompat.R.style.Base_Theme_AppCompat_Light_Dialog_Alert);
-    View dialogView = activity.getLayoutInflater().inflate(R.layout.layout_confirm_dialog, null);
+    View dialogView = activity.getLayoutInflater().inflate(R.layout.fm_layout_confirm_dialog, null);
     AlertDialog diaglog = builder.setView(dialogView)
             .create();
     diaglog.setCancelable(false);

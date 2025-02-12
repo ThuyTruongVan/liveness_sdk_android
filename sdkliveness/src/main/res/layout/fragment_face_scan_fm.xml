@@ -65,7 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignTop="@id/camera_view_video"
-        android:layout_marginVertical="120dp"
+        android:layout_marginVertical="160dp"
         android:layout_alignBottom="@id/camera_view_video"
         android:visibility="invisible" />
 
@@ -78,7 +78,7 @@
         app:colorNormal="@color/fm_transparent"
         app:colorWarning="@color/fm_color_yellow"
         app:paddingHorizontal="40dp"
-        app:paddingVertical="146dp"
+        app:paddingVertical="190dp"
         app:strokeWidth="2dp"
         />
 
@@ -89,7 +89,7 @@
         android:layout_height="20dp"
         android:layout_centerHorizontal="true"
         android:layout_alignBottom="@id/frMark"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="50dp"
         android:max="100"
         android:progress="50"
         android:indeterminate="false"
@@ -104,7 +104,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/frMark"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="80dp"
         android:gravity="center"
         android:padding="10dp"
         android:textColor="#FFFFFF"

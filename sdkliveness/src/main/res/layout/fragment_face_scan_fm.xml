@@ -65,7 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignTop="@id/camera_view_video"
-        android:layout_marginVertical="160dp"
+        android:layout_marginVertical="120dp"
         android:layout_alignBottom="@id/camera_view_video"
         android:visibility="invisible" />
 
@@ -78,7 +78,7 @@
         app:colorNormal="@color/fm_transparent"
         app:colorWarning="@color/fm_color_yellow"
         app:paddingHorizontal="40dp"
-        app:paddingVertical="190dp"
+        app:paddingVertical="140dp"
         app:strokeWidth="2dp"
         />
 

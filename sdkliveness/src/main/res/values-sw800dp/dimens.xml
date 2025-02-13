@@ -1,0 +1,8 @@
+<resources>
+  <dimen name="default_padding_horizontal">20dp</dimen>
+  <dimen name="default_padding_vertical">30dp</dimen>
+  <dimen name="default_stroke_width">2dp</dimen>
+  <dimen name="padding_oval">288.89dp</dimen>
+  <dimen name="margin_frame">244.44dp</dimen>
+
+</resources>

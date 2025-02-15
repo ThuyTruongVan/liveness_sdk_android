@@ -6,7 +6,7 @@
     <string name="fm_register_process">Đang đăng ký…</string>
     <string name="fm_look_straight">Hãy nhìn thẳng vào camera</string>
     <string name="fm_face_center_frame">Vui lòng đưa khuôn mặt vào chính giữa khung hình</string>
-    <string name="fm_face_out_frame">Vui lòng đưa khuôn mặt vào chính giữa khung hình để mặt để bắt đầu xác thực</string>
+    <string name="fm_face_out_frame">Vui lòng đưa khuôn mặt vào chính giữa khung hình để bắt đầu xác thực</string>
     <string name="fm_come_closer">Vui lòng di chuyển khuôn mặt lại gần khung hình</string>
     <string name="fm_move_face_farther">Vui lòng di chuyển khuôn mặt ra xa khung hình</string>
 

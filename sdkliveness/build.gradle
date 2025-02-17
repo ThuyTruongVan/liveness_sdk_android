@@ -64,6 +64,8 @@ dependencies {
     implementation('org.bouncycastle:bcpkix-jdk18on:1.73')
     implementation('com.nimbusds:nimbus-jose-jwt:9.31')
     implementation('commons-codec:commons-codec:1.16.0')
+    implementation("com.airbnb.android:lottie:6.1.0")
+
 
 
 }

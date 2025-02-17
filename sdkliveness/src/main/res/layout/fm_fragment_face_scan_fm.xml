@@ -77,20 +77,50 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/vDummy" />
 
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/faceAnim"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginVertical="10dp"
+        app:layout_constraintBottom_toBottomOf="@id/vDummy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/vDummy"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        android:visibility="gone"
+        app:lottie_rawRes="@raw/anim_1" />
+
     <com.liveness.sdk.corev4.facedetector.EllipseView
         android:id="@+id/frMark"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:colorActive="@color/fm_color_progress"
-        app:colorNormal="@color/fm_color_normal"
-        app:colorWarning="@color/fm_color_error"
+        app:colorActive="@color/fm_white"
+        app:colorNormal="@color/fm_white"
+        app:colorWarning="@color/fm_white"
         app:layout_constraintDimensionRatio="1:1.2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/llToolbar"
-        app:paddingHorizontal="60dp"
-        app:paddingVertical="40dp"
+        app:paddingHorizontal="65dp"
+        app:paddingVertical="42dp"
         app:strokeWidth="4dp" />
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/endAnim"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginVertical="10dp"
+        app:layout_constraintBottom_toBottomOf="@id/vDummy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/vDummy"
+        app:lottie_autoPlay="true"
+        android:visibility="visible"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/anim_2" />
 
     <View
         android:id="@+id/vDummy"

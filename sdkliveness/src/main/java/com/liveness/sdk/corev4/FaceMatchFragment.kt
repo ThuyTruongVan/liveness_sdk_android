@@ -27,6 +27,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.airbnb.lottie.LottieAnimationView
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.corev4.api.HttpClientUtils
 import com.liveness.sdk.corev4.facedetector.EllipseView
@@ -81,6 +82,8 @@ internal class FaceMatchFragment : Fragment() {
     private lateinit var tvSuccess: TextView
     private lateinit var slider: SliderView
     private lateinit var rlVideo: ConstraintLayout
+    private lateinit var faceAnim: LottieAnimationView
+    private lateinit var endAnim: LottieAnimationView
 //    private lateinit var test: TextView
 
     private var mFaceDetector: FaceDetectorScan? = null
@@ -132,6 +135,8 @@ internal class FaceMatchFragment : Fragment() {
         ivSuccess = view.findViewById(R.id.ivSuccess)
         tvSuccess = view.findViewById(R.id.tvSuccess)
         rlVideo = view.findViewById(R.id.rlVideo)
+        faceAnim = view.findViewById(R.id.faceAnim)
+        endAnim = view.findViewById(R.id.endAnim)
 //        test = view.findViewById(R.id.tvTest)
         if (arguments?.containsKey(AppConfig.KEY_BUNDLE_BOOLEAN) == true) {
             isShowToolbar = arguments?.getBoolean(AppConfig.KEY_BUNDLE_BOOLEAN, true) == true

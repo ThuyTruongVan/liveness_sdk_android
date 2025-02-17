@@ -103,24 +103,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/llToolbar"
-        app:paddingHorizontal="65dp"
-        app:paddingVertical="42dp"
+        app:paddingHorizontal="60dp"
+        app:paddingVertical="40dp"
         app:strokeWidth="4dp" />
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/endAnim"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginVertical="10dp"
-        app:layout_constraintBottom_toBottomOf="@id/vDummy"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="wrap_content"
+        android:background="@color/fm_black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/vDummy"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
         app:lottie_autoPlay="true"
         android:visibility="visible"
         app:lottie_loop="true"
-        app:lottie_rawRes="@raw/anim_2" />
+        app:lottie_rawRes="@raw/anim2" />
 
     <View
         android:id="@+id/vDummy"

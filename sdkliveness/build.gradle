@@ -37,6 +37,9 @@ android {
     buildFeatures {
         buildConfig true
     }
+    kotlinOptions {
+        jvmTarget = "17" // Đặt Kotlin JVM target về 17 để đồng bộ
+    }
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"

@@ -32,7 +32,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
+    kotlinOptions {
+        jvmTarget = "17" // Đặt Kotlin JVM target về 17 để đồng bộ
+    }
 
 //    buildFeatures {
 //        viewBinding true

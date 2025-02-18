@@ -28,7 +28,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.airbnb.lottie.LottieAnimationView
-import com.airbnb.lottie.LottieDrawable
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.LottieCompositionFactory
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.corev4.api.HttpClientUtils
 import com.liveness.sdk.corev4.facedetector.EllipseView
@@ -61,7 +62,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.Executors
-import kotlin.random.Random
+
 
 /**
  * Created by Hieudt43 on 26/09/2024.
@@ -82,6 +83,7 @@ internal class FaceMatchFragment : Fragment() {
     private lateinit var slider: SliderView
     private lateinit var rlVideo: ConstraintLayout
     private lateinit var faceAnim: LottieAnimationView
+    private lateinit var loadingAnim: LottieAnimationView
     private lateinit var endAnim: LottieAnimationView
 //    private lateinit var test: TextView
 
@@ -111,7 +113,11 @@ internal class FaceMatchFragment : Fragment() {
     private val mErrorListener = object : InformationDialogListener {
         override fun onPositiveClick() {
             cameraViewVideo.open()
-            faceAnim.visibility=View.VISIBLE
+            faceAnim.visibility = View.VISIBLE
+            loadingAnim.visibility = View.GONE
+            loadingAnim.progress = 0f
+            endAnim.visibility = View.INVISIBLE
+            endAnim.progress = 0f
         }
 
         override fun onNegativeClick() {
@@ -135,6 +141,7 @@ internal class FaceMatchFragment : Fragment() {
         btBack = view.findViewById(R.id.ivBack)
         rlVideo = view.findViewById(R.id.rlVideo)
         faceAnim = view.findViewById(R.id.faceAnim)
+        loadingAnim = view.findViewById(R.id.loadingAnim)
         endAnim = view.findViewById(R.id.endAnim)
 //        test = view.findViewById(R.id.tvTest)
         if (arguments?.containsKey(AppConfig.KEY_BUNDLE_BOOLEAN) == true) {
@@ -168,6 +175,12 @@ internal class FaceMatchFragment : Fragment() {
             requestPermissions()
         }
         setScreenBrightness(1f)
+        LottieCompositionFactory.fromRawRes(context, R.raw.anim_3)
+            .addListener { composition: LottieComposition? ->
+                endAnim.setComposition(
+                    composition!!
+                )
+            }
         return view
     }
 
@@ -579,11 +592,9 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun uploadFile() {
-        faceAnim.visibility= View.GONE
-        endAnim.visibility= View.VISIBLE
-        endAnim.setAnimation(R.raw.anim_2)
-//        endAnim.repeatCount=1000
-        endAnim.playAnimation()
+        faceAnim.visibility = View.GONE
+        faceAnim.clearAnimation()
+        loadingAnim.visibility = View.VISIBLE
         if (mImageList.size >= 4) {
             callApiUploadSession(mImageList[1], mImageList[0], mImageList[2], mImageList[3])
         } else if (mImageList.size >= 2) {
@@ -794,22 +805,24 @@ internal class FaceMatchFragment : Fragment() {
                         getString(R.string.fm_skip),
                         mErrorListener
                     )
-                    endAnim.visibility= View.GONE
+                    loadingAnim.visibility = View.GONE
                 } else {
-                    mFrameMark?.loadingViewFull(mAngle)
+                    activity?.runOnUiThread {
+                        loadingAnim.clearAnimation()
+                        loadingAnim.visibility = View.GONE
+                        endAnim.visibility = View.VISIBLE
+                        endAnim.playAnimation()
+                    }
+
                     mBackRunnable = Runnable {
                         AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
                         onBackFragment()
                     }
-                    endAnim.setAnimation(R.raw.anim_3)
-                    endAnim.repeatCount=1
-                    endAnim.playAnimation()
-                    mSuccessRunnable = Runnable {
-                        rlVideo.visibility = View.GONE
-                        slider.visibility = View.GONE
-                        mHandler.postDelayed(mBackRunnable, 200)
-                    }
-                    mHandler.postDelayed(mBackRunnable, 350)
+
+//                    mSuccessRunnable = Runnable {
+//                        mHandler.postDelayed(mBackRunnable, 300)
+//                    }
+                    mHandler.postDelayed(mBackRunnable, 2100)
 
                 }
             }

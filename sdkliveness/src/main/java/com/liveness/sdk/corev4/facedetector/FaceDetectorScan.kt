@@ -147,7 +147,7 @@ internal class FaceDetectorScan(
             if (faces.size > 0) {
                 if (faces.size == 1) {
                     val rectF = faces[0].toFaceBounds(this)
-                    Log.d("--hieudt", rectF.toString())
+//                    Log.d("--hieudt", rectF.toString())
                     if (mFrameViewMax == null) {
                         return@addOnSuccessListener
                     }
@@ -287,8 +287,8 @@ internal class FaceDetectorScan(
             mFrameViewMax!!.right.toFloat() + offset,
             mFrameViewMax!!.bottom + offset
         )
-        Log.d("border", "border$borderline")
-        Log.d("border", "face $bound")
+//        Log.d("border", "border$borderline")
+//        Log.d("border", "face $bound")
         return (bound.left < borderline.left || bound.top < borderline.top || bound.right > borderline.right || bound.bottom > borderline.bottom)
     }
 

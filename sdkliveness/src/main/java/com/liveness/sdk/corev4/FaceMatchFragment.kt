@@ -28,6 +28,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.LottieDrawable
 import com.google.mlkit.vision.face.Face
 import com.liveness.sdk.corev4.api.HttpClientUtils
 import com.liveness.sdk.corev4.facedetector.EllipseView
@@ -78,8 +79,6 @@ internal class FaceMatchFragment : Fragment() {
 
     private lateinit var toolbar: LinearLayout
     private lateinit var btBack: ImageView
-    private lateinit var ivSuccess: ImageView
-    private lateinit var tvSuccess: TextView
     private lateinit var slider: SliderView
     private lateinit var rlVideo: ConstraintLayout
     private lateinit var faceAnim: LottieAnimationView
@@ -132,8 +131,6 @@ internal class FaceMatchFragment : Fragment() {
         slider = view.findViewById(R.id.imageSlider)
         toolbar = view.findViewById(R.id.llToolbar)
         btBack = view.findViewById(R.id.ivBack)
-        ivSuccess = view.findViewById(R.id.ivSuccess)
-        tvSuccess = view.findViewById(R.id.tvSuccess)
         rlVideo = view.findViewById(R.id.rlVideo)
         faceAnim = view.findViewById(R.id.faceAnim)
         endAnim = view.findViewById(R.id.endAnim)
@@ -447,7 +444,7 @@ internal class FaceMatchFragment : Fragment() {
         prbLoading.visibility = View.GONE
         if (typeScreen != AppConfig.TYPE_SCREEN_REGISTER_FACE) {
             slider.visibility = View.VISIBLE
-            mFrameMark?.loadingViewSemi((mCount!! * 1000).toLong())
+//            mFrameMark?.loadingViewSemi((mCount!! * 1000).toLong())
         }
     }
 
@@ -580,6 +577,10 @@ internal class FaceMatchFragment : Fragment() {
     }
 
     private fun uploadFile() {
+        faceAnim.visibility= View.GONE
+        endAnim.visibility= View.VISIBLE
+        endAnim.setAnimation(R.raw.anim_2)
+        endAnim.playAnimation()
         if (mImageList.size >= 4) {
             callApiUploadSession(mImageList[1], mImageList[0], mImageList[2], mImageList[3])
         } else if (mImageList.size >= 2) {
@@ -660,8 +661,8 @@ internal class FaceMatchFragment : Fragment() {
         imageB64: String, image2B64: String?, image3B64: String?, image4B64: String?
     ) {
 //        showLoading(true)
-        mAngle = Random.nextInt(180, 300).toFloat()
-        mFrameMark?.loadingViewPrepare(Random.nextLong(3000, 5001), mAngle)
+//        mAngle = Random.nextInt(180, 300).toFloat()
+//        mFrameMark?.loadingViewPrepare(Random.nextLong(3000, 5001), mAngle)
 
         Thread {
 
@@ -796,14 +797,15 @@ internal class FaceMatchFragment : Fragment() {
                         AppConfig.livenessListener?.onCallbackLiveness(liveNessModel)
                         onBackFragment()
                     }
+                    endAnim.setAnimation(R.raw.anim_3)
+                    endAnim.repeatCount=1
+                    endAnim.playAnimation()
                     mSuccessRunnable = Runnable {
                         rlVideo.visibility = View.GONE
                         slider.visibility = View.GONE
-                        ivSuccess.visibility = View.VISIBLE
-                        tvSuccess.visibility = View.VISIBLE
-                        mHandler.postDelayed(mBackRunnable, 700)
+                        mHandler.postDelayed(mBackRunnable, 200)
                     }
-                    mHandler.postDelayed(mSuccessRunnable, 350)
+                    mHandler.postDelayed(mBackRunnable, 350)
 
                 }
             }

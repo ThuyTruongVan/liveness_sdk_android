@@ -175,12 +175,12 @@ internal class FaceMatchFragment : Fragment() {
             requestPermissions()
         }
         setScreenBrightness(1f)
-        LottieCompositionFactory.fromRawRes(context, R.raw.anim_3)
-            .addListener { composition: LottieComposition? ->
-                endAnim.setComposition(
-                    composition!!
-                )
-            }
+//        LottieCompositionFactory.fromRawRes(context, R.raw.anim_3)
+//            .addListener { composition: LottieComposition? ->
+//                endAnim.setComposition(
+//                    composition!!
+//                )
+//            }
         return view
     }
 

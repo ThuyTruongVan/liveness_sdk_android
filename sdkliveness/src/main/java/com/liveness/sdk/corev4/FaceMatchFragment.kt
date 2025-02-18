@@ -111,10 +111,12 @@ internal class FaceMatchFragment : Fragment() {
     private val mErrorListener = object : InformationDialogListener {
         override fun onPositiveClick() {
             cameraViewVideo.open()
+            faceAnim.visibility=View.VISIBLE
         }
 
         override fun onNegativeClick() {
             activity?.finish()
+
         }
     }
 
@@ -580,6 +582,7 @@ internal class FaceMatchFragment : Fragment() {
         faceAnim.visibility= View.GONE
         endAnim.visibility= View.VISIBLE
         endAnim.setAnimation(R.raw.anim_2)
+//        endAnim.repeatCount=1000
         endAnim.playAnimation()
         if (mImageList.size >= 4) {
             callApiUploadSession(mImageList[1], mImageList[0], mImageList[2], mImageList[3])
@@ -791,6 +794,7 @@ internal class FaceMatchFragment : Fragment() {
                         getString(R.string.fm_skip),
                         mErrorListener
                     )
+                    endAnim.visibility= View.GONE
                 } else {
                     mFrameMark?.loadingViewFull(mAngle)
                     mBackRunnable = Runnable {

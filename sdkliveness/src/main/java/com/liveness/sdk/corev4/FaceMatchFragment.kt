@@ -78,7 +78,8 @@ internal class FaceMatchFragment : Fragment() {
     private var mFaceDetector: FaceDetectorScan? = null
     private var mStepScan = 0
 
-    private var permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+//    private var permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+    private var permissions = arrayOf(Manifest.permission.CAMERA)
     private val listColor: ArrayList<Long> = arrayListOf()
 
     private lateinit var sliderAdapter: SliderAdapter
@@ -581,7 +582,7 @@ internal class FaceMatchFragment : Fragment() {
         if (AppConfig.mLivenessRequest?.offlineMode == true) {
             AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(imageResult = getImageResult()))
 //            if (activity is FaceMatchActivity) {
-            onBackFragment()
+//            onBackFragment()
 //            }
         } else {
             getTOTP(imageB64, image2B64, image3B64, image4B64)

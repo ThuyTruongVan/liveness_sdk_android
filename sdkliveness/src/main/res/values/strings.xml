@@ -17,9 +17,9 @@
     <string name="fm_face_match_success">So khớp khuôn mặt\nthành công</string>
 
     <string name="fm_face_math_fail_title">Kết quả so khớp không thành công</string>
-    <string name="fm_face_math_fail_message">Có vẻ như bạn và chủ sở hữu CCCD không cùng một người, bạn có muốn xác nhận lại không</string>
+    <string name="fm_face_math_fail_message">Có vẻ như bạn và chủ sở hữu CCCD\nkhông cùng một người, bạn có muốn xác nhận lại không</string>
 
-    <string name="fm_face_live_fail_title">Kết quả xác thực sự sống không thành công</string>
+    <string name="fm_face_live_fail_title">Kết quả xác thực sự sống\nkhông thành công</string>
     <string name="fm_face_live_fail_message">Vui lòng kiểm tra và thực hiện lại</string>
 
     <string name="fm_face_accessories_fail_title">Xuất hiện vật cản hoặc không đủ ánh sáng trong quá trình liveness</string>

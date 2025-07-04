@@ -66,7 +66,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 class KeyStoreUtils(private val mContext: Context) {
     // Using algorithm as described at https://medium.com/@ericfu/securely-storing-secrets-in-an-android-application-501f030ae5a3
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Throws(
         KeyStoreException::class,
         CertificateException::class,
@@ -126,7 +125,6 @@ class KeyStoreUtils(private val mContext: Context) {
         removeSavedSharedPreferences()
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Throws(
         NoSuchAlgorithmException::class,
         NoSuchProviderException::class,
@@ -140,11 +138,7 @@ class KeyStoreUtils(private val mContext: Context) {
     )
     private fun initValidKeys() {
         synchronized(s_keyInitLock) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                generateKeysForAPIMOrGreater()
-            } else {
-                generateKeysForAPILessThanM()
-            }
+            generateKeysForAPIMOrGreater()
         }
     }
 
@@ -155,95 +149,12 @@ class KeyStoreUtils(private val mContext: Context) {
         Log.d(LOG_TAG, String.format("Cleared secret key shared preferences `%s`", clearedPreferencesSuccessfully))
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-    @Throws(
-        NoSuchProviderException::class,
-        NoSuchAlgorithmException::class,
-        InvalidAlgorithmParameterException::class,
-        CertificateException::class,
-        UnrecoverableEntryException::class,
-        NoSuchPaddingException::class,
-        KeyStoreException::class,
-        InvalidKeyException::class,
-        IOException::class
-    )
-    private fun generateKeysForAPILessThanM() {
-        // Generate a key pair for encryption
-        val start = Calendar.getInstance()
-        val end = Calendar.getInstance()
-        end.add(Calendar.YEAR, 30)
-        val spec = KeyPairGeneratorSpec.Builder(mContext)
-            .setAlias(KEY_ALIAS)
-            .setSubject(X500Principal("CN=" + KEY_ALIAS))
-            .setSerialNumber(BigInteger.TEN)
-            .setStartDate(start.time)
-            .setEndDate(end.time)
-            .build()
-        val kpg = KeyPairGenerator.getInstance(RSA_ALGORITHM_NAME, ANDROID_KEY_STORE_NAME)
-        kpg.initialize(spec)
-        kpg.generateKeyPair()
-        saveEncryptedKey()
-    }
-
-    @SuppressLint("ApplySharedPref")
-    @Throws(
-        CertificateException::class,
-        NoSuchPaddingException::class,
-        InvalidKeyException::class,
-        NoSuchAlgorithmException::class,
-        KeyStoreException::class,
-        NoSuchProviderException::class,
-        UnrecoverableEntryException::class,
-        IOException::class
-    )
-    private fun saveEncryptedKey() {
-        val pref = mContext.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE)
-        var encryptedKeyBase64encoded = pref.getString(ENCRYPTED_KEY_NAME, null)
-        if (encryptedKeyBase64encoded == null) {
-            val key = ByteArray(16)
-            val secureRandom = SecureRandom()
-            secureRandom.nextBytes(key)
-            val encryptedKey = rsaEncryptKey(key)
-            encryptedKeyBase64encoded = Base64.encodeToString(encryptedKey, Base64.DEFAULT)
-            val edit = pref.edit()
-            edit.putString(ENCRYPTED_KEY_NAME, encryptedKeyBase64encoded)
-            val successfullyWroteKey = edit.commit()
-            if (successfullyWroteKey) {
-                Log.d(LOG_TAG, "Saved keys successfully")
-            } else {
-                Log.e(LOG_TAG, "Saved keys unsuccessfully")
-                throw IOException("Could not save keys")
-            }
-        }
-    }
-
-    @get:Throws(
-        CertificateException::class,
-        NoSuchPaddingException::class,
-        InvalidKeyException::class,
-        NoSuchAlgorithmException::class,
-        KeyStoreException::class,
-        NoSuchProviderException::class,
-        UnrecoverableEntryException::class,
-        IOException::class
-    )
-    private val secretKeyAPILessThanM: Key
-        private get() {
-            val encryptedKeyBase64Encoded = secretKeyFromSharedPreferences
-            if (TextUtils.isEmpty(encryptedKeyBase64Encoded)) {
-                throw InvalidKeyException("Saved key missing from shared preferences")
-            }
-            val encryptedKey = Base64.decode(encryptedKeyBase64Encoded, Base64.DEFAULT)
-            val key = rsaDecryptKey(encryptedKey)
-            return SecretKeySpec(key, "AES")
-        }
     private val secretKeyFromSharedPreferences: String?
         private get() {
             val sharedPreferences = mContext.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE)
             return sharedPreferences.getString(ENCRYPTED_KEY_NAME, null)
         }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Throws(NoSuchAlgorithmException::class, NoSuchProviderException::class, InvalidAlgorithmParameterException::class)
     protected fun generateKeysForAPIMOrGreater() {
         val keyGenerator: KeyGenerator
@@ -263,7 +174,6 @@ class KeyStoreUtils(private val mContext: Context) {
         keyGenerator.generateKey()
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Throws(
         NoSuchPaddingException::class,
         NoSuchAlgorithmException::class,
@@ -281,35 +191,15 @@ class KeyStoreUtils(private val mContext: Context) {
         initKeys()
         requireNotNull(stringDataToEncrypt) { "Data to be decrypted must be non null" }
         val cipher: Cipher
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            cipher = Cipher.getInstance(AES_MODE_M_OR_GREATER)
-            cipher.init(
-                Cipher.ENCRYPT_MODE, secretKeyAPIMorGreater,
-                GCMParameterSpec(128, FIXED_IV)
-            )
-        } else {
-            cipher =
-                Cipher.getInstance(AES_MODE_LESS_THAN_M, CIPHER_PROVIDER_NAME_ENCRYPTION_DECRYPTION_AES)
-            try {
-                cipher.init(Cipher.ENCRYPT_MODE, secretKeyAPILessThanM)
-            } catch (e: InvalidKeyException) {
-                // Since the keys can become bad (perhaps because of lock screen change)
-                // drop keys in this case.
-                removeKeys()
-                throw e
-            } catch (e: IOException) {
-                removeKeys()
-                throw e
-            } catch (e: IllegalArgumentException) {
-                removeKeys()
-                throw e
-            }
-        }
+        cipher = Cipher.getInstance(AES_MODE_M_OR_GREATER)
+        cipher.init(
+            Cipher.ENCRYPT_MODE, secretKeyAPIMorGreater,
+            GCMParameterSpec(128, FIXED_IV)
+        )
         val encodedBytes = cipher.doFinal(stringDataToEncrypt.toByteArray(charset(CHARSET_NAME)))
         return Base64.encodeToString(encodedBytes, Base64.DEFAULT)
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Throws(
         NoSuchPaddingException::class,
         NoSuchAlgorithmException::class,
@@ -329,13 +219,8 @@ class KeyStoreUtils(private val mContext: Context) {
         val encryptedDecodedData = Base64.decode(encryptedData, Base64.DEFAULT)
         val c: Cipher
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                c = Cipher.getInstance(AES_MODE_M_OR_GREATER)
-                c.init(Cipher.DECRYPT_MODE, secretKeyAPIMorGreater, GCMParameterSpec(128, FIXED_IV))
-            } else {
-                c = Cipher.getInstance(AES_MODE_LESS_THAN_M, CIPHER_PROVIDER_NAME_ENCRYPTION_DECRYPTION_AES)
-                c.init(Cipher.DECRYPT_MODE, secretKeyAPILessThanM)
-            }
+            c = Cipher.getInstance(AES_MODE_M_OR_GREATER)
+            c.init(Cipher.DECRYPT_MODE, secretKeyAPIMorGreater, GCMParameterSpec(128, FIXED_IV))
         } catch (e: InvalidKeyException) {
             // Since the keys can become bad (perhaps because of lock screen change)
             // drop keys in this case.
@@ -431,15 +316,11 @@ class KeyStoreUtils(private val mContext: Context) {
     companion object {
         private const val ANDROID_KEY_STORE_NAME = "AndroidKeyStore"
         private const val AES_MODE_M_OR_GREATER = "AES/GCM/NoPadding"
-        private const val AES_MODE_LESS_THAN_M = "AES/ECB/PKCS7Padding"
         private const val KEY_ALIAS = "LIVENESS-KEYSTORE-SECRET-ALIAS"
 
         // TODO update these bytes to be random for IV of encryption
         private const val CHARSET_NAME = "UTF-8"
 
-        //	private static final byte[] FIXED_IV = new byte[]{ 55, 54, 53, 52, 51, 50,
-        //			49, 48, 47,
-        //			46, 45, 44 };
         private val FIXED_IV = byteArrayOf(80, -90, 78, 98, 17, 106, 7, 69, -58, 50, -46, -14)
         private const val RSA_ALGORITHM_NAME = "RSA"
         private const val RSA_MODE = "RSA/ECB/PKCS1Padding"

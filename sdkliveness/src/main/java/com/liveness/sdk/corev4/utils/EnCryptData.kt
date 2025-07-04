@@ -28,32 +28,16 @@ class EnCryptData {
 
         val keyGenerator: KeyGenerator
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE)
-            keyGenerator.init(
-                KeyGenParameterSpec.Builder(
-                    alias,
-                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-                )
-                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                    .build()
+        keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE)
+        keyGenerator.init(
+            KeyGenParameterSpec.Builder(
+                alias,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
             )
-        } else {
-            val start = Calendar.getInstance()
-            val end = Calendar.getInstance()
-            end.add(Calendar.YEAR, 30)
-            keyGenerator = KeyGenerator
-                .getInstance(ANDROID_KEY_STORE)
-            val spec = KeyPairGeneratorSpec.Builder(context)
-                .setAlias(alias)
-                .setSubject(X500Principal("VN=$alias"))
-                .setSerialNumber(BigInteger.TEN)
-                .setStartDate(start.time)
-                .setEndDate(end.time)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .build()
-            keyGenerator.init(spec)
-        }
+        )
 
         return keyGenerator.generateKey()
     }

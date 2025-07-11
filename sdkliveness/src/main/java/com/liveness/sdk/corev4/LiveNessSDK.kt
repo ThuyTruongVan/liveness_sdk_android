@@ -9,12 +9,16 @@ import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import com.liveness.sdk.corev4.api.HttpClientUtils
+import com.liveness.sdk.corev4.model.LivenessModel
 import com.liveness.sdk.corev4.model.LivenessRequest
 import com.liveness.sdk.corev4.utils.AppConfig
 import com.liveness.sdk.corev4.utils.AppPreferenceUtils
 import com.liveness.sdk.corev4.utils.CallbackAPIListener
 import com.liveness.sdk.corev4.utils.CallbackLivenessListener
 import com.liveness.sdk.corev4.utils.RSACryptData
+import com.liveness.sdk.corev4.utils.TotpUtils
+import com.nimbusds.jose.shaded.gson.Gson
+import org.json.JSONObject
 
 /**
  * Created by Thuytv on 15/04/2024.
@@ -259,6 +263,51 @@ class LiveNessSDK {
                 transaction.commit()
             } else {
                 httpClientUtil?.registerDeviceAndFace(context, mLivenessRequest.imageFace ?: "")
+            }
+        }
+
+        @Keep
+        fun initTransaction(
+            context: Context,
+            readCardId: String?
+        ): String? {
+            val httpClientUtil = HttpClientUtils.instance
+            return httpClientUtil?.initTransactionProov(context, readCardId)
+        }
+
+        @Keep
+        fun verifyFaceDynamicFlash(
+            context: Context,
+            transactionId: String
+        ): LivenessModel? {
+            val httpClientUtil = HttpClientUtils.instance
+            val tOTP = TotpUtils(context).getTotp()
+
+            if (tOTP.isEmpty() || tOTP == "-1") {
+//                AppConfig.livenessListener?.onCallbackLiveness(LivenessModel(status = -1, message = ""))
+                return LivenessModel(success = false, message = "TOTP Null")
+            } else {
+                val response = httpClientUtil?.verifyFaceDynamicFlash(context, transactionId, tOTP)
+                var result: JSONObject? = null
+                if (response?.isNotEmpty() == true) {
+                    result = JSONObject(response)
+                }
+                var status = -1
+                if (result?.has("status") == true) {
+                    status = result.getInt("status")
+                }
+                var strMessage = "Error"
+                if (result?.has("message") == true) {
+                    strMessage = result.getString("message")
+                }
+                if (status == 200) {
+                    val liveNessModel = Gson().fromJson(response, LivenessModel::class.java)
+                    return liveNessModel
+                } else {
+                    return LivenessModel(
+                        status = status, message = strMessage
+                    )
+                }
             }
         }
 

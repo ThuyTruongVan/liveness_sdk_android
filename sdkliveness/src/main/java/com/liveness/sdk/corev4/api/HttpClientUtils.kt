@@ -338,6 +338,20 @@ internal class HttpClientUtils {
         return initTransaction(mContext, b, readCardId ?: "")
     }
 
+    fun initTransactionProov(mContext: Context, readCardId: String?): String? {
+        var b = AppConfig.mLivenessRequest?.deviceId ?: AppPreferenceUtils(mContext).getDeviceId()
+        if (b.isNullOrEmpty()) {
+            b = UUID.randomUUID().toString()
+        }
+        showLog("initTransaction-2--readCard--Id: $readCardId")
+        val request = JSONObject()
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceId), b)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_period), AppConfig.mLivenessRequest?.duration)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_clientTransactionId), readCardId)
+        request.put("withToken", true)
+        return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_init_transaction), request)
+    }
+
     fun initTransaction(mContext: Context, a: String, rId: String): String? {
         val request = JSONObject()
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_deviceId), a)
@@ -355,6 +369,18 @@ internal class HttpClientUtils {
         val request = JSONObject()
         request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_transaction_id), d)
         return instance?.postV3(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_init_attemp), request)
+    }
+
+    fun verifyFaceDynamicFlash(mContext: Context, a: String,o: String): String? {
+        val request = JSONObject()
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_transaction_id), a)
+        request.put(AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_totp), o)
+        val optionalHeader = HashMap<String, String>()
+        optionalHeader.put(
+            AppUtils.decodeAndDecrypt(mContext, AppConfig.encrypted_device_id),
+            AppPreferenceUtils(mContext).getDeviceId() ?: AppConfig.mLivenessRequest?.deviceId ?: ""
+        )
+        return instance?.postV3("/eid/v3/verifyFaceDynamicFlash", request, optionalHeader)
     }
 
     fun checkLiveNessFlash(mContext: Context, a: String, b: String, c: String, d: Int): String? {

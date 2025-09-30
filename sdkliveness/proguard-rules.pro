@@ -23,3 +23,4 @@
 -keep class kotlin.Metadata { *; }
 -dontwarn kotlin.**
 -keep class org.apache.commons.** { *; }
+-dontwarn java.lang.invoke.StringConcatFactory

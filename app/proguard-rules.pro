@@ -28,3 +28,4 @@
 -allowaccessmodification
 -useuniqueclassmembernames
 -keeppackagenames doNotKeepAThing
+-dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305

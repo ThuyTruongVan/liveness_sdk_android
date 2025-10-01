@@ -7,6 +7,11 @@ class Secrets {
 
     companion object {
         init {
+//            try {
+//                System.loadLibrary("secrets16k")
+//            } catch (e: UnsatisfiedLinkError) {
+//                System.loadLibrary("secrets4k")
+//            }
             System.loadLibrary("secrets")
         }
     }

@@ -18,9 +18,20 @@ add_library( # Specifies the name of the library.
 
              # Provides a relative path to your source file(s).
              secrets.cpp )
+#(4K)
+#add_library(secrets4k SHARED secrets.cpp)
+#target_link_libraries(secrets4k log)
+
+# 16K (aarch64)
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
     target_link_options(secrets PRIVATE
             "-Wl,-z,max-page-size=16384"
-            "-Wl,-z,common-page-size=16384"
+            "-Wl,-z,common-page-size=4096"
+    )
+endif()
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+    target_link_options(secrets PRIVATE
+            "-Wl,-z,max-page-size=16384"
+            "-Wl,-z,common-page-size=4096"
     )
 endif()

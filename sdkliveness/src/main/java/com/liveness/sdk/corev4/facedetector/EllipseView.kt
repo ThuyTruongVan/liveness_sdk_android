@@ -13,12 +13,19 @@ import android.view.View
 import androidx.annotation.DimenRes
 import androidx.annotation.StyleableRes
 import com.liveness.sdk.corev4.R
+import kotlin.math.min
 
 
 /**
  * Created by Hieudt43 on 12/1/21.
  */
 internal class EllipseView : View {
+
+    private companion object {
+        const val OVAL_ASPECT_RATIO = 1.35f        // height/width ratio for face oval
+        const val WIDE_SCREEN_WIDTH_FRACTION = 0.65f // oval = 50% of view width on tablet/foldable
+        const val MAX_HEIGHT_FRACTION = 0.80f      // oval max 80% of view height
+    }
 
     private val NOT_PRESENT: Int = Int.MIN_VALUE
 
@@ -27,12 +34,17 @@ internal class EllipseView : View {
     private var eraser: Paint? = null
     private var paddingVertical = 0f
     private var paddingHorizontal = 0f
+    private var xmlPaddingVertical = 0f
+    private var xmlPaddingHorizontal = 0f
+    private var dynamicPaddingApplied = false
     private var strokeWidth = 0f
     private var colorNormal = Color.WHITE
     private var colorWarning = Color.YELLOW
     private var colorActive = Color.GREEN
     private var colorStroke: Int = Color.WHITE
     private lateinit var strokePaint: Paint
+
+    var onOvalChangedListener: ((RectF) -> Unit)? = null
 
     constructor(context: Context?) : super(context) {
         init(null, 0)
@@ -83,6 +95,8 @@ internal class EllipseView : View {
                 colorActive = ta.getColor(R.styleable.EllipseView_colorActive, Color.GREEN)
                 colorStroke = colorNormal
 
+                xmlPaddingHorizontal = paddingHorizontal
+                xmlPaddingVertical = paddingVertical
             } finally {
                 ta.recycle()
             }
@@ -95,7 +109,54 @@ internal class EllipseView : View {
             cv = Canvas(bm!!)
         }
         super.onSizeChanged(w, h, oldw, oldh)
+        recalculateDynamicPadding(w, h)
     }
+
+    /**
+     * Phát hiện màn hình rộng: tablet (smallestWidthDp >= 600) hoặc Z Fold mở (w/h > 0.75)
+     */
+    private fun isWideScreen(viewWidth: Int, viewHeight: Int): Boolean {
+        val swDp = context.resources.configuration.smallestScreenWidthDp
+        val ratio = viewWidth.toFloat() / viewHeight.toFloat()
+        return swDp >= 600 || ratio > 0.75f
+    }
+
+    private fun recalculateDynamicPadding(w: Int, h: Int) {
+        if (w == 0 || h == 0) return
+
+        // Điện thoại thường: giữ nguyên padding từ XML
+        if (!isWideScreen(w, h)) {
+            paddingHorizontal = xmlPaddingHorizontal
+            paddingVertical = xmlPaddingVertical
+            dynamicPaddingApplied = false
+            return
+        }
+
+        // Tablet/Foldable: tính oval động — W nhỏ lại, H luôn theo tỷ lệ W
+        val wf = w.toFloat()
+        val hf = h.toFloat()
+        var ovalW = wf * WIDE_SCREEN_WIDTH_FRACTION
+        var ovalH = ovalW * OVAL_ASPECT_RATIO
+
+        val maxH = hf * MAX_HEIGHT_FRACTION
+        if (ovalH > maxH) {
+            ovalH = maxH
+            ovalW = ovalH / OVAL_ASPECT_RATIO
+        }
+
+        paddingHorizontal = (wf - ovalW) / 2f
+        paddingVertical = (hf - ovalH) / 2f
+        dynamicPaddingApplied = true
+
+        val ovalRect = RectF(paddingHorizontal, paddingVertical,
+            wf - paddingHorizontal, hf - paddingVertical)
+        onOvalChangedListener?.invoke(ovalRect)
+    }
+
+    fun getOvalRect(): RectF = RectF(
+        paddingHorizontal, paddingVertical,
+        width - paddingHorizontal, height - paddingVertical
+    )
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {

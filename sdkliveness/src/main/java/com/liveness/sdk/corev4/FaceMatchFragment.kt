@@ -106,6 +106,16 @@ internal class FaceMatchFragment : Fragment() {
         prbLoading = view.findViewById(R.id.pbLoading)
         mViewMark = view.findViewById(R.id.frMark)
         mFrameImageMax = view.findViewById(R.id.imv_frame_face)
+        mViewMark?.onOvalChangedListener = { ovalRect ->
+            val params = mFrameImageMax.layoutParams as? android.widget.RelativeLayout.LayoutParams
+            if (params != null && mViewMark != null) {
+                params.topMargin = ovalRect.top.toInt()
+                params.bottomMargin = (mViewMark!!.height - ovalRect.bottom).toInt()
+                params.leftMargin = ovalRect.left.toInt()
+                params.rightMargin = (mViewMark!!.width - ovalRect.right).toInt()
+                mFrameImageMax.layoutParams = params
+            }
+        }
         tvStatus = view.findViewById(R.id.tvStatus)
         slider = view.findViewById(R.id.imageSlider)
         toolbar = view.findViewById(R.id.llToolbar)

@@ -22,9 +22,10 @@ import kotlin.math.min
 internal class EllipseView : View {
 
     private companion object {
-        const val OVAL_ASPECT_RATIO = 1.45f        // height/width ratio for face oval (taller, ellipse shape)
-        const val WIDE_SCREEN_WIDTH_FRACTION = 0.50f // oval = 50% of view width on tablet/foldable
-        const val MAX_HEIGHT_FRACTION = 0.80f      // oval max 80% of view height
+        const val OVAL_ASPECT_RATIO = 1.40f          // height/width — luôn ép ellipse, không bao giờ tròn
+        const val NORMAL_WIDTH_FRACTION = 0.82f       // điện thoại thường: oval = 82% chiều rộng
+        const val WIDE_SCREEN_WIDTH_FRACTION = 0.50f  // tablet/foldable mở: oval = 50% chiều rộng
+        const val MAX_HEIGHT_FRACTION = 0.75f         // oval tối đa 75% chiều cao view
     }
 
     private val NOT_PRESENT: Int = Int.MIN_VALUE
@@ -121,29 +122,24 @@ internal class EllipseView : View {
         return swDp >= 600 || ratio > 0.75f
     }
 
+    /**
+     * Luôn ép tỷ lệ OVAL_ASPECT_RATIO cho MỌI loại màn hình.
+     * - Điện thoại thường: oval chiếm 82% chiều rộng
+     * - Tablet/Foldable mở: oval chiếm 50% chiều rộng
+     * → Khi Z Fold gập lại, ratio < 0.75 → dùng NORMAL_WIDTH_FRACTION, vẫn giữ ellipse.
+     */
     private fun recalculateDynamicPadding(w: Int, h: Int) {
         if (w == 0 || h == 0) return
 
-        // Điện thoại thường: giảm padding từ XML để oval to chiều ngang và chiều cao hơn
-        if (!isWideScreen(w, h)) {
-            val offsetH = dpToPx(16).toFloat()
-            val offsetV = dpToPx(24).toFloat()
-            paddingHorizontal = (xmlPaddingHorizontal - offsetH).coerceAtLeast(dpToPx(20).toFloat())
-            paddingVertical = (xmlPaddingVertical - offsetV).coerceAtLeast(dpToPx(20).toFloat())
-            dynamicPaddingApplied = false
-            
-            val ovalRect = RectF(paddingHorizontal, paddingVertical,
-                w.toFloat() - paddingHorizontal, h.toFloat() - paddingVertical)
-            onOvalChangedListener?.invoke(ovalRect)
-            return
-        }
-
-        // Tablet/Foldable: tính oval động — W nhỏ lại, H luôn theo tỷ lệ W
         val wf = w.toFloat()
         val hf = h.toFloat()
-        var ovalW = wf * WIDE_SCREEN_WIDTH_FRACTION
+
+        val widthFraction = if (isWideScreen(w, h)) WIDE_SCREEN_WIDTH_FRACTION else NORMAL_WIDTH_FRACTION
+
+        var ovalW = wf * widthFraction
         var ovalH = ovalW * OVAL_ASPECT_RATIO
 
+        // Giới hạn chiều cao tối đa
         val maxH = hf * MAX_HEIGHT_FRACTION
         if (ovalH > maxH) {
             ovalH = maxH
@@ -152,7 +148,7 @@ internal class EllipseView : View {
 
         paddingHorizontal = (wf - ovalW) / 2f
         paddingVertical = (hf - ovalH) / 2f
-        dynamicPaddingApplied = true
+        dynamicPaddingApplied = isWideScreen(w, h)
 
         val ovalRect = RectF(paddingHorizontal, paddingVertical,
             wf - paddingHorizontal, hf - paddingVertical)

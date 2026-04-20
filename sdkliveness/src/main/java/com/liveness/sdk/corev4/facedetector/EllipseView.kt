@@ -3,6 +3,7 @@ package com.liveness.sdk.corev4.facedetector
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.content.res.TypedArray
 import android.graphics.*
@@ -22,9 +23,9 @@ import kotlin.math.min
 internal class EllipseView : View {
 
     private companion object {
-        const val OVAL_ASPECT_RATIO = 1.40f          // height/width — luôn ép ellipse, không bao giờ tròn
+        const val OVAL_ASPECT_RATIO = 1.5f          // height/width — luôn ép ellipse
         const val NORMAL_WIDTH_FRACTION = 0.82f       // điện thoại thường: oval = 82% chiều rộng
-        const val WIDE_SCREEN_WIDTH_FRACTION = 0.50f  // tablet/foldable mở: oval = 50% chiều rộng
+        const val TABLET_SCALE_FACTOR = 0.60f         // tablet/foldable mở: thu nhỏ oval (tương tự ref 0.52)
         const val MAX_HEIGHT_FRACTION = 0.75f         // oval tối đa 75% chiều cao view
     }
 
@@ -114,19 +115,57 @@ internal class EllipseView : View {
     }
 
     /**
-     * Phát hiện màn hình rộng: tablet (smallestWidthDp >= 600) hoặc Z Fold mở (w/h > 0.75)
+     * Safety net: khi Z Fold gập/mở, configChanges trong manifest ngăn Activity recreate,
+     * nhưng cần recalculate lại oval vì configuration thay đổi (isTablet() có thể thay đổi).
      */
-    private fun isWideScreen(viewWidth: Int, viewHeight: Int): Boolean {
-        val swDp = context.resources.configuration.smallestScreenWidthDp
-        val ratio = viewWidth.toFloat() / viewHeight.toFloat()
-        return swDp >= 600 || ratio > 0.75f
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        // Post để đợi view layout xong với kích thước mới
+        post {
+            if (width > 0 && height > 0) {
+                bm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                cv = Canvas(bm!!)
+                recalculateDynamicPadding(width, height)
+                invalidate()
+            }
+        }
     }
 
     /**
-     * Luôn ép tỷ lệ OVAL_ASPECT_RATIO cho MỌI loại màn hình.
-     * - Điện thoại thường: oval chiếm 82% chiều rộng
-     * - Tablet/Foldable mở: oval chiếm 50% chiều rộng
-     * → Khi Z Fold gập lại, ratio < 0.75 → dùng NORMAL_WIDTH_FRACTION, vẫn giữ ellipse.
+     * Kiểm tra thiết bị là tablet thật
+     */
+    private fun isTablet(): Boolean {
+        val screenLayout = context.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK
+        val isLargeScreen = screenLayout >= Configuration.SCREENLAYOUT_SIZE_LARGE
+        val smallestWidthDp = context.resources.configuration.smallestScreenWidthDp
+        val isSmallestWidthTablet = smallestWidthDp >= 600
+        return isLargeScreen || isSmallestWidthTablet
+    }
+
+    /**
+     * Hệ số scale cho tablet/foldable mở — giảm kích thước oval trên màn hình lớn.
+     *
+     * Quy tắc:
+     * - ratio > 0.75: chắc chắn wide screen (Z Fold mở, tablet landscape) → scale nhỏ
+     * - isTablet() VÀ ratio > 0.55: tablet portrait thật (ratio ~0.625)
+     *   → Z Fold gập (ratio ~0.37-0.44) KHÔNG vào đây → oval giữ ellipse
+     * - Còn lại: điện thoại thường → không scale
+     */
+    private fun getScaleFactor(viewWidth: Int, viewHeight: Int): Float {
+        val ratio = viewWidth.toFloat() / viewHeight.toFloat()
+        // Z Fold mở hoặc tablet landscape
+        if (ratio > 0.75f) return TABLET_SCALE_FACTOR
+        // Tablet portrait thật (ratio ~0.625), nhưng KHÔNG phải Z Fold gập (ratio ~0.37-0.44)
+        if (isTablet() && ratio > 0.55f) return TABLET_SCALE_FACTOR
+        // Điện thoại thường hoặc Z Fold gập
+        return 1.0f
+    }
+
+    /**
+     * Tính oval theo pattern tabletScaleFactor (giống LivenessMaskView reference).
+     * - Base: oval chiếm NORMAL_WIDTH_FRACTION (82%) chiều rộng, tỷ lệ OVAL_ASPECT_RATIO (1.4x)
+     * - Tablet/Foldable mở: nhân thêm TABLET_SCALE_FACTOR để thu nhỏ
+     * - Luôn ép aspect ratio → KHÔNG BAO GIỜ thành hình tròn
      */
     private fun recalculateDynamicPadding(w: Int, h: Int) {
         if (w == 0 || h == 0) return
@@ -134,10 +173,14 @@ internal class EllipseView : View {
         val wf = w.toFloat()
         val hf = h.toFloat()
 
-        val widthFraction = if (isWideScreen(w, h)) WIDE_SCREEN_WIDTH_FRACTION else NORMAL_WIDTH_FRACTION
+        // Kích thước oval gốc (giống ref: viewW * 0.85)
+        val baseW = wf * NORMAL_WIDTH_FRACTION
+        val baseH = baseW * OVAL_ASPECT_RATIO
 
-        var ovalW = wf * widthFraction
-        var ovalH = ovalW * OVAL_ASPECT_RATIO
+        // Áp dụng scale cho tablet (giống ref: tabletScaleFactor)
+        val scaleFactor = getScaleFactor(w, h)
+        var ovalW = baseW * scaleFactor
+        var ovalH = baseH * scaleFactor
 
         // Giới hạn chiều cao tối đa
         val maxH = hf * MAX_HEIGHT_FRACTION
@@ -148,7 +191,7 @@ internal class EllipseView : View {
 
         paddingHorizontal = (wf - ovalW) / 2f
         paddingVertical = (hf - ovalH) / 2f
-        dynamicPaddingApplied = isWideScreen(w, h)
+        dynamicPaddingApplied = scaleFactor < 1.0f
 
         val ovalRect = RectF(paddingHorizontal, paddingVertical,
             wf - paddingHorizontal, hf - paddingVertical)

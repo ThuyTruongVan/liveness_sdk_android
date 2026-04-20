@@ -122,7 +122,9 @@ internal class EllipseView : View {
         super.onConfigurationChanged(newConfig)
         // Post để đợi view layout xong với kích thước mới
         post {
+            if (!isAttachedToWindow) return@post
             if (width > 0 && height > 0) {
+                bm?.recycle()
                 bm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                 cv = Canvas(bm!!)
                 recalculateDynamicPadding(width, height)
@@ -196,6 +198,9 @@ internal class EllipseView : View {
         val ovalRect = RectF(paddingHorizontal, paddingVertical,
             wf - paddingHorizontal, hf - paddingVertical)
         onOvalChangedListener?.invoke(ovalRect)
+
+        // Force vẽ lại ngay lập tức khi oval thay đổi (quan trọng cho Z Fold gập/mở)
+        invalidate()
     }
 
     fun getOvalRect(): RectF = RectF(
@@ -205,6 +210,10 @@ internal class EllipseView : View {
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
+        val bitmap = bm ?: return
+        val cvs = cv ?: return
+        val eraserPaint = eraser ?: return
+
         strokePaint = Paint().apply {
             isAntiAlias = true
             style = Paint.Style.STROKE
@@ -224,11 +233,11 @@ internal class EllipseView : View {
             width - paddingHorizontal,
             height - paddingVertical
         )
-        bm!!.eraseColor(Color.TRANSPARENT)
-        cv?.drawColor(context.getColor(R.color.fm_black_60))
-        cv?.drawOval(strokeRect, strokePaint)
-        cv?.drawOval(rect, eraser!!)
-        canvas.drawBitmap(bm!!, 0f, 0f, null)
+        bitmap.eraseColor(Color.TRANSPARENT)
+        cvs.drawColor(context.getColor(R.color.fm_black_60))
+        cvs.drawOval(strokeRect, strokePaint)
+        cvs.drawOval(rect, eraserPaint)
+        canvas.drawBitmap(bitmap, 0f, 0f, null)
         super.onDraw(canvas)
     }
 

@@ -22,8 +22,8 @@ import kotlin.math.min
 internal class EllipseView : View {
 
     private companion object {
-        const val OVAL_ASPECT_RATIO = 1.35f        // height/width ratio for face oval
-        const val WIDE_SCREEN_WIDTH_FRACTION = 0.65f // oval = 50% of view width on tablet/foldable
+        const val OVAL_ASPECT_RATIO = 1.45f        // height/width ratio for face oval (taller, ellipse shape)
+        const val WIDE_SCREEN_WIDTH_FRACTION = 0.50f // oval = 50% of view width on tablet/foldable
         const val MAX_HEIGHT_FRACTION = 0.80f      // oval max 80% of view height
     }
 
@@ -124,11 +124,17 @@ internal class EllipseView : View {
     private fun recalculateDynamicPadding(w: Int, h: Int) {
         if (w == 0 || h == 0) return
 
-        // Điện thoại thường: giữ nguyên padding từ XML
+        // Điện thoại thường: giảm padding từ XML để oval to chiều ngang và chiều cao hơn
         if (!isWideScreen(w, h)) {
-            paddingHorizontal = xmlPaddingHorizontal
-            paddingVertical = xmlPaddingVertical
+            val offsetH = dpToPx(16).toFloat()
+            val offsetV = dpToPx(24).toFloat()
+            paddingHorizontal = (xmlPaddingHorizontal - offsetH).coerceAtLeast(dpToPx(20).toFloat())
+            paddingVertical = (xmlPaddingVertical - offsetV).coerceAtLeast(dpToPx(20).toFloat())
             dynamicPaddingApplied = false
+            
+            val ovalRect = RectF(paddingHorizontal, paddingVertical,
+                w.toFloat() - paddingHorizontal, h.toFloat() - paddingVertical)
+            onOvalChangedListener?.invoke(ovalRect)
             return
         }
 
